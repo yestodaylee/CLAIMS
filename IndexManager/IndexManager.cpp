@@ -305,7 +305,7 @@ bool IndexManager::deserialize(std::string file_name)
 		fread((void*)(&index->attribute.index), sizeof(unsigned), 1, filename);
 		data_type type;
 		fread((void*)(&type), sizeof(data_type), 1, filename);
-		index->attribute.attrType = new column_type(type);
+		index->attribute.attrType = new ColumnType(type);
 		fread((void*)(&strlength), sizeof(unsigned long), 1, filename);
 		fread((void*)index->attribute.attrName.c_str(), sizeof(char), strlength, filename);
 

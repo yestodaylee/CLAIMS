@@ -7,6 +7,7 @@
 //TODO change TypeCast warning the temporary variable
 #ifndef TYPECAST_H_
 #define TYPECAST_H_
+
 #ifdef DMALLOC
 #include "dmalloc.h"
 #endif

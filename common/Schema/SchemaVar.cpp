@@ -16,7 +16,7 @@ SchemaVar::~SchemaVar() {
 	// TODO 自动生成的析构函数存根
 }
 
-SchemaVar::SchemaVar(std::vector<column_type> columns):Schema(columns) {
+SchemaVar::SchemaVar(std::vector<ColumnType> columns):Schema(columns) {
 	attributes_=columns.size();
 	for(unsigned i=0;i<columns.size();i++){
 		if(columns[i].type==t_string)
@@ -29,7 +29,7 @@ unsigned SchemaVar::getTupleActualSize(void* tuple) const{
 	unsigned column_off=0;
 	for(unsigned i=0;i<columns.size();i++){
 		if(columns[i].type!=t_string){
-			ofs+=columns[i].get_length();
+			ofs+=columns[i].GetLength();
 		}
 		else{
 			ofs+=*(int *)((char*)tuple+column_off*4);

@@ -99,7 +99,7 @@ public:
 	static void compute(ExpressionItem operator_item,ExpressionItemStack& stack);
 	static void computes(ExpressionItem operator_item,ExpressionItemStack& stack);
 	static data_type getOutputType(vector<ExpressionItem> &exp);
-	static column_type getOutputType_(vector<ExpressionItem> &exp);
+	static ColumnType getOutputType_(vector<ExpressionItem> &exp);
 
 private:
 

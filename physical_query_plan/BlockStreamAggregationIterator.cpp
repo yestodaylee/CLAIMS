@@ -122,7 +122,7 @@ bool BlockStreamAggregationIterator::Open(const PartitionOffset& partition_offse
 			 */
 			bn=0;
 			if(state_.groupByIndex.size()>0)
-				bn=state_.input->getcolumn(state_.groupByIndex[0]).operate->getPartitionValue(state_.input->getColumnAddess(state_.groupByIndex[0],cur),state_.nbuckets);
+				bn=state_.input->getcolumn(state_.groupByIndex[0]).operate->GetPartitionValue(state_.input->getColumnAddess(state_.groupByIndex[0],cur),state_.nbuckets, nullptr);
 
 			private_hashtable->placeIterator(pht_it,bn);
 			key_exist=false;
@@ -137,7 +137,7 @@ bool BlockStreamAggregationIterator::Open(const PartitionOffset& partition_offse
 				{
 					key_in_input_tuple=state_.input->getColumnAddess(state_.groupByIndex[i],cur);
 					key_in_hash_table=state_.hashSchema->getColumnAddess(inputGroupByToOutput_[i],tuple_in_hashtable);
-					if(!state_.input->getcolumn(state_.groupByIndex[i]).operate->equal(key_in_input_tuple,key_in_hash_table))
+					if(!state_.input->getcolumn(state_.groupByIndex[i]).operate->Equal(key_in_input_tuple,key_in_hash_table))
 					{
 						key_exist=false;
 						break;
@@ -168,7 +168,7 @@ bool BlockStreamAggregationIterator::Open(const PartitionOffset& partition_offse
 			{
 				key_in_input_tuple=state_.input->getColumnAddess(state_.groupByIndex[i],cur);
 				key_in_hash_table=state_.hashSchema->getColumnAddess(inputGroupByToOutput_[i],new_tuple_in_hash_table);
-				state_.input->getcolumn(state_.groupByIndex[i]).operate->assignment(key_in_input_tuple,key_in_hash_table);
+				state_.input->getcolumn(state_.groupByIndex[i]).operate->Assign(key_in_input_tuple,key_in_hash_table);
 			}
 
 			for(unsigned i=0;i<state_.aggregationIndex.size();i++)
@@ -186,7 +186,7 @@ bool BlockStreamAggregationIterator::Open(const PartitionOffset& partition_offse
 					value_in_input_tuple=state_.input->getColumnAddess(state_.aggregationIndex[i],cur);
 				}
 				value_in_hash_table=state_.hashSchema->getColumnAddess(inputAggregationToOutput_[i],new_tuple_in_hash_table);
-				state_.hashSchema->getcolumn(inputAggregationToOutput_[i]).operate->assignment(value_in_input_tuple,value_in_hash_table);
+				state_.hashSchema->getcolumn(inputAggregationToOutput_[i]).operate->Assign(value_in_input_tuple,value_in_hash_table);
 			}
 			bsti->increase_cur_();
 		}
@@ -204,7 +204,7 @@ bool BlockStreamAggregationIterator::Open(const PartitionOffset& partition_offse
 			 */
 			bn=0;
 			if(state_.groupByIndex.size()>0)
-				bn=state_.hashSchema->getcolumn(0).operate->getPartitionValue(state_.hashSchema->getColumnAddess(0,cur),state_.nbuckets);
+				bn=state_.hashSchema->getcolumn(0).operate->GetPartitionValue(state_.hashSchema->getColumnAddess(0,cur),state_.nbuckets, nullptr);
 
 			hashtable_->lockBlock(bn);
 			hashtable_->placeIterator(ht_it,bn);
@@ -220,7 +220,7 @@ bool BlockStreamAggregationIterator::Open(const PartitionOffset& partition_offse
 				{
 					key_in_input_tuple=state_.hashSchema->getColumnAddess(i,cur);
 					key_in_hash_table=state_.hashSchema->getColumnAddess(inputGroupByToOutput_[i],tuple_in_hashtable);
-					if(!state_.hashSchema->getcolumn(i).operate->equal(key_in_input_tuple,key_in_hash_table))
+					if(!state_.hashSchema->getcolumn(i).operate->Equal(key_in_input_tuple,key_in_hash_table))
 					{
 						key_exist=false;
 						break;
@@ -253,14 +253,14 @@ bool BlockStreamAggregationIterator::Open(const PartitionOffset& partition_offse
 			{
 				key_in_input_tuple=state_.hashSchema->getColumnAddess(i,cur);
 				key_in_hash_table=state_.hashSchema->getColumnAddess(inputGroupByToOutput_[i],new_tuple_in_hash_table);
-				state_.hashSchema->getcolumn(i).operate->assignment(key_in_input_tuple,key_in_hash_table);
+				state_.hashSchema->getcolumn(i).operate->Assign(key_in_input_tuple,key_in_hash_table);
 			}
 
 			for(unsigned i=0;i<state_.aggregationIndex.size();i++)
 			{
 				value_in_input_tuple=state_.hashSchema->getColumnAddess(i+state_.groupByIndex.size(),cur);
 				value_in_hash_table=state_.hashSchema->getColumnAddess(inputAggregationToOutput_[i],new_tuple_in_hash_table);
-				state_.hashSchema->getcolumn(inputAggregationToOutput_[i]).operate->assignment(value_in_input_tuple,value_in_hash_table);
+				state_.hashSchema->getcolumn(inputAggregationToOutput_[i]).operate->Assign(value_in_input_tuple,value_in_hash_table);
 			}
 			hashtable_->unlockBlock(bn);
 			pht_it.increase_cur_();
@@ -318,7 +318,7 @@ bool BlockStreamAggregationIterator::Next(BlockStreamBase *block){
 					{
 						key_in_hash_tuple=state_.hashSchema->getColumnAddess(inputGroupByToOutput_[i],cur_in_ht);
 						key_in_output_tuple=state_.output->getColumnAddess(inputGroupByToOutput_[i],tuple);
-						state_.output->getcolumn(inputGroupByToOutput_[i]).operate->assignment(key_in_hash_tuple,key_in_output_tuple);
+						state_.output->getcolumn(inputGroupByToOutput_[i]).operate->Assign(key_in_hash_tuple,key_in_output_tuple);
 					}
 					state_.avgIndex.push_back(-1);//boundary point,
 					int aggsize=state_.aggregationIndex.size()-1;
@@ -348,7 +348,7 @@ bool BlockStreamAggregationIterator::Next(BlockStreamBase *block){
 							key_in_hash_tuple=state_.hashSchema->getColumnAddess(inputAggregationToOutput_[i],cur_in_ht);
 						}
 						key_in_output_tuple=state_.output->getColumnAddess(inputAggregationToOutput_[i],tuple);
-						state_.output->getcolumn(inputAggregationToOutput_[i]).operate->assignment(key_in_hash_tuple,key_in_output_tuple);
+						state_.output->getcolumn(inputAggregationToOutput_[i]).operate->Assign(key_in_hash_tuple,key_in_output_tuple);
 					}
 				}
 				else{

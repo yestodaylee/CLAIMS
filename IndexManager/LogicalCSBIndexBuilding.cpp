@@ -50,7 +50,7 @@ BlockStreamIteratorBase* LogicalCSBIndexBuilding::GetPhysicalPlan(const unsigned
 
 	bottomLayerSorting::State bls_state;
 
-	vector<column_type> bls_column_list;
+	vector<ColumnType> bls_column_list;
 	bls_column_list.push_back(t_int);			//chunk offset
 	bls_column_list.push_back(blc_state.schema_->getcolumn(blc_state.key_indexing_));			//sec_code
 	bls_column_list.push_back(t_u_smallInt);	//chunk offset

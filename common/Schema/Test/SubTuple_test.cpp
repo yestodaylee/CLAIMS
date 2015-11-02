@@ -16,11 +16,11 @@ struct Tuple{
 #pragma pack()
 static int sub_tuple_test(){
 	printf("Hello li\n");
-	column_type a(t_int);
-	column_type b(t_u_long);
-	column_type c(t_int);
-	column_type d(t_string,14);
-	std::vector<column_type> columns;
+	ColumnType a(t_int);
+	ColumnType b(t_u_long);
+	ColumnType c(t_int);
+	ColumnType d(t_string,14);
+	std::vector<ColumnType> columns;
 	columns.push_back(a);
 	columns.push_back(d);
 	columns.push_back(b);

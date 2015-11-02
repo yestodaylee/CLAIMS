@@ -28,8 +28,8 @@ using std::map;
 
 typedef void* TuplePtr;
 
-inline int getFrequency(const void* tuple, const column_type* type) {
-  return *((int*)(((char*)tuple) + type->get_length()));
+inline int getFrequency(const void* tuple, const ColumnType* type) {
+  return *((int*)(((char*)tuple) + type->GetLength()));
 }
 
 Analyzer::Analyzer() {
@@ -41,7 +41,7 @@ Analyzer::~Analyzer() {
 }
 
 int compare(const void* a, const void* b, void* arg) {
-  return ((Operate*)arg)->compare(*(void**)a, *(void**)b);
+  return ((Operate*)arg)->Compare(*(void**)a, *(void**)b);
 }
 
 void Analyzer::analyse(const AttributeID& attrID) {
@@ -316,8 +316,8 @@ void Analyzer::mcvAnalyse(void** list, const unsigned long size,
   void** valueList = new void* [magicNumber];  // new
   double* selList = new double[magicNumber];  // new
   for (i = 0; i < magicNumber; ++i) {
-    valueList[i] = new char[attr.attrType->get_length()];  // new
-    attr.attrType->operate->assign(mcvList[i], valueList[i]);
+    valueList[i] = new char[attr.attrType->GetLength()];  // new
+    attr.attrType->operate->Assign(mcvList[i], valueList[i]);
     selList[i] =
         (1.0 * getFrequency(mcvList[i], attr.attrType)) / stat->getTupleCount();
   }
@@ -359,8 +359,8 @@ void Analyzer::equiDepthAnalyse(void** list, const unsigned long size,
 
   void** valueList = new void* [magicNumber];  // new
   for (i = 0; i < magicNumber; ++i) {
-    valueList[i] = new char[attr.attrType->get_length()];  // new
-    attr.attrType->operate->assign(boundList[i], valueList[i]);
+    valueList[i] = new char[attr.attrType->GetLength()];  // new
+    attr.attrType->operate->Assign(boundList[i], valueList[i]);
   }
 
   stat->setEquithDepthBound(valueList, boundCnt);

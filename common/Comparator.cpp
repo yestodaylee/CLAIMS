@@ -278,7 +278,7 @@ void Comparator::initialize_LEQ()
 	funs_LEQ[Comparator::Pair(t_decimal,t_decimal)]=lessEqual<NValue*,NValue*>;
 }
 
-Comparator::Comparator(column_type x, column_type y, Comparator::comparison c):pair(x,y),compareType(c) {
+Comparator::Comparator(ColumnType x, ColumnType y, Comparator::comparison c):pair(x,y),compareType(c) {
 	// TODO Auto-generated constructor stub
 	iniatilize();
 	assert(compare!=0);

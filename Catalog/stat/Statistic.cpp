@@ -56,7 +56,7 @@ void Histogram::setMostCommonValues(void **mcvList, double *seleList) {
 	m_staNumbers2 = seleList;
 }
 
-void Histogram::Print(column_type type) {
+void Histogram::Print(ColumnType type) {
 
 	printf("Tuple Count: %d\n\n", m_staCount);
 
@@ -73,7 +73,7 @@ void Histogram::Print(column_type type) {
 //	printf("\n");
 	printf("End-Baised\n");
 	for (unsigned i = 0; i < m_bucketCnt; ++i) {
-		printf("%s ", type.operate->toString(m_staValues2[i]).c_str());
+		printf("%s ", type.operate->ToString(m_staValues2[i]).c_str());
 	}
 	printf("\n");
 	for (unsigned i = 0; i < m_bucketCnt; ++i) {

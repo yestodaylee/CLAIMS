@@ -19,7 +19,7 @@ void TupleConvertor::sub_tuple(const Schema*& src_s,const Schema*& des_s,const v
 	for(unsigned i=0;i<index.size();i++){
 		const void* const source_column_address=src_s->getColumnAddess(index[i],tuple);
 		void* const desc_column_address=des_s->getColumnAddess(i,desc);
-		des_s->getcolumn(i).operate->assignment(source_column_address,desc_column_address);
+		des_s->getcolumn(i).operate->Assign(source_column_address,desc_column_address);
 	}
 }
 
@@ -32,6 +32,6 @@ void SubTuple::getSubTuple(void*& tuple, void*& target){
 	for(unsigned i=0;i<index_.size();i++){
 		const void* const source_column_address=source_schema_->getColumnAddess(index_[i],tuple);
 		void* const desc_column_address=target_schema_->getColumnAddess(i,target);
-		target_schema_->getcolumn(i).operate->assignment(source_column_address,desc_column_address);
+		target_schema_->getcolumn(i).operate->Assign(source_column_address,desc_column_address);
 	}
 }

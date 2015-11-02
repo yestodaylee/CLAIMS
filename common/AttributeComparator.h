@@ -19,8 +19,8 @@ class AttributeComparator:public Comparator
 	{
 		friend class FilterIterator;
 	public:
-		AttributeComparator(column_type x,column_type y,Comparator::comparison c,unsigned index, void* value);
-		AttributeComparator(column_type x,Comparator::comparison c,unsigned index, void* value);
+		AttributeComparator(ColumnType x,ColumnType y,Comparator::comparison c,unsigned index, void* value);
+		AttributeComparator(ColumnType x,Comparator::comparison c,unsigned index, void* value);
 		AttributeComparator(const  AttributeComparator & c_a);
 		AttributeComparator():value_(0),Comparator(),index(0){};
 		~AttributeComparator();
@@ -52,7 +52,7 @@ class AttributeComparator:public Comparator
 		//	Register_Iterators_Except_For_PrintIterator(ar);
 			if(valuebytes.empty()&&compare!=0)
 			{
-				for(unsigned i=0;i<pair.second.get_length();i++)
+				for(unsigned i=0;i<pair.second.GetLength();i++)
 				{
 					valuebytes.push_back(*((char*)value_+i));
 				}
@@ -62,8 +62,8 @@ class AttributeComparator:public Comparator
 
 			if(value_==0)
 			{
-				value_=memalign(cacheline_size,pair.second.get_length());
-				for(unsigned i=0;i<pair.second.get_length();i++)
+				value_=memalign(cacheline_size,pair.second.GetLength());
+				for(unsigned i=0;i<pair.second.GetLength();i++)
 				{
 					*((char*)value_+i)=valuebytes[i];
 

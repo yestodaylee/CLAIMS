@@ -14,7 +14,7 @@
 
 #include "../../common/ids.h"
 #include "../../common/hash.h"
-
+#include "../../common/data_type.h"
 #include "../../common/Block/BlockStreamBuffer.h"
 
 #include "../../Catalog/Column.h"
@@ -25,6 +25,7 @@
 
 #include "../../storage/PartitionStorage.h"
 #include "../../storage/BlockManager.h"
+
 
 #define block_size (1024*1024)
 void init_alloc_destory();
@@ -232,7 +233,7 @@ void* insert_into_hash_table_from_projection(void * argment){
 	arg.barrier->Arrive();
 
 	BlockStreamBase* fetched_block=BlockStreamBase::createBlockWithDesirableSerilaizedSize(arg.schema,block_size);
-	Operate* op=arg.schema->columns[0].operate->duplicateOperator();
+	Operate* op=arg.schema->columns[0].operate->DuplicateOperator();
 	unsigned nbuckets=arg.hash->getNumberOfPartitions();
 	unsigned long long int start=curtick();
 	printf("tuple length=%d\n",arg.schema->getTupleMaxSize());
@@ -323,9 +324,9 @@ static double projection_scan(unsigned degree_of_parallelism){
 	return ret;
 }
 Schema* generate_schema(unsigned tuple_length){
-	std::vector<column_type> columns;
+	std::vector<ColumnType> columns;
 	for(unsigned i=0;i<tuple_length/4;i++){
-		columns.push_back(column_type(t_int));
+		columns.push_back(ColumnType(t_int));
 	}
 	Schema* schema=new SchemaFix(columns);
 	return schema;
@@ -347,7 +348,7 @@ BlockStreamBuffer* initial_input_date(Schema* schema,unsigned long total_data_si
 		void* tuple;
 		new_block->setEmpty();
 		while(tuple=new_block->allocateTuple(schema->getTupleMaxSize())){
-			schema->columns[0].operate->assignment(&value,tuple);
+			schema->columns[0].operate->Assign(&value,tuple);
 			value=random();
 //			value++;
 		}
@@ -377,7 +378,7 @@ void* insert_into_hash_table(void * argment){
 	}
 
 	BlockStreamBase* fetched_block=BlockStreamBase::createBlockWithDesirableSerilaizedSize(arg.schema,block_size);
-	Operate* op=arg.schema->columns[0].operate->duplicateOperator();
+	Operate* op=arg.schema->columns[0].operate->DuplicateOperator();
 	unsigned nbuckets=arg.hash->getNumberOfPartitions();
 	while(arg.buffer->getBlock(*fetched_block)){
 		void* tuple;
@@ -389,7 +390,7 @@ void* insert_into_hash_table(void * argment){
 //			if(op->getPartitionValue(tuple,arg.hash)==0){
 //				break;
 //			}
-			unsigned bn=arg.schema->columns[0].operate->getPartitionValue(tuple,arg.hash);
+			unsigned bn=arg.schema->columns[0].operate->getPartitionValue(tuple, 0, arg.hash);
 			void* new_tuple_in_hashtable=(*arg.hash_table)->atomicAllocate(bn,arg.tid);
 			arg.schema->copyTuple(tuple,new_tuple_in_hashtable);
 		}

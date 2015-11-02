@@ -35,7 +35,7 @@ public:
 
 	struct query_range {
 		query_range() : value_low(0), value_high(0){ valuebytes_low.clear(); valuebytes_high.clear(); }
-		query_range(void* value_low_, comparison comp_low_, void* value_high_, comparison comp_high_, column_type c_type_)
+		query_range(void* value_low_, comparison comp_low_, void* value_high_, comparison comp_high_, ColumnType c_type_)
 		:value_low(value_low_), comp_low(comp_low_), value_high(value_high_), comp_high(comp_high_), c_type(c_type_)
 		{ valuebytes_low.clear(); valuebytes_high.clear(); }
 
@@ -43,7 +43,7 @@ public:
 		comparison comp_low;
 		void* value_high;
 		comparison comp_high;
-		column_type c_type;
+		ColumnType c_type;
 		std::vector<char> valuebytes_low, valuebytes_high;
 
 		friend class boost::serialization::access;
@@ -52,7 +52,7 @@ public:
 
 			if(valuebytes_low.empty() && valuebytes_high.empty() && c_type.operate != 0)
 			{
-				for (unsigned i = 0; i < c_type.get_length(); i++)
+				for (unsigned i = 0; i < c_type.GetLength(); i++)
 				{
 					valuebytes_low.push_back(*((char*)value_low+i));
 					valuebytes_high.push_back(*((char*)value_high+i));
@@ -63,9 +63,9 @@ public:
 
 			if (value_low == 0 || value_high ==0)
 			{
-				value_low = malloc(c_type.get_length());		//newmalloc
-				value_high = malloc(c_type.get_length());		//newmalloc
-				for (unsigned i = 0; i < c_type.get_length(); i++)
+				value_low = malloc(c_type.GetLength());		//newmalloc
+				value_high = malloc(c_type.GetLength());		//newmalloc
+				for (unsigned i = 0; i < c_type.GetLength(); i++)
 				{
 					*((char*)value_low+i)=valuebytes_low[i];
 					*((char*)value_high+i)=valuebytes_high[i];

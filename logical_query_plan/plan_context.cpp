@@ -57,7 +57,7 @@ Schema* PlanContext::GetSchema() const {
    * Only fixed schema is supported now.
    * TODO(wangli): support other schemas.
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   for (unsigned i = 0; i < attribute_list_.size(); i++) {
     columns.push_back(*attribute_list_[i].attrType);
   }
@@ -66,7 +66,7 @@ Schema* PlanContext::GetSchema() const {
 unsigned PlanContext::GetTupleSize() const {
   unsigned ret = 0;
   for (unsigned i = 0; i < attribute_list_.size(); i++) {
-    ret += attribute_list_[i].attrType->get_length();
+    ret += attribute_list_[i].attrType->GetLength();
   }
   return ret;
 }

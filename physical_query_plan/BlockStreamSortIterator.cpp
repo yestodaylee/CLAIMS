@@ -88,9 +88,9 @@ bool BlockStreamSortIterator::compare(const SNode *a,const SNode *b){
 	const void *l=a->state_->input_->getColumnAddess(a->orderKey,a->tuple);
 	const void *r=b->state_->input_->getColumnAddess(b->orderKey,b->tuple);
 	if(a->dir)
-		return a->op->greate(l,r);
+		return a->op->Greater(l,r);
 	else
-		return a->op->less(l,r);
+		return a->op->Less(l,r);
 }
 
 void BlockStreamSortIterator::order(unsigned column,unsigned tuple_count){
@@ -100,7 +100,7 @@ void BlockStreamSortIterator::order(unsigned column,unsigned tuple_count){
 
 void BlockStreamSortIterator::order(){
 	for(unsigned i=0;i<state_.orderbyKey_.size();i++){
-		Operate *op_=state_.input_->getcolumn(state_.orderbyKey_[i]).operate->duplicateOperator();
+		Operate *op_=state_.input_->getcolumn(state_.orderbyKey_[i]).operate->DuplicateOperator();
 		for(unsigned j=0;j<secondaryArray_.size();j++){
 			secondaryArray_[j]->orderKey=state_.orderbyKey_[i];
 			secondaryArray_[j]->op=op_;

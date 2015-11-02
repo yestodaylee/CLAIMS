@@ -11,8 +11,9 @@
 
 #include <vector>
 #include <gtest/gtest.h>
-#include "../../common/data_type.h"
 #include "../../utility/generator.h"
+
+#include "../../common/data_type.h"
 #include "../../Debug.h"
 
 TEST(GENERATOR,SCHEMASS){

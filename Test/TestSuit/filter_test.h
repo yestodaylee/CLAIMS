@@ -35,7 +35,7 @@ int filter_test(){
 	unsigned long passed_count=0;
 
 	int va=100;
-	AttributeComparator ac(column_type(t_int), Comparator::EQ,0,&va);
+	AttributeComparator ac(ColumnType(t_int), Comparator::EQ,0,&va);
 
 
 

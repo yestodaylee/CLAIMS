@@ -201,9 +201,9 @@ data_type ExpressionCalculator::getOutputType(std::vector<ExpressionItem> &exp){
 	return stack.top().return_type;
 }
 
-column_type ExpressionCalculator::getOutputType_(std::vector<ExpressionItem> &exp){
+ColumnType ExpressionCalculator::getOutputType_(std::vector<ExpressionItem> &exp){
 	ExpressionItemStack stack;
-	column_type *ct=0;
+	ColumnType *ct=0;
 	for(unsigned i=0;i<exp.size();i++){
 		if(exp[i].type!=ExpressionItem::operator_type){
 			stack.push(exp[i]);
@@ -241,10 +241,10 @@ column_type ExpressionCalculator::getOutputType_(std::vector<ExpressionItem> &ex
 	assert(stack.size()==1);
 	data_type dt=stack.top().return_type;
 	if(dt==t_string){
-		ct=new column_type(dt,exp[0].size);
+		ct=new ColumnType(dt,exp[0].size);
 	}
 	else{
-		ct=new column_type(dt);
+		ct=new ColumnType(dt);
 	}
 	return *ct;
 }

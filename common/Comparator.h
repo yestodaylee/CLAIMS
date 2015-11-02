@@ -7,6 +7,7 @@
 
 #ifndef COMPARATOR_H_
 #define COMPARATOR_H_
+
 #ifdef DMALLOC
 #include "dmalloc.h"
 #endif
@@ -26,10 +27,10 @@ public:
 	enum comparison{L,LEQ,EQ,NEQ,G,GEQ};
 	struct Pair
 	{
-		column_type first;
-		column_type second;
+		ColumnType first;
+		ColumnType second;
 	public:
-		Pair(column_type first,column_type second):first(first),second(second){};
+		Pair(ColumnType first,ColumnType second):first(first),second(second){};
 		Pair(){};
 		bool operator==(const struct Comparator::Pair &p) const
 		{
@@ -48,7 +49,7 @@ public:
 			ar & first & second;
 		}
 	};
-	Comparator(column_type x, column_type b, Comparator::comparison c);
+	Comparator(ColumnType x, ColumnType b, Comparator::comparison c);
 	Comparator():compare(0){};
 	Comparator(const Comparator & r);
 	virtual ~Comparator();

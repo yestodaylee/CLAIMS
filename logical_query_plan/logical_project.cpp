@@ -94,13 +94,13 @@ PlanContext LogicalProject::GetPlanContext() {
    * else just construct a column having the same type as the return type
    */
   for (int i = 0; i < expression_tree_.size(); ++i) {
-    column_type* column = NULL;
+    ColumnType* column = NULL;
     if (t_string == expression_tree_[i]->return_type ||
         t_decimal == expression_tree_[i]->return_type) {
-      column = new column_type(expression_tree_[i]->return_type,
+      column = new ColumnType(expression_tree_[i]->return_type,
                                expression_tree_[i]->length);
     } else {
-      column = new column_type(expression_tree_[i]->return_type);
+      column = new ColumnType(expression_tree_[i]->return_type);
     }
     // set TableID
     const unsigned kTableID = INTERMEIDATE_TABLEID;

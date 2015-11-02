@@ -10,7 +10,7 @@
 #include "CodeGenerator.h"
 using namespace std;
 static void get_one(){
-	std::vector<column_type> columns;
+	std::vector<ColumnType> columns;
 	columns.push_back(data_type(t_int));
 	columns.push_back(data_type(t_int));
 	Schema* s=new SchemaFix(columns);
@@ -38,7 +38,7 @@ static void get_one(){
 
 }
 static void get_another_one(){
-	std::vector<column_type> columns;
+	std::vector<ColumnType> columns;
 	columns.push_back(data_type(t_int));
 	columns.push_back(data_type(t_int));
 	Schema* s=new SchemaFix(columns);

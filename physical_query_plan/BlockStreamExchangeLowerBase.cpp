@@ -83,6 +83,6 @@ void BlockStreamExchangeLowerBase::WaitingForCloseNotification(const int & targe
 unsigned BlockStreamExchangeLowerBase::hash(void* input_tuple, Schema* schema,
 		unsigned partition_key_index, unsigned nuppers) {
 		const void* hash_key_address=schema->getColumnAddess(partition_key_index,input_tuple);
-		return schema->getcolumn(partition_key_index).operate->getPartitionValue(hash_key_address,nuppers);
+		return schema->getcolumn(partition_key_index).operate->GetPartitionValue(hash_key_address,nuppers,nullptr);
 
 }

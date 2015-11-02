@@ -19,7 +19,7 @@
 #include "Schema.h"
 class SchemaFix:public Schema {
 public:
-	SchemaFix(const std::vector<column_type>& columns);
+	SchemaFix(const std::vector<ColumnType>& columns);
 	SchemaFix(const SchemaFix& r);
 	SchemaFix(){};
 	virtual ~SchemaFix();
@@ -53,7 +53,7 @@ public:
 	Schema* getSubSchema(std::vector<unsigned>)const;
 	Schema* duplicateSchema()const;
 //	void displayTuple(const void* tuple_start_address,const char* spliter)const;
-	void addColumn(column_type ct,unsigned size);
+	void addColumn(ColumnType ct,unsigned size);
 	unsigned getColumnOffset(unsigned index);
 	void toValue(std::string text_tuple, void* binary_tuple, const char attr_separator);
 	inline void showAccum_off()

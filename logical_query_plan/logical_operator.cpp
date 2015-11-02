@@ -44,7 +44,7 @@ namespace logical_query_plan {
 //
 Schema* LogicalOperator::GetSchema(
     const std::vector<Attribute>& attributes) const {
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   for (unsigned i = 0; i < attributes.size(); i++) {
     columns.push_back(*attributes[i].attrType);
   }
@@ -53,7 +53,7 @@ Schema* LogicalOperator::GetSchema(
 Schema* LogicalOperator::GetSchema(
     const std::vector<Attribute>& attributes_left,
     const std::vector<Attribute>& attributes_right) const {
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   for (unsigned i = 0; i < attributes_left.size(); i++) {
     columns.push_back(*attributes_left[i].attrType);
   }

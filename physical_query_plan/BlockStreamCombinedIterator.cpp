@@ -68,7 +68,7 @@ bool BlockStreamCombinedIterator::Next(BlockStreamBase *block){
 					cur=rb.bsti_list_[j]->currentTuple();
 				}
 				column_in_combinedTuple=state_.output_->getColumnAddess(j,combinedTuple_);
-				state_.output_->columns[j].operate->assign(cur,column_in_combinedTuple);
+				state_.output_->columns[j].operate->Assign(cur,column_in_combinedTuple);
 			}
 			if((tuple=block->allocateTuple(total_length_))>0){
 				memcpy(tuple,combinedTuple_,total_length_);

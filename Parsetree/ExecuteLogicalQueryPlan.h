@@ -120,7 +120,7 @@ void DropTable(
 
 
 bool InsertValueToStream(Insert_vals *insert_value, TableDescriptor *table, unsigned position, ostringstream &ostr);
-bool CheckType(const column_type *col_type, Expr *expr);
+bool CheckType(const ColumnType *col_type, Expr *expr);
 
 LogicalOperator* convert_sql_to_logical_operator_tree(const char* sql);
 

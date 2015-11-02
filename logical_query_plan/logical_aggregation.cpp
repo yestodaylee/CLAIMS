@@ -174,7 +174,7 @@ void LogicalAggregation::ChangeSchemaForAVG(
   // one count() column at the end.
 
   if (state_.avgIndex.size() > 0) {
-    column_type count_column_type = column_type(t_u_long, 8);
+    ColumnType count_column_type = ColumnType(t_u_long, 8);
     state_.hashSchema->addColumn(count_column_type, 8);
     if (state_.agg_node_type ==
         BlockStreamAggregationIterator::State::Hybrid_Agg_Private) {
@@ -410,8 +410,8 @@ std::vector<Attribute> LogicalAggregation::GetAggAttrsAfterAgg() const {
 
     switch (aggregation_function_list_[i]) {
       case BlockStreamAggregationIterator::State::count: {
-        if (!(temp.isNULL() || temp.isANY())) temp.attrType->~column_type();
-        temp.attrType = new column_type(t_u_long, 8);
+        if (!(temp.isNULL() || temp.isANY())) temp.attrType->~ColumnType();
+        temp.attrType = new ColumnType(t_u_long, 8);
         temp.attrName = "count(" + temp.getName() + ")";
         temp.index = aggregation_start_index++;
         temp.table_id_ = INTERMEIDATE_TABLEID;

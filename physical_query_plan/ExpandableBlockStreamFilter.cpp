@@ -15,10 +15,10 @@
 #include "../../common/Expression/qnode.h"
 #include "../../common/Expression/initquery.h"
 #include "../../common/Expression/queryfunc.h"
-#include "../../common/data_type.h"
 #include "../../Config.h"
 #include "../../Parsetree/sql_node_struct.h"
 #include "../../codegen/ExpressionGenerator.h"
+#include "../common/data_type.h"
 
 #define NEWCONDITION
 

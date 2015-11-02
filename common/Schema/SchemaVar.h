@@ -24,7 +24,7 @@ public:
 	SchemaVar();
 	virtual ~SchemaVar();
 
-	SchemaVar(std::vector<column_type> columns);
+	SchemaVar(std::vector<ColumnType> columns);
 
 	virtual unsigned getTupleMaxSize()const{return -1;};
 	virtual unsigned getTupleActualSize(void* tuple) const;
@@ -45,7 +45,7 @@ public:
 		if(index>0){
 			for(unsigned i=0;i<index;i++){
 				if(columns[i].type!=t_string){
-					ofs+=columns[i].get_length();
+					ofs+=columns[i].GetLength();
 				}
 				else{
 					ofs+=*(int *)((char*)column_start+column_off*4);

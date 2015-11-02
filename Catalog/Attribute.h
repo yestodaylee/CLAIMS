@@ -23,7 +23,7 @@ struct Attribute
 		table_id_=tableid;
 		index=pos;
 		attrName = name;
-		attrType = new column_type(type, size, can_be_null);
+		attrType = new ColumnType(type, size, can_be_null);
 		unique=unqiue;
 
 	}
@@ -43,7 +43,7 @@ struct Attribute
 //			{
 //				puts("0<-2  oh ,my god!!");
 //			}
-			attrType=new column_type(*att.attrType);
+			attrType=new ColumnType(*att.attrType);
 			index=att.index;
 		}
 
@@ -53,7 +53,7 @@ struct Attribute
 		attrName=att.attrName;
 		unique=att.unique;
 		if(att.table_id_<ATTRIBUTE_ANY){
-			attrType=new column_type(*att.attrType);
+			attrType=new ColumnType(*att.attrType);
 			index=att.index;
 		}
 		return *this;
@@ -86,7 +86,7 @@ struct Attribute
 	}
 	~Attribute(){
 		if(table_id_<TableID(ATTRIBUTE_ANY)){
-			attrType->~column_type();
+			attrType->~ColumnType();
 		}
 	}
 	bool operator==(const Attribute& r)const{
@@ -121,7 +121,7 @@ struct Attribute
 		return AttributeID(table_id_,index);
 	}
 	std::string attrName;
-	column_type* attrType;
+	ColumnType* attrType;
 	/*the position in the table*/
 	unsigned index;
 	TableID table_id_;

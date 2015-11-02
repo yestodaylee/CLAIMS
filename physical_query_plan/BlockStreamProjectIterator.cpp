@@ -161,8 +161,8 @@ void BlockStreamProjectIterator::process_logic(BlockStreamBase* block,
 			for(int i=0;i<tc->thread_qual_.size();i++)
 			{
 				void * result=tc->thread_qual_[i]->FuncId(tc->thread_qual_[i],tuple_from_child,state_.input_);
-				copyNewValue(tuple,result,state_.output_->getcolumn(i).get_length());
-				tuple=(char *)tuple+state_.output_->getcolumn(i).get_length();
+				copyNewValue(tuple,result,state_.output_->getcolumn(i).GetLength());
+				tuple=(char *)tuple+state_.output_->getcolumn(i).GetLength();
 			}
 			tc->block_stream_iterator_->increase_cur_();
 		}

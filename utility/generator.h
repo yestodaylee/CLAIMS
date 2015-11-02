@@ -19,9 +19,9 @@
 
 
 struct column_metadata{
-	column_type type;
+	ColumnType type;
 	ColumnDistribution* dis;
-	column_metadata(column_type type,ColumnDistribution* dis=0):type(type),dis(dis){
+	column_metadata(ColumnType type,ColumnDistribution* dis=0):type(type),dis(dis){
 	}
 	column_metadata():dis(0){
 
@@ -39,7 +39,7 @@ public:
 	}
 	void addIntUniformColumn(int min=0, int max=1024*1024, int seed=0){
 		column_metadata column;
-		column.type=column_type(t_int);
+		column.type=ColumnType(t_int);
 		column.dis=new UniformInt(min,max,seed);
 		columns_.push_back(column);
 	}
@@ -56,22 +56,22 @@ private:
 };
 
 inline Schema* generateSchema(unsigned tuple_length){
-	std::vector<column_type> columns;
+	std::vector<ColumnType> columns;
 	for(unsigned i=0;i<tuple_length/sizeof(int);i++){
-		columns.push_back(column_type(t_int));
+		columns.push_back(ColumnType(t_int));
 	}
 	Schema* schema=new SchemaFix(columns);
 	return schema;
 
 }
 
-inline Schema* generateSchema(std::vector<column_type> columns){
+inline Schema* generateSchema(std::vector<ColumnType> columns){
 	return new SchemaFix(columns);
 
 }
 
 inline DynamicBlockBuffer* generateBlockStreamBuffer(vector<column_metadata> columns, unsigned long tuple_count, Schema** return_schema=0){
-	std::vector<column_type> column_types;
+	std::vector<ColumnType> column_types;
 	for(unsigned i=0;i<columns.size();i++){
 		column_types.push_back(columns[i].type);
 	}
@@ -131,7 +131,7 @@ inline DynamicBlockBuffer* generate_BlockStreamBuffer(Schema* schema,unsigned lo
 		new_block->setEmpty();
 		while(tuple=new_block->allocateTuple(schema->getTupleMaxSize())){
 			memcpy(tuple,tmp_tuple,tuple_length);
-			schema->columns[0].operate->assignment(&value,tuple);
+			schema->columns[0].operate->Assign(&value,tuple);
 			value=random();
 //			value++;
 			i++;

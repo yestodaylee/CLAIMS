@@ -153,7 +153,7 @@ bool BlockStreamJoinIterator::Open(const PartitionOffset& partition_offset) {
 
   const Schema* input_schema = state_.input_schema_left->duplicateSchema();
   const Operate* op = input_schema->getcolumn(state_.joinIndex_left[0]).operate
-      ->duplicateOperator();
+      ->DuplicateOperator();
   const unsigned buckets = state_.ht_nbuckets;
 
   unsigned long long int start = curtick();
@@ -172,7 +172,7 @@ bool BlockStreamJoinIterator::Open(const PartitionOffset& partition_offset) {
 #endif
       const void* key_addr = input_schema->getColumnAddess(
           state_.joinIndex_left[0], cur);
-      bn = op->getPartitionValue(key_addr, buckets);
+      bn = op->GetPartitionValue(key_addr, buckets, nullptr);
       tuple_in_hashtable = hashtable->atomicAllocate(bn);
       /* copy join index columns*/
 //			for(unsigned i=0;i<state_.joinIndex_left.size();i++){
@@ -243,10 +243,10 @@ bool BlockStreamJoinIterator::Next(BlockStreamBase *block) {
     while ((tuple_from_right_child =
         jtc->r_block_stream_iterator_->currentTuple()) > 0) {
       unsigned bn = state_.input_schema_right->getcolumn(
-          state_.joinIndex_right[0]).operate->getPartitionValue(
+          state_.joinIndex_right[0]).operate->GetPartitionValue(
           state_.input_schema_right->getColumnAddess(state_.joinIndex_right[0],
                                                      tuple_from_right_child),
-          state_.ht_nbuckets);
+          state_.ht_nbuckets, nullptr);
 
       while ((tuple_in_hashtable = jtc->hashtable_iterator_.readCurrent()) > 0) {
         cff_(tuple_in_hashtable, tuple_from_right_child, &key_exit,
@@ -279,10 +279,10 @@ bool BlockStreamJoinIterator::Next(BlockStreamBase *block) {
       if ((tuple_from_right_child =
           jtc->r_block_stream_iterator_->currentTuple())) {
         bn = state_.input_schema_right->getcolumn(state_.joinIndex_right[0])
-            .operate->getPartitionValue(
+            .operate->GetPartitionValue(
             state_.input_schema_right->getColumnAddess(
                 state_.joinIndex_right[0], tuple_from_right_child),
-            state_.ht_nbuckets);
+            state_.ht_nbuckets, nullptr);
         hashtable->placeIterator(jtc->hashtable_iterator_, bn);
       }
     }
@@ -302,10 +302,10 @@ bool BlockStreamJoinIterator::Next(BlockStreamBase *block) {
     jtc->r_block_stream_iterator_ = jtc->r_block_for_asking_->createIterator();
     if ((tuple_from_right_child = jtc->r_block_stream_iterator_->currentTuple())) {
       unsigned bn = state_.input_schema_right->getcolumn(
-          state_.joinIndex_right[0]).operate->getPartitionValue(
+          state_.joinIndex_right[0]).operate->GetPartitionValue(
           state_.input_schema_right->getColumnAddess(state_.joinIndex_right[0],
                                                      tuple_from_right_child),
-          state_.ht_nbuckets);
+          state_.ht_nbuckets, nullptr);
       hashtable->placeIterator(jtc->hashtable_iterator_, bn);
     }
   }
@@ -349,7 +349,7 @@ inline void BlockStreamJoinIterator::isMatch(void* l_tuple_addr,
                                                    r_tuple_addr);
     void* key_in_hashtable = l_schema->getColumnAddess(l_join_index[i],
                                                        l_tuple_addr);
-    if (!r_schema->getcolumn(r_join_index[i]).operate->equal(
+    if (!r_schema->getcolumn(r_join_index[i]).operate->Equal(
         key_in_input, key_in_hashtable)) {
       key_exit = false;
       break;

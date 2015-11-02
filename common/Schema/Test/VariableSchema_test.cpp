@@ -66,10 +66,10 @@ static int variable_schema_test(){
 	cout<<"in ======================================"<<endl;
 
 	/*******************scan******************/
-	vector<column_type> column_list;
-	column_list.push_back(column_type(t_int));
-	column_list.push_back(column_type(t_double));
-	column_list.push_back(column_type(t_string));
+	vector<ColumnType> column_list;
+	column_list.push_back(ColumnType(t_int));
+	column_list.push_back(ColumnType(t_double));
+	column_list.push_back(ColumnType(t_string));
 	ExpandableBlockStreamProjectionScan::State scan_state(catalog->getTable(0)->getProjectoin(0)->getProjectionID(),new SchemaVar(column_list),64*1024-sizeof(unsigned));
 	BlockStreamIteratorBase* scan=new ExpandableBlockStreamProjectionScan(scan_state);
 	//------------------------------------------------------------------
@@ -78,13 +78,13 @@ static int variable_schema_test(){
 	ExpandableBlockStreamFilter::State filter_state;
 
 	int f0=1;
-	AttributeComparator filter0(column_type(t_int),Comparator::EQ,0,&f0);
+	AttributeComparator filter0(ColumnType(t_int),Comparator::EQ,0,&f0);
 	char* str="string123";
-	AttributeComparator filter1(column_type(t_string),Comparator::EQ,2,str);
+	AttributeComparator filter1(ColumnType(t_string),Comparator::EQ,2,str);
 	std::vector<AttributeComparator> ComparatorList;
 	ComparatorList.push_back(filter1);
 
-	std::vector<column_type> svc;
+	std::vector<ColumnType> svc;
 	svc.push_back(data_type(t_int));
 	svc.push_back(data_type(t_double));
 	svc.push_back(data_type(t_string));

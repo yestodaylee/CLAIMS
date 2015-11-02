@@ -21,80 +21,80 @@
 
 std::string test_decimal_to_string(char* decimal,int number_of_fractions){
 	NValue v1 = NValue::getDecimalValueFromString(decimal);
-	column_type* op=new column_type(data_type(t_decimal),number_of_fractions);
-	std::string ret=op->operate->toString(&v1);
-	op->~column_type();
+	ColumnType* op=new ColumnType(data_type(t_decimal),number_of_fractions);
+	std::string ret=op->operate->ToString(&v1);
+	op->~ColumnType();
 	return ret;
 }
 
 std::string test_decimal_add(char* left,char* right,int number_of_fractions){
 	NValue v1 = NValue::getDecimalValueFromString(left);
 	NValue v2 = NValue::getDecimalValueFromString(right);
-	column_type* op=new column_type(data_type(t_decimal),number_of_fractions);
-	op->operate->add(&v1,&v2);
-	std::string ret=op->operate->toString(&v1);
-	op->~column_type();
+	ColumnType* op=new ColumnType(data_type(t_decimal),number_of_fractions);
+	op->operate->Add(&v1,&v2);
+	std::string ret=op->operate->ToString(&v1);
+	op->~ColumnType();
 	return ret;
 }
  void test_decimal_to_value1(){
 	NValue v1 = NValue::getDecimalValueFromString("1.033333");
-	column_type* op=new column_type(data_type(t_decimal),4);
-	if(!print_test_name_result(op->operate->toString(&v1)==string("1.0333"),"Decimal toString()")){
-		printf("Expected 1.0333, actual: %s\n",op->operate->toString(&v1).c_str());
+	ColumnType* op=new ColumnType(data_type(t_decimal),4);
+	if(!print_test_name_result(op->operate->ToString(&v1)==string("1.0333"),"Decimal toString()")){
+		printf("Expected 1.0333, actual: %s\n",op->operate->ToString(&v1).c_str());
 	}
 }
  void test_decimal_to_value2(){
 	NValue v1 = NValue::getDecimalValueFromString("1.2220");
-	column_type* op=new column_type(data_type(t_decimal),4);
-	if(!print_test_name_result(op->operate->toString(&v1)==string("1.2220"),"Decimal toString()")){
-		printf("Expected 1.2220, actual: %s\n",op->operate->toString(&v1).c_str());
+	ColumnType* op=new ColumnType(data_type(t_decimal),4);
+	if(!print_test_name_result(op->operate->ToString(&v1)==string("1.2220"),"Decimal toString()")){
+		printf("Expected 1.2220, actual: %s\n",op->operate->ToString(&v1).c_str());
 	}
 }
  void test_decimal_to_value3(){
 	NValue v1 = NValue::getDecimalValueFromString("1333");
-	column_type* op=new column_type(data_type(t_decimal),2);
-	if(!print_test_name_result(op->operate->toString(&v1)==string("1333.00"),"Decimal toString()")){
-		printf("Expected 1333.00, actual: %s\n",op->operate->toString(&v1).c_str());
+	ColumnType* op=new ColumnType(data_type(t_decimal),2);
+	if(!print_test_name_result(op->operate->ToString(&v1)==string("1333.00"),"Decimal toString()")){
+		printf("Expected 1333.00, actual: %s\n",op->operate->ToString(&v1).c_str());
 	}
 }
  void test_decimal_to_value4(){
 	NValue v1 = NValue::getDecimalValueFromString("0.00001");
-	column_type* op=new column_type(data_type(t_decimal),2);
-	if(!print_test_name_result(op->operate->toString(&v1)==string("0.00"),"Decimal toString()")){
-		printf("Expected 0.00, actual: %s\n",op->operate->toString(&v1).c_str());
+	ColumnType* op=new ColumnType(data_type(t_decimal),2);
+	if(!print_test_name_result(op->operate->ToString(&v1)==string("0.00"),"Decimal toString()")){
+		printf("Expected 0.00, actual: %s\n",op->operate->ToString(&v1).c_str());
 	}
 }
  void test_decimal_to_value5(){
 
 
 	NValue v1 = NValue::getDecimalValueFromString("-0.02");
-	column_type* op=new column_type(data_type(t_decimal),2);
-	if(!print_test_name_result(op->operate->toString(&v1)==string("-0.02"),"Decimal toString()")){
-		printf("Expected -0.02, actual: %s\n",op->operate->toString(&v1).c_str());
+	ColumnType* op=new ColumnType(data_type(t_decimal),2);
+	if(!print_test_name_result(op->operate->ToString(&v1)==string("-0.02"),"Decimal toString()")){
+		printf("Expected -0.02, actual: %s\n",op->operate->ToString(&v1).c_str());
 	}
 }
  void test_decimal_add1(){
 	NValue v1 = NValue::getDecimalValueFromString("4.4");
 	NValue v2 = NValue::getDecimalValueFromString("-18");
-	column_type* op=new column_type(data_type(t_decimal),2);
-	op->operate->add(&v1,&v2);
-	if(!print_test_name_result(op->operate->toString(&v1)==string("-13.60"),"Decimal add")){
-		printf("Expected -13.60, actual: %s\n",op->operate->toString(&v1).c_str());
+	ColumnType* op=new ColumnType(data_type(t_decimal),2);
+	op->operate->Add(&v1,&v2);
+	if(!print_test_name_result(op->operate->ToString(&v1)==string("-13.60"),"Decimal add")){
+		printf("Expected -13.60, actual: %s\n",op->operate->ToString(&v1).c_str());
 	}
 }
 
  std::string test_decimal_minus(char* left, char* right, int number_of_fractions)
  {
-	vector<column_type> column_list;
-	column_list.push_back(column_type(t_decimal, number_of_fractions));
+	vector<ColumnType> column_list;
+	column_list.push_back(ColumnType(t_decimal, number_of_fractions));
 	Schema* schema = new SchemaFix(column_list);
 
 	void* left_ = malloc(16);		//newmalloc
 	void* right_ = malloc(16);		//newmalloc
-	schema->getcolumn(0).operate->toValue(left_, left);
-	schema->getcolumn(0).operate->toValue(right_, right);
-	schema->getcolumn(0).operate->add(left_, right_);
-	return schema->getcolumn(0).operate->toString(left_);
+	schema->getcolumn(0).operate->ToValue(left_, left);
+	schema->getcolumn(0).operate->ToValue(right_, right);
+	schema->getcolumn(0).operate->Add(left_, right_);
+	return schema->getcolumn(0).operate->ToString(left_);
  }
 
  int test_decimal(){
@@ -163,10 +163,10 @@ std::string test_date_computation(std::string dt, std::string d, data_type d_t)
 	{
 		void* value = malloc(sizeof(date));		//newmalloc
 		Operate* op = new OperateDate();
-		op->toValue(value, dt.c_str());
+		op->ToValue(value, dt.c_str());
 		date_duration dd(atoi(d.c_str()));
-		op->add(value, (void*)(&dd));
-		ret = op->toString(value);
+		op->Add(value, (void*)(&dd));
+		ret = op->ToString(value);
 		op->~Operate();
 		free(value);
 		return ret;
@@ -176,10 +176,10 @@ std::string test_date_computation(std::string dt, std::string d, data_type d_t)
 		void* value = malloc(sizeof(time_duration));		//newmalloc
 		void* increament = malloc(sizeof(time_duration));		//newmalloc
 		Operate* op = new OperateTime();
-		op->toValue(value, dt.c_str());
-		op->toValue(increament, d.c_str());
-		op->add(value, increament);
-		ret = op->toString(value);
+		op->ToValue(value, dt.c_str());
+		op->ToValue(increament, d.c_str());
+		op->Add(value, increament);
+		ret = op->ToString(value);
 		op->~Operate();
 		free(value);
 		free(increament);
@@ -189,10 +189,10 @@ std::string test_date_computation(std::string dt, std::string d, data_type d_t)
 	{
 		void* value = malloc(sizeof(ptime));		//newmalloc
 		Operate* op = new OperateDatetime();
-		op->toValue(value, dt.c_str());
+		op->ToValue(value, dt.c_str());
 		time_duration td(duration_from_string(d));
-		op->add(value, (void*)(&td));
-		ret = op->toString(value);
+		op->Add(value, (void*)(&td));
+		ret = op->ToString(value);
 		op->~Operate();
 		free(value);
 		return ret;
@@ -208,11 +208,11 @@ TEST(DATE_TYPE, DATE_COMPUTATION)
 
 std::string null_value_test(unsigned int size, data_type t)
 {
-	column_type* ct = new column_type(t, 12, true);
+	ColumnType* ct = new ColumnType(t, 12, true);
 	void* value = malloc(size);		//newmalloc
-	ct->operate->toValue(value, "");
-	std::string ret =  ct->operate->toString(value);
-	ct->~column_type();
+	ct->operate->ToValue(value, "");
+	std::string ret =  ct->operate->ToString(value);
+	ct->~ColumnType();
 	free(value);
 	return ret;
 }
@@ -233,11 +233,11 @@ TEST(DATA_TYPE, NULL_VALUE_TEST)
 
 std::string set_null_test(unsigned int size, data_type t)
 {
-	column_type* ct = new column_type(t, 12, true);
+	ColumnType* ct = new ColumnType(t, 12, true);
 	void* value = malloc(size);		//newmalloc
-	ct->operate->setNull(value);
-	std::string ret =  ct->operate->toString(value);
-	ct->~column_type();
+	ct->operate->SetNull(value);
+	std::string ret =  ct->operate->ToString(value);
+	ct->~ColumnType();
 	free(value);
 	return ret;
 }

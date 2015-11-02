@@ -36,7 +36,7 @@ public:
 	unsigned long getValueCount() const;
 	unsigned getBucketCnt() const;
 
-	void Print(column_type type);
+	void Print(ColumnType type);
 
 	void destory();
 	virtual ~Histogram();

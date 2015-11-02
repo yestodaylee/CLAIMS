@@ -13,8 +13,8 @@
 
 int mainasdfaf234(int argc,const char** argv){
 
-	std::vector<column_type> column_list,column_list_;
-	column_list.push_back(column_type(t_int));
+	std::vector<ColumnType> column_list,column_list_;
+	column_list.push_back(ColumnType(t_int));
 
 	Schema* input=new SchemaFix(column_list);
 
@@ -26,7 +26,7 @@ int mainasdfaf234(int argc,const char** argv){
 
 
 
-	AttributeComparator fA(column_type(t_int),Comparator::L,0,&f);
+	AttributeComparator fA(ColumnType(t_int),Comparator::L,0,&f);
 	std::vector<AttributeComparator> ComparatorList;
 	ComparatorList.push_back(fA);
 	BlockStreamFilter::State bsf_state(input,bsscs1,ComparatorList,4096);

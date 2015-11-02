@@ -9,16 +9,16 @@
 #include "SchemaFix.h"
 
 
-SchemaFix::SchemaFix(const std::vector<column_type>& col):Schema(col) {
+SchemaFix::SchemaFix(const std::vector<ColumnType>& col):Schema(col) {
 
 //	accum_offsets=new unsigned[columns.size()];	//new
 	totalsize=0;
 	unsigned accumu=0;
 	for(unsigned i=0;i<col.size();i++)
 	{
-		totalsize+=col[i].get_length();
+		totalsize+=col[i].GetLength();
 		accum_offsets.push_back(accumu);
-		accumu+=col[i].get_length();
+		accumu+=col[i].GetLength();
 	}
 
 }
@@ -40,7 +40,7 @@ void SchemaFix::getColumnValue(unsigned index, void* src, void* desc)
 	assert(index<columns.size());
 	assert(src!=0&&desc!=0);
 
-	columns[index].operate->assignment(accum_offsets[index]+(char*)src,desc);
+	columns[index].operate->Assign(accum_offsets[index]+(char*)src,desc);
 }
 
 unsigned SchemaFix::getColumnOffset(unsigned index)
@@ -48,7 +48,7 @@ unsigned SchemaFix::getColumnOffset(unsigned index)
 	return accum_offsets[index];
 }
 Schema* SchemaFix::getSubSchema(std::vector<unsigned> index)const{
-	std::vector<column_type> col;
+	std::vector<ColumnType> col;
 	for(unsigned i=0;i<index.size();i++){
 		col.push_back(columns[index[i]]);
 	}
@@ -72,7 +72,7 @@ void SchemaFix::toValue(std::string text_tuple, void* binary_tuple, const char a
 		for(; (attr_separator != text_tuple[pos]) && (pos<text_tuple.length()); pos++);
 		if(prev_pos <= pos)
 		{
-			columns[i].operate->toValue((char*)binary_tuple+accum_offsets[i],text_tuple.substr(prev_pos,pos-prev_pos).c_str());
+			columns[i].operate->ToValue((char*)binary_tuple+accum_offsets[i],text_tuple.substr(prev_pos,pos-prev_pos).c_str());
 
 //			cout << "Original: " << text_tuple.substr(prev_pos,pos-prev_pos).c_str() << "\t Transfer: " << columns[i].operate->toString(binary_tuple+accum_offsets[i]) << endl;
 			pos++;
@@ -80,7 +80,7 @@ void SchemaFix::toValue(std::string text_tuple, void* binary_tuple, const char a
 		}
 	}
 }
-void SchemaFix::addColumn(column_type  ct,unsigned size)
+void SchemaFix::addColumn(ColumnType  ct,unsigned size)
 {
 	accum_offsets.push_back(totalsize);
 	columns.push_back(ct);

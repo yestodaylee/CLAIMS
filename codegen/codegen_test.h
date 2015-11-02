@@ -10,7 +10,6 @@
 #include <gtest/gtest.h>
 #include <map>
 #include "CodeGenerator.h"
-#include "../common/data_type.h"
 #include "../common/Schema/Schema.h"
 #include "../common/Expression/qnode.h"
 #include "../common/Expression/initquery.h"
@@ -19,6 +18,7 @@
 #include "CompareFunctonGenerator.h"
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include "boost/date_time/gregorian/parsers.hpp"
+#include "../common/data_type.h"
 
 using std::map;
 
@@ -56,7 +56,7 @@ TEST_F(CodeGenerationTest,AddInt) {
    * Express: #1 + #2
    */
 
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_int));
   Schema* s = new SchemaFix(columns);
@@ -92,7 +92,7 @@ TEST_F(CodeGenerationTest,AddInt2) {
    *         -1   2   3
    * Express: #1 + #2 + #3
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_int));
@@ -132,7 +132,7 @@ TEST_F(CodeGenerationTest,AddFloat) {
    *         0     -1.2    3.8
    * Express: #1 + #2 + #3
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_float));
   columns.push_back(data_type(t_float));
   columns.push_back(data_type(t_float));
@@ -171,7 +171,7 @@ TEST_F(CodeGenerationTest,AddFloatPromote) {
    *         1     -1.2    3.8
    * Express: #1 + #2 + #3
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_float));
   columns.push_back(data_type(t_float));
@@ -210,7 +210,7 @@ TEST_F(CodeGenerationTest,AddFloatPromote2) {
    *         1     -1.2    3.8
    * Express: #1 + #2 + #3
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_float));
@@ -249,7 +249,7 @@ TEST_F(CodeGenerationTest,AddLongPromote) {
    *         1     -1     200
    * Express: #1 + #2 + #3
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_u_long));
@@ -288,7 +288,7 @@ TEST_F(CodeGenerationTest,SUB) {
    *         1     -1     200
    * Express: #1 + #2 + #3
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_u_long));
@@ -327,7 +327,7 @@ TEST_F(CodeGenerationTest,Multiply) {
    *         1     -1     200
    * Express: #1 + #2 + #3
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_u_long));
@@ -366,7 +366,7 @@ TEST_F(CodeGenerationTest,Multiply1) {
    *         2     0.5    3
    * Express: #1 x #2 x #3 = 3
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_float));
   columns.push_back(data_type(t_u_long));
@@ -405,7 +405,7 @@ TEST_F(CodeGenerationTest,Divide) {
    *         4     3     0.5
    * Express: #1 / #2 / #3 = 2
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_float));
@@ -444,7 +444,7 @@ TEST_F(CodeGenerationTest,Divide2) {
    *         4     0.5     -0.5
    * Express: #1 / #2 / #3 = -16
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_float));
   columns.push_back(data_type(t_double));
@@ -483,7 +483,7 @@ TEST_F(CodeGenerationTest,Const) {
    *        -0.5
    * Express: (int)4*(float)0.5*#1 = -1.0
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_double));
   Schema* s = new SchemaFix(columns);
   map<std::string, int> column_index;
@@ -517,7 +517,7 @@ TEST_F(CodeGenerationTest,CompareLT) {
    *        3     | 4
    * Express: #1 < #2 = true
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_u_long));
   columns.push_back(data_type(t_u_long));
   Schema* s = new SchemaFix(columns);
@@ -551,7 +551,7 @@ TEST_F(CodeGenerationTest,GreatCompare) {
    *        3     | 4
    * Express: #1 < #2 = true
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_u_long));
   columns.push_back(data_type(t_u_long));
   Schema* s = new SchemaFix(columns);
@@ -585,7 +585,7 @@ TEST_F(CodeGenerationTest,AND) {
    *        1     | 0
    * Express: #1 AND #2 = false
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_boolean));
   columns.push_back(data_type(t_boolean));
   Schema* s = new SchemaFix(columns);
@@ -619,7 +619,7 @@ TEST_F(CodeGenerationTest,CompareEQ) {
    *        3     | 4
    * Express: #1 = #2 = false
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_u_long));
   columns.push_back(data_type(t_u_long));
   Schema* s = new SchemaFix(columns);
@@ -652,7 +652,7 @@ TEST_F(CodeGenerationTest,CompareEQ1) {
    *        4     | 4
    * Express: #1 = #2 = true
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_u_long));
   columns.push_back(data_type(t_u_long));
   Schema* s = new SchemaFix(columns);
@@ -685,7 +685,7 @@ TEST_F(CodeGenerationTest,CompareEQ2) {
    *        4     | 4
    * Express: #1 = #2 = true
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_u_long));
   columns.push_back(data_type(t_u_long));
   Schema* s = new SchemaFix(columns);
@@ -720,12 +720,12 @@ TEST_F(CodeGenerationTest,CompareEQ3) {
    *         3     | 6.3
    * Express: #1 < #2 = true
    */
-  std::vector<column_type> columns1;
+  std::vector<ColumnType> columns1;
   columns1.push_back(data_type(t_u_long));
   columns1.push_back(data_type(t_u_long));
   Schema* s1 = new SchemaFix(columns1);
 
-  std::vector<column_type> columns2;
+  std::vector<ColumnType> columns2;
   columns2.push_back(data_type(t_int));
   columns2.push_back(data_type(t_double));
   Schema* s2 = new SchemaFix(columns2);
@@ -767,12 +767,12 @@ TEST_F(CodeGenerationTest,EqualJoinCompare) {
    *         4     | 3
    * Expression Tuple1.#1 == Tuple2.#2 AND Tuple1.#2 == Tuple1.#1 = true
    */
-  std::vector<column_type> columns1;
+  std::vector<ColumnType> columns1;
   columns1.push_back(data_type(t_u_long));
   columns1.push_back(data_type(t_u_long));
   Schema* s1 = new SchemaFix(columns1);
 
-  std::vector<column_type> columns2;
+  std::vector<ColumnType> columns2;
   columns2.push_back(data_type(t_u_long));
   columns2.push_back(data_type(t_u_long));
   Schema* s2 = new SchemaFix(columns2);
@@ -806,7 +806,7 @@ TEST_F(CodeGenerationTest,EqualJoinCompare) {
 }
 
 TEST_F(CodeGenerationTest,FilterLogic) {
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_int));
   Schema* s = new SchemaFix(columns);
@@ -855,7 +855,7 @@ TEST_F(CodeGenerationTest,FilterLogic) {
 }
 
 TEST_F(CodeGenerationTest,FilterLogic1) {
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_int));
   Schema* s = new SchemaFix(columns);
@@ -902,7 +902,7 @@ TEST_F(CodeGenerationTest,FilterLogic1) {
 }
 
 TEST_F(CodeGenerationTest,FilterLogic2) {
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_int));
   Schema* s = new SchemaFix(columns);
@@ -948,7 +948,7 @@ TEST_F(CodeGenerationTest,FilterLogic2) {
 }
 
 TEST_F(CodeGenerationTest,FilterLogic3) {
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_int));
   Schema* s = new SchemaFix(columns);
@@ -994,7 +994,7 @@ TEST_F(CodeGenerationTest,FilterLogic3) {
 }
 
 TEST_F(CodeGenerationTest,FilterLogic4) {
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_u_long));
   columns.push_back(data_type(t_u_long));
   Schema* s = new SchemaFix(columns);
@@ -1040,13 +1040,13 @@ TEST_F(CodeGenerationTest,FilterLogic4) {
 }
 
 TEST_F(CodeGenerationTest,FilterLogicReal) {
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_u_long));
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_int));
   columns.push_back(data_type(t_u_long));
-  columns.push_back(column_type(data_type(t_string), 1000));
-  columns.push_back(column_type(data_type(t_string), 1000));
+  columns.push_back(ColumnType(data_type(t_string), 1000));
+  columns.push_back(ColumnType(data_type(t_string), 1000));
   columns.push_back(data_type(t_datetime));
   Schema* s = new SchemaFix(columns);
   map<string, int> column_index;
@@ -1205,7 +1205,7 @@ TEST_F(CodeGenerationTest, LessCompare3) {
    *        3     | 4
    * Express: #1 < #2 = true
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_decimal));
   columns.push_back(data_type(t_decimal));
   Schema* s = new SchemaFix(columns);
@@ -1239,7 +1239,7 @@ TEST_F(CodeGenerationTest, LessCompare4) {
    *        3     | 4
    * Express: #1 < #2 = true
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_decimal));
   columns.push_back(data_type(t_decimal));
   Schema* s = new SchemaFix(columns);
@@ -1273,7 +1273,7 @@ TEST_F(CodeGenerationTest, LessCompare5) {
    *        3     | 4
    * Express: #1 < #2 = true
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_decimal));
   columns.push_back(data_type(t_decimal));
   Schema* s = new SchemaFix(columns);
@@ -1310,7 +1310,7 @@ TEST_F(CodeGenerationTest, LessCompare6) {
    *        3     | 4
    * Express: #1 < #2 = true
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_decimal));
   columns.push_back(data_type(t_decimal));
   Schema* s = new SchemaFix(columns);
@@ -1347,7 +1347,7 @@ TEST_F(CodeGenerationTest, GreatCompareDecimal) {
    *        3     | 4
    * Express: #1 < #2 = true
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_decimal));
   columns.push_back(data_type(t_decimal));
   Schema* s = new SchemaFix(columns);
@@ -1384,7 +1384,7 @@ TEST_F(CodeGenerationTest, EqualCompare) {
    *        3     | 4
    * Express: #1 < #2 = true
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_decimal));
   columns.push_back(data_type(t_decimal));
   Schema* s = new SchemaFix(columns);
@@ -1421,7 +1421,7 @@ TEST_F(CodeGenerationTest, LessCompareDate) {
    *        2011-11-11     | 2011-11-12
    * Express: #1 < #2 = true
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_date));
   columns.push_back(data_type(t_date));
   Schema* s = new SchemaFix(columns);
@@ -1456,7 +1456,7 @@ TEST_F(CodeGenerationTest, GreatCompareDate) {
    *        2011-11-11     | 2011-11-12
    * Express: #1 > #2 = false
    */
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   columns.push_back(data_type(t_date));
   columns.push_back(data_type(t_date));
   Schema* s = new SchemaFix(columns);

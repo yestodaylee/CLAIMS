@@ -344,10 +344,10 @@ inline void test_cast(){
 inline void test_decimal_add2(){
 	NValue v1 = NValue::getDecimalValueFromString("4.4");
 	NValue v2 = NValue::getDecimalValueFromString("-8");
-	column_type* op=new column_type(data_type(t_decimal),2);
-	op->operate->multiple(&v1,&v2);
-	if(!print_test_name_result(op->operate->toString(&v1)==string("-35.20"),"Decimal multiple")){
-		printf("Expected -35.20, actual: %s\n",op->operate->toString(&v1).c_str());
+	ColumnType* op=new ColumnType(data_type(t_decimal),2);
+	op->operate->Multiply(&v1,&v2);
+	if(!print_test_name_result(op->operate->ToString(&v1)==string("-35.20"),"Decimal multiple")){
+		printf("Expected -35.20, actual: %s\n",op->operate->ToString(&v1).c_str());
 	}
 }
 

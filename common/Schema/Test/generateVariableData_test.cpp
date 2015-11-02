@@ -8,10 +8,10 @@ using namespace std;
 static int generateVariableData_test(){
 	int fd=FileOpen("/home/casa/storage/file/var/new.data",O_WRONLY|O_CREAT);
 	BlockStreamBase *blockstreambase=0;
-	vector<column_type> column_list;
-	column_list.push_back(column_type(t_int));
-	column_list.push_back(column_type(t_double));
-	column_list.push_back(column_type(t_string));
+	vector<ColumnType> column_list;
+	column_list.push_back(ColumnType(t_int));
+	column_list.push_back(ColumnType(t_double));
+	column_list.push_back(ColumnType(t_string));
 	Schema *schema=new SchemaVar(column_list);
 	unsigned string1_number=0;
 	unsigned string123_number=0;

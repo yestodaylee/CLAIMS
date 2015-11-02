@@ -65,7 +65,7 @@ Schema* ProjectionDescriptor::getSchema() const {
    * TODO: support other schema.
    */
   const vector<Attribute> attributes = getAttributeList();
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   for (unsigned i = 0; i < attributes.size(); i++) {
     columns.push_back(*attributes[i].attrType);
   }
@@ -289,7 +289,7 @@ Attribute TableDescriptor::getAttribute2(const std::string& name) const {
 
 Schema* TableDescriptor::getSchema() const {
   const vector<Attribute> attributes = getAttributes();
-  std::vector<column_type> columns;
+  std::vector<ColumnType> columns;
   for (unsigned i = 0; i < attributes.size(); i++) {
     columns.push_back(*attributes[i].attrType);
   }
@@ -304,7 +304,7 @@ long int ProjectionDescriptor::getNumberOfTuplesOnPartition(
 unsigned int ProjectionDescriptor::getProjectionCost() const {
   unsigned int sum = 0;
   for (auto it = column_list_.begin(); it != column_list_.end(); ++it) {
-    sum += it->attrType->get_length();
+    sum += it->attrType->GetLength();
   }
 
   return sum;

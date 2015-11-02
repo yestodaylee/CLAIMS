@@ -257,7 +257,7 @@ bool query(const string& sql, query_result& result_set) {
 	return ret;
 }
 */
-bool CheckType(const column_type *col_type, Expr *expr)		// check whether the string is digit, can use strtol()
+bool CheckType(const ColumnType *col_type, Expr *expr)		// check whether the string is digit, can use strtol()
 {
 	nodetype insert_value_type = expr->type;
 	//TODO	对类型为int的列不能插入字符串等。。。
@@ -266,7 +266,7 @@ bool CheckType(const column_type *col_type, Expr *expr)		// check whether the st
 	case t_int: return (insert_value_type != t_intnum) || strlen(expr->data) > INT_LENGTH;
 	case t_float: return !(insert_value_type == t_approxnum) || strlen(expr->data) > FLOAT_LENGTH;
 	case t_double: return (insert_value_type != t_approxnum);
-	case t_string: return (insert_value_type != t_stringval) || strlen(expr->data) > col_type->get_length();//---5.27fzh---
+	case t_string: return (insert_value_type != t_stringval) || strlen(expr->data) > col_type->GetLength();//---5.27fzh---
 	//case t_u_long: return (insert_value_type != t_intnum) || strlen(expr->data) > INT_LENGTH || (expr->data[0] == '-');	// =='-' 实际不可行，‘-’不会被识别进expr中
 	case t_date: return false;
 	case t_time: return false;
