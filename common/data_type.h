@@ -64,7 +64,6 @@ using boost::hash_value;
 using boost::hash_combine;
 using decimal::NValue;
 using decimal::ExportSerializeOutput;
-
 typedef void (*fun)(void*, void*);
 #define DATA_TYPE_NUMBER 20
 /**
@@ -72,25 +71,29 @@ typedef void (*fun)(void*, void*);
  * descrition: the different types of data value
  */
 enum data_type {
-  t_smallInt = 0,     //!< t_smallInt
-  t_int,          //!< t_int
-  t_u_long,       //!< t_u_long
-  t_float,        //!< t_float
-  t_double,       //!< t_double
-  t_string,       //!< t_string
-  t_date,         //!< t_date
-  t_time,         //!< t_time
-  t_datetime,     //!< t_datetime
-  t_decimal,      //!< t_decimal
-  t_boolean,      //!< t_boolean
-  t_u_smallInt,   //!< t_u_smallInt
-  t_date_day,     //!< t_date_day
-  t_date_week,    //!< t_date_week
-  t_date_month,   //!< t_date_month
-  t_date_year,    //!< t_date_year
-  t_date_quarter  //!< t_date_quarter
+  t_smallInt = 0,  //!< t_smallInt
+  t_int,           //!< t_int
+  t_u_long,        //!< t_u_long
+  t_float,         //!< t_float
+  t_double,        //!< t_double
+  t_string,        //!< t_string
+  t_date,          //!< t_date
+  t_time,          //!< t_time
+  t_datetime,      //!< t_datetime
+  t_decimal,       //!< t_decimal
+  t_boolean,       //!< t_boolean
+  t_u_smallInt,    //!< t_u_smallInt
+  t_date_day,      //!< t_date_day
+  t_date_week,     //!< t_date_week
+  t_date_month,    //!< t_date_month
+  t_date_year,     //!< t_date_year
+  t_date_quarter   //!< t_date_quarter
 };
-static map<data_type,unsigned int> data_type_size_dic_abcx = {
+/**
+ * The size of all different data type,
+ * but the item of string type is useless.
+ */
+static map<data_type, unsigned int> data_type_size = {
     {t_int, sizeof(int)},
     {t_float, sizeof(float)},
     {t_double, sizeof(double)},
@@ -102,8 +105,7 @@ static map<data_type,unsigned int> data_type_size_dic_abcx = {
     {t_decimal, 16},
     {t_smallInt, sizeof(short)},
     {t_u_smallInt, sizeof(unsigned short)},
-    {t_boolean, sizeof(int)}
-};
+    {t_boolean, sizeof(int)}};
 /**
  * NULL value for all date type
  */
@@ -121,10 +123,10 @@ static map<data_type,unsigned int> data_type_size_dic_abcx = {
 #define NULL_BOOLEAN 2
 static NValue nvalue_null = NValue::getDecimalValueFromString(
     "99999999999999999999999999.999999999999");  // null value for decimal
-/**
- * the number of bytes that are aligned between any two
- *  adjacent data types
- */
+                                                 /**
+                                                  * The number of bytes that are aligned between any two
+                                                  *  adjacent data types
+                                                  */
 #define allign_bytes 4
 #define byte_align(size) (((size - 1) / allign_bytes + 1) * allign_bytes)
 
@@ -187,30 +189,36 @@ class Operate {
    * @return a function pointer
    */
   fun GetMAXFunction() { return Max; }
-  fun GetIncreateByOneFunction() {return IncreaseByOne; }
+  fun GetIncreateByOneFunction() { return IncreaseByOne; }
   bool nullable;
   data_type type;
   unsigned int digit_len;
+  /**
+   * @ brief The function pointer of all operations will be
+   *          assigned at Operate constructor
+   */
   void (*Assign)(const void* src, void* desc);
-  bool (*Equal)(const void*  a, const void* b);
-  bool (*Less)(const void*  a, const void*  b);
-  bool (*Greater)(const void* a, const void*  b);
+  bool (*Equal)(const void* a, const void* b);
+  bool (*Less)(const void* a, const void* b);
+  bool (*Greater)(const void* a, const void* b);
   void (*Add)(void* target, void* increment);
   void (*Min)(void* target, void* increment);
   void (*Max)(void* target, void* increment);
   void (*Multiply)(void* target, void* increment);
   void (*IncreaseByOne)(void* target, void* increment);
-  int  (*Compare)(const void* a, const void* b);
-  unsigned (*GetPartitionValue)( const void* key, unsigned long,
+  int (*Compare)(const void* a, const void* b);
+  /**
+   * @brief Get the partition value for a kind of data type
+   */
+  unsigned (*GetPartitionValue)(const void* key, unsigned long mod,
       PartitionFunction* partition_function);
 };
-
 /**
  *  The Operate for int type
  */
 class OperateInt : public Operate {
  public:
-  explicit OperateInt(bool _nullable) : Operate(t_int, _nullable) { }
+  explicit OperateInt(bool _nullable) : Operate(t_int, _nullable) {}
   inline string ToString(void* value) {
     string ret;
     if (this->nullable == true &&
@@ -239,17 +247,14 @@ class OperateInt : public Operate {
       return true;
     return false;
   }
-  Operate* DuplicateOperator() const {
-    return new OperateInt(this->nullable);
-  }
+  Operate* DuplicateOperator() const { return new OperateInt(this->nullable); }
 };
-
 /**
  * The operate for bool type
  */
 class OperateBool : public Operate {
  public:
-  explicit OperateBool(bool _nullable) : Operate(t_boolean, _nullable) { }
+  explicit OperateBool(bool _nullable) : Operate(t_boolean, _nullable) {}
   inline string ToString(void* value) {
     if (this->nullable == true && *static_cast<int*>(value) == NULL_BOOLEAN) {
       return "NULL";
@@ -278,7 +283,6 @@ class OperateBool : public Operate {
     *static_cast<int*>(value) = NULL_BOOLEAN;
     return true;
   }
-
   inline bool IsNull(void* value) const {
     if (this->nullable == true && *static_cast<int*>(value) == NULL_SMALL_INT)
       return true;
@@ -328,7 +332,8 @@ class OperateFloat : public Operate {
  */
 class OperateDouble : public Operate {
  public:
-  explicit OperateDouble(bool _nullable = true): Operate(t_double, _nullable) {}
+  explicit OperateDouble(bool _nullable = true)
+      : Operate(t_double, _nullable) {}
   inline string ToString(void* value) {
     string ret;
     if (this->nullable == true && *static_cast<double*>(value) == NULL_DOUBLE) {
@@ -373,7 +378,8 @@ class OperateSmallInt : public Operate {
   explicit OperateSmallInt(bool _nullable = true)
       : Operate(t_smallInt, _nullable) {}
   inline string ToString(void* value) {
-    if (this->nullable == true && *static_cast<short*>(value) == NULL_SMALL_INT) {
+    if (this->nullable == true &&
+        *static_cast<short*>(value) == NULL_SMALL_INT) {
       return "NULL";
     } else {
       ostringstream ss;
@@ -415,7 +421,7 @@ class OperateUSmallInt : public Operate {
         *static_cast<unsigned short*>(value) == NULL_U_SMALL_INT)
       return "NULL";
     ostringstream ss;
-    ss << *static_cast<short *>(value);
+    ss << *static_cast<short*>(value);
     string ret = ss.str();
     return ret;
   }
@@ -423,7 +429,8 @@ class OperateUSmallInt : public Operate {
     if ((strcmp(str, "") == 0) && this->nullable == true)
       *static_cast<unsigned short*>(target) = NULL_U_SMALL_INT;
     else
-      *static_cast<unsigned short*>(target) = static_cast<unsigned short>(atoi(str));
+      *static_cast<unsigned short*>(target) =
+          static_cast<unsigned short>(atoi(str));
   }
   Operate* DuplicateOperator() const {
     return new OperateUSmallInt(this->nullable);
@@ -434,7 +441,8 @@ class OperateUSmallInt : public Operate {
     return true;
   }
   inline bool IsNull(void* value) const {
-    if (this->nullable == true && *static_cast<unsigned short*>(value) == NULL_U_SMALL_INT)
+    if (this->nullable == true &&
+        *static_cast<unsigned short*>(value) == NULL_U_SMALL_INT)
       return true;
     return false;
   }
@@ -443,10 +451,9 @@ class OperateUSmallInt : public Operate {
  * Operate for unsigned long
  */
 
-
 class OperateULong : public Operate {
  public:
-  OperateULong(bool _nullable = true):Operate(t_u_long, _nullable) { }
+  OperateULong(bool _nullable = true) : Operate(t_u_long, _nullable) {}
   inline string ToString(void* value) {
     string ret;
     if (this->nullable == true && (*(unsigned long*)value) == NULL_U_LONG)
@@ -473,7 +480,8 @@ class OperateULong : public Operate {
     return true;
   }
   inline bool IsNull(void* value) const {
-    if (this->nullable == true && *static_cast<unsigned long*>(value) == NULL_U_LONG)
+    if (this->nullable == true &&
+        *static_cast<unsigned long*>(value) == NULL_U_LONG)
       return true;
     return false;
   }
@@ -495,6 +503,10 @@ class OperateString : public Operate {
     if ((strcmp(str, "") == 0) && this->nullable == true)
       *static_cast<char*>(target) = NULL_STRING;
     else
+      /***
+       * @brief This is a dangerous operation, for a C-style
+       *        strcpy doesn't hava length check
+       */
       strcpy(static_cast<char*>(target), str);
   }
   Operate* DuplicateOperator() const {
@@ -566,7 +578,7 @@ class OperateDate : public Operate {
 
 class OperateTime : public Operate {
  public:
-  explicit OperateTime(bool _nullable = true): Operate(t_time, _nullable) {}
+  explicit OperateTime(bool _nullable = true) : Operate(t_time, _nullable) {}
   inline string ToString(void* value) {
     if (this->nullable == true &&
         static_cast<time_duration*>(value)->is_neg_infinity() == true)
@@ -600,8 +612,8 @@ class OperateTime : public Operate {
  */
 class OperateDatetime : public Operate {
  public:
-  explicit OperateDatetime(bool _nullable = true):
-  Operate(t_datetime, _nullable) {}
+  explicit OperateDatetime(bool _nullable = true)
+      : Operate(t_datetime, _nullable) {}
   inline string ToString(void* value) {
     if (this->nullable == true &&
         static_cast<ptime*>(value)->is_neg_infinity() == true)
@@ -637,8 +649,8 @@ class OperateDatetime : public Operate {
  */
 class OperateDecimal : public Operate {
  public:
-  explicit OperateDecimal(unsigned _digit_len = 12, bool _nullable = true)
-      :Operate(t_decimal, _nullable, _digit_len) {}
+  explicit OperateDecimal(bool _nullable = true,unsigned _digit_len = 12)
+      : Operate(t_decimal, _nullable, _digit_len) {}
   inline string ToString(void* value) {
     if (this->nullable == true &&
         Compare(value, static_cast<void*>(&NULL_DECIMAL)) == 0)
@@ -677,7 +689,8 @@ class OperateDecimal : public Operate {
 };
 
 /**
- *  The abstract of a table column.
+ *  The abstract of a table column which contents a operator
+ *   with given data type
  */
 class ColumnType {
  public:
@@ -687,11 +700,11 @@ class ColumnType {
    * @param _size   the size of this column
    * @param _nullable  the column is allowed to be a null or not
    */
- ColumnType(data_type type, unsigned _size = 0, bool _nullable = true)
+  ColumnType(data_type type, unsigned _size = 0, bool _nullable = true)
       : type(type), size(_size), nullable(_nullable) {
     this->initialize();
   }
- ColumnType(const ColumnType& r) {
+  ColumnType(const ColumnType& r) {
     this->type = r.type;
     this->size = r.size;
     this->nullable = r.nullable;
@@ -713,21 +726,17 @@ class ColumnType {
     delete operate;
     operate = nullptr;
   }
- /**
-  * get the length of this column
-  */
+  /**
+   * Get the length of this column
+   */
   unsigned GetLength() const {
-    if (type != t_string )
-      return data_type_size_dic_abcx[type];
+    if (type != t_string)
+      return data_type_size[type];
     else
       return byte_align(size);
   }
-  bool operator==(const ColumnType& c) const {
-    return this->type == c.type;
-  }
-  bool operator!=(const ColumnType& c) const {
-    return this->type != c.type;
-  }
+  bool operator==(const ColumnType& c) const { return this->type == c.type; }
+  bool operator!=(const ColumnType& c) const { return this->type != c.type; }
   bool operator<(const class ColumnType& c) const {
     return this->type < c.type;
   }
@@ -735,7 +744,6 @@ class ColumnType {
   data_type type;
   bool nullable;
   unsigned size;
-
  private:
   friend class boost::serialization::access;
   template <class Archive>
@@ -746,7 +754,7 @@ class ColumnType {
     }
   }
   /**
-   * called after deserialization to construct the right operator.
+   * Called after deserialization to construct the right operator.
    */
   void initialize() {
     switch (type) {
@@ -766,5 +774,4 @@ class ColumnType {
     }
   }
 };
-
 #endif  // COMMON_DATATYPE_H_

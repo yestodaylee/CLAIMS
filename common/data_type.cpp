@@ -159,6 +159,10 @@ void MaxFuc(void* target, void* increment) {
   if (*static_cast<T*>(target) < *static_cast<T*>(increment))
     *static_cast<T*>(target) = *static_cast<T*>(increment);
 }
+/**
+ * @brief This is a dangerous operation,
+ *  for C-style strcpy doesn't hava length check
+ */
 template <>
 void MaxFuc<char>(void* target, void* increment) {
   if (strcmp(static_cast<char*>(target), static_cast<char*>(increment)) < 0)
@@ -327,6 +331,9 @@ template<typename T>
 unsigned GetPartitionValueFuc(
       const void* key, unsigned long mod,
       PartitionFunction* partition_fuc) {
+  /**
+   * @brief A partition function is given by caller
+   */
   if (partition_fuc != nullptr) {
     return partition_fuc->get_partition_value(
         *static_cast<T*>(const_cast<void*>(key)));
