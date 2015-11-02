@@ -338,6 +338,9 @@ unsigned GetPartitionValueFuc(
     return partition_fuc->get_partition_value(
         *static_cast<T*>(const_cast<void*>(key)));
   } else {
+    /**
+     * @brief mod is given
+     */
     if (mod != 0)
       return hash_value(*static_cast<T*>(const_cast<void*>(key))) % mod;
     else
@@ -452,8 +455,10 @@ unsigned GetPartitionValueFuc<NValue>(
 }
 
 /**
- * The function to init a Operate instance
- * @param operate
+ * @brief The function to init a Operate instance
+ *        Some function templates are assigned to operate's
+ *        function pointer with expected type
+ *
  */
 template<typename T>
 inline void InitOperate(Operate * operate) {
