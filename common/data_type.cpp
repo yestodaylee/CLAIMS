@@ -26,8 +26,6 @@
  *
  */
 
-
-
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
@@ -63,23 +61,6 @@ using boost::hash_combine;
 using decimal::NValue;
 using decimal::ExportSerializeOutput;
 
-
-using std::cout;
-using std::cin;
-using std::endl;
-using boost::gregorian::date_duration;
-using boost::gregorian::from_undelimited_string;
-using boost::gregorian::from_string;
-using boost::posix_time::duration_from_string;
-using boost::gregorian::date;
-using boost::posix_time::ptime;
-using boost::posix_time::time_duration;
-using boost::posix_time::time_from_string;
-using boost::posix_time::neg_infin;
-using boost::hash_value;
-using boost::hash_combine;
-using decimal::NValue;
-using decimal::ExportSerializeOutput;
 /**
  * The function template to add increment to target
  * @param target
@@ -335,10 +316,12 @@ int CompareFuc<NValue>(const void *a, const void *b) {
 }
 /**
  * get partition value ( hash value) for a key value
- * @param key
- * @param mod
- * @param partition_function
- * @return the partition value
+ * @param key: The key to get the hash value
+ * @param mod: If mod is not 0 and partition function value is nullptr,
+ *             the hash value will mode mod
+ * @param partition_function if partition function is given, partition function will evaluate
+ *             the hash value
+ * @return the hash value
  */
 template<typename T>
 unsigned GetPartitionValueFuc(

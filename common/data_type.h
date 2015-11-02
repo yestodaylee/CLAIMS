@@ -134,21 +134,60 @@ static NValue nvalue_null = NValue::getDecimalValueFromString(
  */
 class Operate {
  public:
+  /**
+   * Operator's constructor, Operator is a function set for a data type
+   * @param _type  data type
+   * @param _nullable  data_type is allowed to be null value or not
+   * @param _digit_len  digit len for a decimal type
+   */
   explicit Operate(data_type _type = t_int, bool _nullable = true,
                    unsigned int _digit_len = 12);
   virtual ~Operate() {}
+  /**
+   * Get the string format from a kind data_type
+   * @param value
+   * @return string
+   */
   inline virtual string ToString(void* value) = 0;
+  /**
+   * Assign the value to a column of a tuple
+   * @param target
+   * @param str
+   */
   inline virtual void ToValue(void* target, const char* str) = 0;
+  /**
+   * If Operate is nullable, set the column of a tuple to null value
+   * @param value
+   * @return The set operation success or not
+   */
   inline virtual bool SetNull(void* value) = 0;
+  /**
+   * Is the column of a tuple null value or not
+   * @param value
+   * @return false/true
+   */
   inline virtual bool IsNull(void* value) const = 0;
+  /**
+   * Copy the Operate
+   * @return new Operator
+   */
   virtual Operate* DuplicateOperator() const = 0;
+  /**
+   * Get the add function of a Operator
+   * @return a function pointer
+   */
   fun GetADDFunction() { return Add; }
+  /**
+   * Get the min function of a operator
+   * @return a function pointer
+   */
   fun GetMINFunction() { return Min; }
+  /**
+   * Get max function of a operator
+   * @return a function pointer
+   */
   fun GetMAXFunction() { return Max; }
   fun GetIncreateByOneFunction() {return IncreaseByOne; }
- /*
-  *  fun GetAVGFunction() {return IncreateByOneFunction;}
-  *   */
   bool nullable;
   data_type type;
   unsigned int digit_len;
@@ -711,45 +750,19 @@ class ColumnType {
    */
   void initialize() {
     switch (type) {
-      case t_int:
-        operate = new OperateInt(nullable);
-        break;
-      case t_float:
-        operate = new OperateFloat(nullable);
-        break;
-      case t_double:
-        operate = new OperateDouble(nullable);
-        break;
-      case t_string:
-        operate = new OperateString(nullable);
-        break;
-      case t_u_long:
-        operate = new OperateULong(nullable);
-        break;
-      case t_date:
-        operate = new OperateDate(nullable);
-        break;
-      case t_time:
-        operate = new OperateTime(nullable);
-        break;
-      case t_datetime:
-        operate = new OperateDatetime(nullable);
-        break;
-      case t_decimal:
-        operate = new OperateDecimal(nullable, size);
-        break;
-      case t_smallInt:
-        operate = new OperateSmallInt(nullable);
-        break;
-      case t_u_smallInt:
-        operate = new OperateUSmallInt(nullable);
-        break;
-      case t_boolean:
-        operate = new OperateBool(nullable);
-        break;
-      default:
-        operate = nullptr;
-        break;
+      case t_int: operate = new OperateInt(nullable); break;
+      case t_float: operate = new OperateFloat(nullable); break;
+      case t_double: operate = new OperateDouble(nullable); break;
+      case t_string: operate = new OperateString(nullable); break;
+      case t_u_long: operate = new OperateULong(nullable); break;
+      case t_date: operate = new OperateDate(nullable); break;
+      case t_time: operate = new OperateTime(nullable); break;
+      case t_datetime: operate = new OperateDatetime(nullable); break;
+      case t_decimal: operate = new OperateDecimal(nullable, size); break;
+      case t_smallInt: operate = new OperateSmallInt(nullable); break;
+      case t_u_smallInt: operate = new OperateUSmallInt(nullable); break;
+      case t_boolean: operate = new OperateBool(nullable); break;
+      default: operate = nullptr; break;
     }
   }
 };
