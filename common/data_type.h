@@ -270,6 +270,9 @@ class OperateBool : public Operate {
     string f = "FALSE";
     string t = "TRUE";
     string n = "NULL";
+    /**
+     * The bool type is implement by c-int in CLAIMS
+     */
     if ((strcmp(str, n.c_str()) == 0) && this->nullable == true) {
       *static_cast<int*>(target) = NULL_BOOLEAN;
     } else if (strcmp(f.c_str(), str) == 0) {
@@ -505,7 +508,7 @@ class OperateString : public Operate {
     else
       /***
        * @brief This is a dangerous operation, for a C-style
-       *        strcpy doesn't hava length check
+       *        strcpy doesn't hava a length check
        */
       strcpy(static_cast<char*>(target), str);
   }
@@ -645,7 +648,7 @@ class OperateDatetime : public Operate {
   }
 };
 /**
- * Operate for decimal
+ * Operate for decimal type
  */
 class OperateDecimal : public Operate {
  public:

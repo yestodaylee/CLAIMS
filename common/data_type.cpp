@@ -139,6 +139,10 @@ void MinFuc(void* target, void* increment) {
 }
 template <>
 void MinFuc<char>(void* target, void* increment) {
+  /***
+     * @brief This is a dangerous operation, for a C-style
+     *        strcpy doesn't hava a length check
+     */
   if (strcmp(static_cast<char*>(target), static_cast<char*>(increment)) > 0)
     strcpy(static_cast<char*>(target), static_cast<char*>(increment));
 }
@@ -159,12 +163,12 @@ void MaxFuc(void* target, void* increment) {
   if (*static_cast<T*>(target) < *static_cast<T*>(increment))
     *static_cast<T*>(target) = *static_cast<T*>(increment);
 }
-/**
- * @brief This is a dangerous operation,
- *  for C-style strcpy doesn't hava length check
- */
 template <>
 void MaxFuc<char>(void* target, void* increment) {
+  /**
+   * @brief This is a dangerous operation,
+   *  for C-style strcpy doesn't hava a length check
+   */
   if (strcmp(static_cast<char*>(target), static_cast<char*>(increment)) < 0)
     strcpy(static_cast<char*>(target), static_cast<char*>(increment));
 }
@@ -188,9 +192,9 @@ void AssignFuc<char>(const void*  src, void*  desc) {
          static_cast<char*>(const_cast<void*>(src)));
 }
 /**
- * add "1" up to target
- * @param target
- * @param increment
+ * Add "1" up to target, like ++ operation
+ * @param target    : target to be added
+ * @param increment : useless
  */
 template <typename T>
 void IncreaseByOneFuc(void* target, void* increment) {
@@ -236,7 +240,8 @@ bool EqualFuc<NValue>(const void *   a, const void * b) {
  * The function template to compare a and b
  * @param a
  * @param b
- * @return a is less than b or not
+ * @return a is less than b(true)
+ *          or not(return false)
  */
 template<typename T>
 bool LessFuc(const void*  a, const void*  b) {
@@ -264,7 +269,7 @@ bool LessFuc<NValue>(const void* a, const void* b) {
  * The function template to compare a and b
  * @param a
  * @param b
- * @return a is greater than b or not
+ * @return a is greater than b(true) or not(false)
  */
 template<typename T>
 bool GreaterFuc(const void* a, const void* b) {
@@ -290,6 +295,9 @@ bool GreaterFuc<NValue>(const void* a, const void* b) {
 
 /**
  * The function template to compare a and b
+ * if a < b return a negative value
+ * if a == b return zero
+ * or return a positive
  * @param a
  * @param b
  * @return a - b
@@ -332,16 +340,17 @@ unsigned GetPartitionValueFuc(
       const void* key, unsigned long mod,
       PartitionFunction* partition_fuc) {
   /**
-   * @brief A partition function is given by caller
+   * @brief A partition/hash function is given by caller
    */
   if (partition_fuc != nullptr) {
     return partition_fuc->get_partition_value(
         *static_cast<T*>(const_cast<void*>(key)));
   } else {
     /**
-     * @brief mod is given
+     * @brief The default partition/hash function
+     *         is given by boost lib
      */
-    if (mod != 0)
+    if (mod != 0)  // mod is given
       return hash_value(*static_cast<T*>(const_cast<void*>(key))) % mod;
     else
       return hash_value(*static_cast<T*>(const_cast<void*>(key)));
@@ -367,6 +376,10 @@ template<>
 unsigned GetPartitionValueFuc<char>(
       const void* key, unsigned long mod,
       PartitionFunction* partition_fuc) {
+  /**
+   * @brief Partition/hash function for string type which is provide by caller
+   *         is not implement yet
+   */
   if (partition_fuc != nullptr) {
       cout<<"The hash function for string type is not implement yet!"<<endl;
       assert(false);
@@ -458,7 +471,8 @@ unsigned GetPartitionValueFuc<NValue>(
  * @brief The function to init a Operate instance
  *        Some function templates are assigned to operate's
  *        function pointer with expected type
- *
+ *        The user define types could be implement here by
+ *        assigning this function pointers to functions from DLL dynamically.
  */
 template<typename T>
 inline void InitOperate(Operate * operate) {
@@ -495,12 +509,18 @@ Operate::Operate(data_type _type = t_int, bool _nullable = true,
     case t_double: InitOperate<double>(this); break;
     case t_string: InitOperate<char>(this); break;
     case t_u_long: InitOperate<unsigned long>(this); break;
+    /**
+     * These three data types (date, time ,datetime) are implement by boost lib
+     */
     case t_date:   InitOperate<date>(this); break;
     case t_time:    InitOperate<time_duration>(this); break;
     case t_datetime: InitOperate<ptime>(this); break;
     case t_decimal:  InitOperate<NValue>(this); break;
     case t_smallInt: InitOperate<short>(this); break;
     case t_u_smallInt: InitOperate<unsigned int>(this); break;
+    /**
+     * @brief Notice! The bool data type is implement by c-int in CLAIMS
+     */
     case t_boolean:   InitOperate<int>(this); break;
   }
 }
