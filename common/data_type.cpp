@@ -489,38 +489,50 @@ inline void InitOperate(Operate * operate) {
   operate->Multiply = MultiplyFuc<T>;
 }
 
-/**
- * The constructor function for Operate
- * accroding to differen data type, InitOperate will
- * assign corresponding  functions to Operate's function pointer
- * like add, min, max , etc.
- * @param _type
- * @param _nullable
- * @param _digit_len
- */
-Operate::Operate(data_type _type = t_int, bool _nullable = true,
-                          unsigned int _digit_len = 12) {
-  this->type = _type;
-  this->nullable = _nullable;
-  this->digit_len = _digit_len;
-  switch(this->type){
-    case t_int: InitOperate<int>(this); break;
-    case t_float: InitOperate<float>(this); break;
-    case t_double: InitOperate<double>(this); break;
-    case t_string: InitOperate<char>(this); break;
-    case t_u_long: InitOperate<unsigned long>(this); break;
-    /**
-     * These three data types (date, time ,datetime) are implement by boost lib
-     */
-    case t_date:   InitOperate<date>(this); break;
-    case t_time:    InitOperate<time_duration>(this); break;
-    case t_datetime: InitOperate<ptime>(this); break;
-    case t_decimal:  InitOperate<NValue>(this); break;
-    case t_smallInt: InitOperate<short>(this); break;
-    case t_u_smallInt: InitOperate<unsigned int>(this); break;
-    /**
-     * @brief Notice! The bool data type is implement by c-int in CLAIMS
-     */
-    case t_boolean:   InitOperate<int>(this); break;
-  }
+OperateInt::OperateInt(bool _nullable = true): Operate(_nullable) {
+  InitOperate<int>(static_cast<Operate*>(this));
 }
+OperateFloat::OperateFloat(bool _nullable = true):Operate(_nullable) {
+  InitOperate<float>(static_cast<Operate*>(this));
+}
+OperateDouble::OperateDouble(bool _nullable = true):Operate(_nullable) {
+  InitOperate<double>(static_cast<Operate*>(this));
+}
+OperateString::OperateString(bool _nullable = true, unsigned int _size = 0)
+:Operate(_nullable) {
+  this->size = _size;
+  InitOperate<char>(static_cast<Operate*>(this));
+}
+OperateULong::OperateULong(bool _nullable = true):Operate(_nullable) {
+  InitOperate<unsigned long>(static_cast<Operate*>(this));
+}
+OperateDate::OperateDate(bool _nullable = true):Operate(_nullable) {
+  InitOperate<date>(static_cast<Operate*>(this));
+}
+OperateTime::OperateTime(bool _nullable = true):Operate(_nullable) {
+  InitOperate<time_duration>(static_cast<Operate*>(this));
+}
+OperateDatetime::OperateDatetime(bool _nullable = true):Operate(_nullable) {
+  InitOperate<ptime>(static_cast<Operate*>(this));
+}
+OperateDecimal::OperateDecimal(bool _nullable = true, unsigned int _size = 12)
+:Operate(_nullable) {
+  this->size = _size;
+  InitOperate<NValue>(static_cast<Operate*>(this));
+}
+OperateSmallInt::OperateSmallInt(bool _nullable = true):Operate(_nullable){
+  InitOperate<short>(static_cast<Operate*>(this));
+}
+OperateUSmallInt::OperateUSmallInt(bool _nullable = true):Operate(_nullable) {
+  InitOperate<unsigned short>(static_cast<Operate*>(this));
+}
+OperateBool::OperateBool(bool _nullable = true):Operate(_nullable) {
+  InitOperate<int>(static_cast<Operate*>(this));
+}
+
+
+
+
+
+
+

@@ -138,12 +138,10 @@ class Operate {
  public:
   /**
    * Operator's constructor, Operator is a function set for a data type
-   * @param _type  data type
    * @param _nullable  data_type is allowed to be null value or not
-   * @param _digit_len  digit len for a decimal type
+   *
    */
-  explicit Operate(data_type _type = t_int, bool _nullable = true,
-                   unsigned int _digit_len = 12);
+  explicit Operate(bool _nullable = true): nullable(_nullable) { }
   virtual ~Operate() {}
   /**
    * Get the string format from a kind data_type
@@ -191,8 +189,6 @@ class Operate {
   fun GetMAXFunction() { return Max; }
   fun GetIncreateByOneFunction() { return IncreaseByOne; }
   bool nullable;
-  data_type type;
-  unsigned int digit_len;
   /**
    * @ brief The function pointer of all operations will be
    *          assigned at Operate constructor
@@ -218,7 +214,7 @@ class Operate {
  */
 class OperateInt : public Operate {
  public:
-  explicit OperateInt(bool _nullable) : Operate(t_int, _nullable) {}
+  explicit OperateInt(bool _nullable = true);
   inline string ToString(void* value) {
     string ret;
     if (this->nullable == true &&
@@ -254,7 +250,7 @@ class OperateInt : public Operate {
  */
 class OperateBool : public Operate {
  public:
-  explicit OperateBool(bool _nullable) : Operate(t_boolean, _nullable) {}
+  explicit OperateBool(bool _nullable = true);
   inline string ToString(void* value) {
     if (this->nullable == true && *static_cast<int*>(value) == NULL_BOOLEAN) {
       return "NULL";
@@ -298,7 +294,7 @@ class OperateBool : public Operate {
  */
 class OperateFloat : public Operate {
  public:
-  explicit OperateFloat(bool _nullable = true) : Operate(t_float, _nullable) {}
+  explicit OperateFloat(bool _nullable = true);
   inline string ToString(void* value) {
     string ret;
     if (this->nullable == true && *static_cast<float*>(value) == NULL_FLOAT) {
@@ -335,8 +331,7 @@ class OperateFloat : public Operate {
  */
 class OperateDouble : public Operate {
  public:
-  explicit OperateDouble(bool _nullable = true)
-      : Operate(t_double, _nullable) {}
+  explicit OperateDouble(bool _nullable = true);
   inline string ToString(void* value) {
     string ret;
     if (this->nullable == true && *static_cast<double*>(value) == NULL_DOUBLE) {
@@ -378,8 +373,7 @@ class OperateDouble : public Operate {
 
 class OperateSmallInt : public Operate {
  public:
-  explicit OperateSmallInt(bool _nullable = true)
-      : Operate(t_smallInt, _nullable) {}
+  explicit OperateSmallInt(bool _nullable = true);
   inline string ToString(void* value) {
     if (this->nullable == true &&
         *static_cast<short*>(value) == NULL_SMALL_INT) {
@@ -417,8 +411,7 @@ class OperateSmallInt : public Operate {
  */
 class OperateUSmallInt : public Operate {
  public:
-  explicit OperateUSmallInt(bool _nullable = true)
-      : Operate(t_smallInt, _nullable) {}
+  explicit OperateUSmallInt(bool _nullable = true);
   inline string ToString(void* value) {
     if (this->nullable == true &&
         *static_cast<unsigned short*>(value) == NULL_U_SMALL_INT)
@@ -456,7 +449,7 @@ class OperateUSmallInt : public Operate {
 
 class OperateULong : public Operate {
  public:
-  OperateULong(bool _nullable = true) : Operate(t_u_long, _nullable) {}
+  OperateULong(bool _nullable = true);
   inline string ToString(void* value) {
     string ret;
     if (this->nullable == true && (*(unsigned long*)value) == NULL_U_LONG)
@@ -494,23 +487,27 @@ class OperateULong : public Operate {
  */
 class OperateString : public Operate {
  public:
-  explicit OperateString(bool _nullable = true)
-      : Operate(t_string, _nullable) {}
+  explicit OperateString(bool _nullable = true, unsigned int _size = 0);
   inline string ToString(void* value) {
     if (this->nullable == true && *static_cast<char*>(value) == NULL_STRING)
       return "NULL";
     else
       return trimSpecialCharactor(string(static_cast<char*>(value)));
   }
+  /**
+   * @brief Assign value from string to a column of the tuple
+   *
+   */
   inline void ToValue(void* target, const char* str) {
     if ((strcmp(str, "") == 0) && this->nullable == true)
       *static_cast<char*>(target) = NULL_STRING;
-    else
+    else{
       /***
        * @brief This is a dangerous operation, for a C-style
        *        strcpy doesn't hava a length check
        */
       strcpy(static_cast<char*>(target), str);
+    }
   }
   Operate* DuplicateOperator() const {
     return new OperateString(this->nullable);
@@ -525,13 +522,14 @@ class OperateString : public Operate {
       return true;
     return false;
   }
+  unsigned int size;
 };
 /**
  * Operate for date type
  */
 class OperateDate : public Operate {
  public:
-  explicit OperateDate(bool _nullable = true) : Operate(t_date, _nullable) {}
+  explicit OperateDate(bool _nullable = true);
   inline string ToString(void* value) {
     if (this->nullable == true &&
         static_cast<date*>(value)->is_neg_infinity() == true)
@@ -581,7 +579,7 @@ class OperateDate : public Operate {
 
 class OperateTime : public Operate {
  public:
-  explicit OperateTime(bool _nullable = true) : Operate(t_time, _nullable) {}
+  explicit OperateTime(bool _nullable = true);
   inline string ToString(void* value) {
     if (this->nullable == true &&
         static_cast<time_duration*>(value)->is_neg_infinity() == true)
@@ -615,8 +613,7 @@ class OperateTime : public Operate {
  */
 class OperateDatetime : public Operate {
  public:
-  explicit OperateDatetime(bool _nullable = true)
-      : Operate(t_datetime, _nullable) {}
+  explicit OperateDatetime(bool _nullable = true);
   inline string ToString(void* value) {
     if (this->nullable == true &&
         static_cast<ptime*>(value)->is_neg_infinity() == true)
@@ -652,15 +649,14 @@ class OperateDatetime : public Operate {
  */
 class OperateDecimal : public Operate {
  public:
-  explicit OperateDecimal(bool _nullable = true,unsigned _digit_len = 12)
-      : Operate(t_decimal, _nullable, _digit_len) {}
+  explicit OperateDecimal(bool _nullable = true, unsigned _size = 12);
   inline string ToString(void* value) {
     if (this->nullable == true &&
         Compare(value, static_cast<void*>(&NULL_DECIMAL)) == 0)
       return "NULL";
     char buf[43] = {"\0"};
     ExportSerializeOutput out(buf, 43);
-    static_cast<NValue*>(value)->serializeToExport(out, &digit_len);
+    static_cast<NValue*>(value)->serializeToExport(out, &size);
     return string(buf + 4);
   }
   inline string toString(const NValue v, unsigned n_o_d_d = 12) {
@@ -676,7 +672,7 @@ class OperateDecimal : public Operate {
       *static_cast<NValue*>(target) = NValue::getDecimalValueFromString(string);
   }
   Operate* DuplicateOperator() const {
-    return new OperateDecimal(digit_len, this->nullable);
+    return new OperateDecimal(size, this->nullable);
   }
   inline bool SetNull(void* value) {
     if (this->nullable == false) return false;
@@ -689,8 +685,8 @@ class OperateDecimal : public Operate {
       return true;
     return false;
   }
+  unsigned int size;
 };
-
 /**
  *  The abstract of a table column which contents a operator
  *   with given data type
@@ -703,8 +699,8 @@ class ColumnType {
    * @param _size   the size of this column
    * @param _nullable  the column is allowed to be a null or not
    */
-  ColumnType(data_type type, unsigned _size = 0, bool _nullable = true)
-      : type(type), size(_size), nullable(_nullable) {
+  ColumnType(data_type _type, unsigned _size = 0, bool _nullable = true)
+      : type(_type), size(_size), nullable(_nullable) {
     this->initialize();
   }
   ColumnType(const ColumnType& r) {
