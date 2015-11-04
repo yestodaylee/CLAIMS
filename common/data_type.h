@@ -154,7 +154,7 @@ class Operate {
    * @param target
    * @param str
    */
-  inline virtual void ToValue(void* target, const char* str) = 0;
+  inline virtual bool ToValue(void* target, const char* str) = 0;
   /**
    * If Operate is nullable, set the column of a tuple to null value
    * @param value
@@ -227,11 +227,16 @@ class OperateInt : public Operate {
     }
     return ret;
   }
-  inline void ToValue(void* target, const char* str) {
+  inline   bool ToValue(void* target, const char* str) {
+    /**
+     * @brief  A int value check is implement to avoid
+     *         overflow caused by big number
+     */
     if (strcmp(str, "") == 0 && this->nullable == true)
       *static_cast<int*>(target) = NULL_INT;
     else
-      *static_cast<int*>(target) = atoi(str);
+      *static_cast<int*>(target) = static_cast<int>(atoi(str));
+    return false;
   }
   inline bool SetNull(void* value) {
     if (this->nullable == false) return false;
@@ -262,7 +267,7 @@ class OperateBool : public Operate {
         return "TRUE";
     }
   }
-  inline void ToValue(void* target, const char* str) {
+  inline bool ToValue(void* target, const char* str) {
     string f = "FALSE";
     string t = "TRUE";
     string n = "NULL";
@@ -276,6 +281,7 @@ class OperateBool : public Operate {
     } else {
       *static_cast<int*>(target) = 1;
     }
+    return false;
   }
   inline bool SetNull(void* value) {
     if (this->nullable == false) return false;
@@ -306,11 +312,12 @@ class OperateFloat : public Operate {
     }
     return ret;
   }
-  inline void ToValue(void* target, const char* str) {
+  inline bool ToValue(void* target, const char* str) {
     if (strcmp(str, "") == 0 && this->nullable == true)
       *static_cast<float*>(target) = NULL_FLOAT;
     else
       *static_cast<float*>(target) = atof(str);
+    return false;
   }
   Operate* DuplicateOperator() const {
     return new OperateFloat(this->nullable);
@@ -343,11 +350,12 @@ class OperateDouble : public Operate {
     }
     return ret;
   }
-  inline void ToValue(void* target, const char* str) {
+  inline bool ToValue(void* target, const char* str) {
     if ((strcmp(str, "") == 0) && this->nullable == true)
       *static_cast<double*>(target) = NULL_DOUBLE;
     else
       *static_cast<double*>(target) = atof(str);
+    return false;
   }
   Operate* DuplicateOperator() const {
     return new OperateDouble(this->nullable);
@@ -385,12 +393,13 @@ class OperateSmallInt : public Operate {
       return ret;
     }
   }
-  inline void ToValue(void* target, const char* str) {
+  inline bool ToValue(void* target, const char* str) {
     if ((strcmp(str, "") == 0) &&
         this->nullable == true)  // modified by Li Wang in Sep.10th
       *static_cast<short*>(target) = NULL_SMALL_INT;
     else
       *static_cast<short*>(target) = static_cast<short>(atoi(str));
+    return false;
   }
   Operate* DuplicateOperator() const {
     return new OperateSmallInt(this->nullable);
@@ -421,12 +430,13 @@ class OperateUSmallInt : public Operate {
     string ret = ss.str();
     return ret;
   }
-  inline void ToValue(void* target, const char* str) {
+  inline bool ToValue(void* target, const char* str) {
     if ((strcmp(str, "") == 0) && this->nullable == true)
       *static_cast<unsigned short*>(target) = NULL_U_SMALL_INT;
     else
       *static_cast<unsigned short*>(target) =
           static_cast<unsigned short>(atoi(str));
+    return false;
   }
   Operate* DuplicateOperator() const {
     return new OperateUSmallInt(this->nullable);
@@ -461,11 +471,12 @@ class OperateULong : public Operate {
     }
     return ret;
   }
-  inline void ToValue(void* target, const char* str) {
+  inline bool ToValue(void* target, const char* str) {
     if ((strcmp(str, "") == 0) && this->nullable == true)
       *static_cast<unsigned long*>(target) = NULL_U_LONG;
     else
       *static_cast<unsigned long*>(target) = strtoul(str, 0, 10);
+    return false;
   }
   Operate* DuplicateOperator() const {
     return new OperateULong(this->nullable);
@@ -498,19 +509,22 @@ class OperateString : public Operate {
    * @brief Assign value from string to a column of the tuple
    *
    */
-  inline void ToValue(void* target, const char* str) {
-    if ((strcmp(str, "") == 0) && this->nullable == true)
+  inline bool ToValue(void* target, const char* str) {
+
+    if ((strcmp(str, "") == 0) && this->nullable == true) {
       *static_cast<char*>(target) = NULL_STRING;
-    else{
+    } else {
       /***
-       * @brief This is a dangerous operation, for a C-style
-       *        strcpy doesn't hava a length check
+       * @brief This string split to avoid overflow
        */
-      strcpy(static_cast<char*>(target), str);
+      strncpy(static_cast<char*>(target), str, size);
+      if (strlen(str) > size)
+        return true;
     }
+    return false;
   }
   Operate* DuplicateOperator() const {
-    return new OperateString(this->nullable);
+    return new OperateString(this->nullable, size);
   }
   inline bool SetNull(void* value) {
     if (this->nullable == false) return false;
@@ -537,7 +551,7 @@ class OperateDate : public Operate {
     else
       return to_iso_extended_string(*static_cast<date*>(value));
   }
-  void ToValue(void* target, const char* str) {
+  bool ToValue(void* target, const char* str) {
     if ((strcmp(str, "") == 0) && this->nullable == true) {
       SetNull(target);
     } else {
@@ -557,6 +571,7 @@ class OperateDate : public Operate {
       else
         *static_cast<date*>(target) = from_string(s);
     }
+    return false;
   }
   Operate* DuplicateOperator() const { return new OperateDate(this->nullable); }
   inline bool SetNull(void* value) {
@@ -587,11 +602,12 @@ class OperateTime : public Operate {
     else
       return to_simple_string(*static_cast<time_duration*>(value));
   }
-  inline void ToValue(void* target, const char* string) {
+  inline bool ToValue(void* target, const char* string) {
     if ((strcmp(string, "") == 0) && this->nullable == true)
       SetNull(target);
     else
       *static_cast<time_duration*>(target) = duration_from_string(string);
+    return false;
   }
   Operate* DuplicateOperator() const { return new OperateTime(this->nullable); }
   inline bool SetNull(void* value) {
@@ -621,11 +637,12 @@ class OperateDatetime : public Operate {
     else
       return to_iso_extended_string(*static_cast<ptime*>(value));
   }
-  inline void ToValue(void* target, const char* str) {
+  inline bool ToValue(void* target, const char* str) {
     if ((strcmp(str, "") == 0) && this->nullable == true)
       SetNull(target);
     else
       *static_cast<ptime*>(target) = time_from_string(str);
+    return false;
   }
   Operate* DuplicateOperator() const {
     return new OperateDatetime(this->nullable);
@@ -665,14 +682,15 @@ class OperateDecimal : public Operate {
     (v).serializeToExport(out, &n_o_d_d);
     return string(buf + 4);
   }
-  inline void ToValue(void* target, const char* string) {
+  inline bool ToValue(void* target, const char* string) {
     if ((strcmp(string, "") == 0) && this->nullable == true)
       *static_cast<NValue*>(target) = NULL_DECIMAL;
     else
       *static_cast<NValue*>(target) = NValue::getDecimalValueFromString(string);
+    return false;
   }
   Operate* DuplicateOperator() const {
-    return new OperateDecimal(size, this->nullable);
+    return new OperateDecimal(this->nullable, size);
   }
   inline bool SetNull(void* value) {
     if (this->nullable == false) return false;
@@ -709,12 +727,7 @@ class ColumnType {
     this->nullable = r.nullable;
     this->operate = r.operate->DuplicateOperator();
   }
-  ColumnType() {
-    this->type = t_int;
-    this->size = 12;
-    this->nullable = false;
-    this->initialize();
-  }
+  ColumnType():operate(0) { }
   ColumnType& operator=(const ColumnType& r) {
     this->type = r.type;
     this->size = r.size;
@@ -760,7 +773,7 @@ class ColumnType {
       case t_int: operate = new OperateInt(nullable); break;
       case t_float: operate = new OperateFloat(nullable); break;
       case t_double: operate = new OperateDouble(nullable); break;
-      case t_string: operate = new OperateString(nullable); break;
+      case t_string: operate = new OperateString(nullable, size); break;
       case t_u_long: operate = new OperateULong(nullable); break;
       case t_date: operate = new OperateDate(nullable); break;
       case t_time: operate = new OperateTime(nullable); break;
