@@ -73,7 +73,7 @@ void Histogram::Print(column_type type) {
 //	printf("\n");
 	printf("End-Baised\n");
 	for (unsigned i = 0; i < m_bucketCnt; ++i) {
-		printf("%s ", type.operate->toString(m_staValues2[i]).c_str());
+		printf("%s ", type.operate->ToString(m_staValues2[i]).c_str());
 	}
 	printf("\n");
 	for (unsigned i = 0; i < m_bucketCnt; ++i) {

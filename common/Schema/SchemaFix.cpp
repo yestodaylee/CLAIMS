@@ -40,7 +40,7 @@ void SchemaFix::getColumnValue(unsigned index, void* src, void* desc)
 	assert(index<columns.size());
 	assert(src!=0&&desc!=0);
 
-	columns[index].operate->assignment(accum_offsets[index]+(char*)src,desc);
+	columns[index].operate->Assign(accum_offsets[index]+(char*)src,desc);
 }
 
 unsigned SchemaFix::getColumnOffset(unsigned index)
@@ -72,7 +72,7 @@ void SchemaFix::toValue(std::string text_tuple, void* binary_tuple, const char a
 		for(; (attr_separator != text_tuple[pos]) && (pos<text_tuple.length()); pos++);
 		if(prev_pos <= pos)
 		{
-			columns[i].operate->toValue((char*)binary_tuple+accum_offsets[i],text_tuple.substr(prev_pos,pos-prev_pos).c_str());
+			columns[i].operate->ToValue((char*)binary_tuple+accum_offsets[i],text_tuple.substr(prev_pos,pos-prev_pos).c_str());
 
 //			cout << "Original: " << text_tuple.substr(prev_pos,pos-prev_pos).c_str() << "\t Transfer: " << columns[i].operate->toString(binary_tuple+accum_offsets[i]) << endl;
 			pos++;

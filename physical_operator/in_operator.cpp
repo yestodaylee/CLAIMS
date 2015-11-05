@@ -111,13 +111,13 @@ bool InOperator::Open(const PartitionOffset& partition_offset) {
     bsti->reset();
     while (cur_tuple = bsti->nextTuple()) {
       bn = state_.schema_child_set_->getcolumn(state_.index_child_set_)
-               .operate->getPartitionValue(
+               .operate->GetPartitionValue(
                    state_.schema_child_set_->getColumnAddess(
                        state_.index_child_set_, cur_tuple),
                    state_.ht_nbuckets_);
       tuple_in_hashtable = hash_table_->atomicAllocate(bn);
       state_.schema_child_set_->getcolumn(state_.index_child_set_)
-          .operate->assignment(state_.schema_child_set_->getColumnAddess(
+          .operate->Assign(state_.schema_child_set_->getColumnAddess(
                                    state_.index_child_set_, cur_tuple),
                                tuple_in_hashtable);
     }
@@ -143,7 +143,7 @@ bool InOperator::Next(BlockStreamBase* block) {
            0) {
       passIn = false;
       bn = state_.schema_child_in_->getcolumn(state_.index_child_in_)
-               .operate->getPartitionValue(
+               .operate->GetPartitionValue(
                    state_.schema_child_in_->getColumnAddess(
                        state_.index_child_in_, tuple_from_child_in),
                    state_.ht_nbuckets_);
@@ -152,7 +152,7 @@ bool InOperator::Next(BlockStreamBase* block) {
         key_in_input = state_.schema_child_in_->getColumnAddess(
             state_.index_child_in_, tuple_from_child_in);
         if (state_.schema_child_in_->getcolumn(state_.index_child_in_)
-                .operate->equal(tuple_in_hashtable, key_in_input)) {
+                .operate->Equal(tuple_in_hashtable, key_in_input)) {
           passIn = true;
           break;
         }
@@ -181,7 +181,7 @@ bool InOperator::Next(BlockStreamBase* block) {
     while ((tuple_from_child_in = traverse_iterator->currentTuple()) > 0) {
       passIn = false;
       bn = state_.schema_child_in_->getcolumn(state_.index_child_in_)
-               .operate->getPartitionValue(
+               .operate->GetPartitionValue(
                    state_.schema_child_in_->getColumnAddess(
                        state_.index_child_in_, tuple_from_child_in),
                    state_.ht_nbuckets_);
@@ -190,7 +190,7 @@ bool InOperator::Next(BlockStreamBase* block) {
         key_in_input = state_.schema_child_in_->getColumnAddess(
             state_.index_child_in_, tuple_from_child_in);
         if (state_.schema_child_in_->getcolumn(state_.index_child_in_)
-                .operate->equal(tuple_in_hashtable, key_in_input)) {
+                .operate->Equal(tuple_in_hashtable, key_in_input)) {
           passIn = true;
           break;
         }

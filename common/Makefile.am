@@ -39,12 +39,12 @@ libcommon_a_SOURCES = \
 	TimeOutReceiver.cpp 		TimeOutReceiver.h \
 	TypeCast.cpp 		TypeCast.h \
 	TypePromotionMap.cpp 		TypePromotionMap.h \
-	data_type.h 		functions.h \
+	data_type.h 	    data_type.cpp	functions.h \
 	hash.cpp 			hash.h \
 	hashtable.cpp 		hashtable.h \
 	ids.cpp 			ids.h \
 	rename.h			error_define.h \
-	error_no.h			error_no.cpp
+	error_no.h			error_no.cpp   
 
 SUBDIRS = Block log Schema types Expression serialization
 DIST_SUBDIRS = Block log Schema types Expression serialization

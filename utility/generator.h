@@ -131,7 +131,7 @@ inline DynamicBlockBuffer* generate_BlockStreamBuffer(Schema* schema,unsigned lo
 		new_block->setEmpty();
 		while(tuple=new_block->allocateTuple(schema->getTupleMaxSize())){
 			memcpy(tuple,tmp_tuple,tuple_length);
-			schema->columns[0].operate->assignment(&value,tuple);
+			schema->columns[0].operate->Assign(&value,tuple);
 			value=random();
 //			value++;
 			i++;

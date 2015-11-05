@@ -47,7 +47,7 @@ unsigned long Estimation::estEqualOper(AttributeID attrID, void *para) {
 
 	for (unsigned i = 0; i < stat->m_bucketCnt; ++i) {
 
-		if (op->equal(valueList[i], para)) {
+		if (op->Equal(valueList[i], para)) {
 			return stat->getTupleCount() * selList[i];
 		}
 	}
@@ -60,7 +60,7 @@ unsigned long Estimation::estEqualOper(AttributeID attrID, void *para) {
 		 * 如果找到最小的 i 满足 para < valueList[i]，那么para必然落在i-1号bucket中。
 		 * 如果始终找不到，那么para必然是最大值，落在最后一个bucket中。
 		 */
-		if (op->compare(para, stat->m_staValues1[i]) < 0)
+		if (op->Compare(para, stat->m_staValues1[i]) < 0)
 			break;
 	}
 
@@ -70,7 +70,7 @@ unsigned long Estimation::estEqualOper(AttributeID attrID, void *para) {
 	/**
 	 * 最大值，属于上一个边界。因为，唯独最后一个bucket两边都是闭区间。
 	 */
-	if (op->compare(para, stat->m_staValues1[stat->m_bucketCnt - 1]) == 0)
+	if (op->Compare(para, stat->m_staValues1[stat->m_bucketCnt - 1]) == 0)
 		--i;
 
 	--i;
@@ -100,15 +100,15 @@ double ratio(const void *sourLow, const void *sourUp, const void *paraLow,
 	void *pLow = new char[type->get_length()];	//new
 	void *pUp = new char[type->get_length()];	//new
 
-	(type->operate->assignment(sourLow, low));
-	(type->operate->assignment)(sourUp, up);
-	(type->operate->assignment(paraLow, pLow));
-	(type->operate->assignment)(paraUp, pUp);
+	(type->operate->Assign(sourLow, low));
+	(type->operate->Assign)(sourUp, up);
+	(type->operate->Assign(paraLow, pLow));
+	(type->operate->Assign)(paraUp, pUp);
 
 	(type->operate->GetMINFunction())(up, pUp);
 	(type->operate->GetMAXFunction())(low, pLow);
 
-	if (type->operate->compare(low, up) < 0) {
+	if (type->operate->Compare(low, up) < 0) {
 
 		switch (type->type) {
 		case t_int:
@@ -169,11 +169,11 @@ unsigned long Estimation::estRangeOper(AttributeID attrID, void *lowPara,
 	double sel = 0;
 	for (unsigned i = 0; i < stat->m_bucketCnt - 1; ++i) {
 
-		if ((op->compare(lowPara, stat->m_staValues1[i]) <= 0)
-				&& (op->compare(stat->m_staValues1[i + 1], upperPara) <= 0)) {
+		if ((op->Compare(lowPara, stat->m_staValues1[i]) <= 0)
+				&& (op->Compare(stat->m_staValues1[i + 1], upperPara) <= 0)) {
 			sel += 1;
 			//the lowest value of the bucket is unreachable
-			if (op->equal(lowPara, stat->m_staValues1[i]))
+			if (op->Equal(lowPara, stat->m_staValues1[i]))
 				sel -= 1.0 / stat->m_staNumbers1[i];
 		} else {	//intersect
 			double r = ratio(stat->m_staValues1[i], stat->m_staValues1[i + 1],

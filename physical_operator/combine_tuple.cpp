@@ -88,7 +88,7 @@ bool CombineTuple::Next(BlockStreamBase *block) {
         }
         column_in_combinedTuple =
             state_.output_schema_->getColumnAddess(j, combinedTuple_);
-        state_.output_schema_->columns[j].operate->assign(
+        state_.output_schema_->columns[j].operate->Assign(
             cur, column_in_combinedTuple);
       }
       if ((tuple = block->allocateTuple(total_length_)) > 0) {

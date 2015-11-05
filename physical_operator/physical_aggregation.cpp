@@ -171,7 +171,7 @@ bool PhysicalAggregation::Open(const PartitionOffset &partition_offset) {
       bn = 0;
       if (state_.index_of_group_by_.size() > 0)
         bn = state_.input_->getcolumn(state_.index_of_group_by_[0])
-                 .operate->getPartitionValue(
+                 .operate->GetPartitionValue(
                      state_.input_->getColumnAddess(
                          state_.index_of_group_by_[0], cur),
                      state_.num_of_buckets_);
@@ -190,7 +190,7 @@ bool PhysicalAggregation::Open(const PartitionOffset &partition_offset) {
           key_in_hash_table = state_.hash_schema_->getColumnAddess(
               input_group_by_to_output_[i], tuple_in_hashtable);
           if (!state_.input_->getcolumn(state_.index_of_group_by_[i])
-                   .operate->equal(key_in_input_tuple, key_in_hash_table)) {
+                   .operate->Equal(key_in_input_tuple, key_in_hash_table)) {
             key_exist = false;
             break;
           }
@@ -222,7 +222,7 @@ bool PhysicalAggregation::Open(const PartitionOffset &partition_offset) {
         key_in_hash_table = state_.hash_schema_->getColumnAddess(
             input_group_by_to_output_[i], new_tuple_in_hash_table);
         state_.input_->getcolumn(state_.index_of_group_by_[i])
-            .operate->assignment(key_in_input_tuple, key_in_hash_table);
+            .operate->Assign(key_in_input_tuple, key_in_hash_table);
       }
 
       for (unsigned i = 0; i < state_.aggregation_index_.size(); i++) {
@@ -240,7 +240,7 @@ bool PhysicalAggregation::Open(const PartitionOffset &partition_offset) {
         value_in_hash_table = state_.hash_schema_->getColumnAddess(
             input_aggregation_to_output_[i], new_tuple_in_hash_table);
         state_.hash_schema_->getcolumn(input_aggregation_to_output_[i])
-            .operate->assignment(value_in_input_tuple, value_in_hash_table);
+            .operate->Assign(value_in_input_tuple, value_in_hash_table);
       }
       bsti->increase_cur_();
     }
@@ -257,7 +257,7 @@ bool PhysicalAggregation::Open(const PartitionOffset &partition_offset) {
        */
       bn = 0;
       if (state_.index_of_group_by_.size() > 0)
-        bn = state_.hash_schema_->getcolumn(0).operate->getPartitionValue(
+        bn = state_.hash_schema_->getcolumn(0).operate->GetPartitionValue(
             state_.hash_schema_->getColumnAddess(0, cur),
             state_.num_of_buckets_);
 
@@ -275,7 +275,7 @@ bool PhysicalAggregation::Open(const PartitionOffset &partition_offset) {
           key_in_hash_table = state_.hash_schema_->getColumnAddess(
               input_group_by_to_output_[i], tuple_in_hashtable);
           if (!state_.hash_schema_->getcolumn(i)
-                   .operate->equal(key_in_input_tuple, key_in_hash_table)) {
+                   .operate->Equal(key_in_input_tuple, key_in_hash_table)) {
             key_exist = false;
             break;
           }
@@ -308,7 +308,7 @@ bool PhysicalAggregation::Open(const PartitionOffset &partition_offset) {
         key_in_hash_table = state_.hash_schema_->getColumnAddess(
             input_group_by_to_output_[i], new_tuple_in_hash_table);
         state_.hash_schema_->getcolumn(i)
-            .operate->assignment(key_in_input_tuple, key_in_hash_table);
+            .operate->Assign(key_in_input_tuple, key_in_hash_table);
       }
 
       for (unsigned i = 0; i < state_.aggregation_index_.size(); i++) {
@@ -317,7 +317,7 @@ bool PhysicalAggregation::Open(const PartitionOffset &partition_offset) {
         value_in_hash_table = state_.hash_schema_->getColumnAddess(
             input_aggregation_to_output_[i], new_tuple_in_hash_table);
         state_.hash_schema_->getcolumn(input_aggregation_to_output_[i])
-            .operate->assignment(value_in_input_tuple, value_in_hash_table);
+            .operate->Assign(value_in_input_tuple, value_in_hash_table);
       }
       hashtable_->unlockBlock(bn);
       pht_it.increase_cur_();
@@ -387,7 +387,7 @@ bool PhysicalAggregation::Next(BlockStreamBase *block) {
             key_in_output_tuple = state_.output_->getColumnAddess(
                 input_group_by_to_output_[i], tuple);
             state_.output_->getcolumn(input_group_by_to_output_[i])
-                .operate->assignment(key_in_hash_tuple, key_in_output_tuple);
+                .operate->Assign(key_in_hash_tuple, key_in_output_tuple);
           }
           state_.avg_index_.push_back(-1);  // boundary point,
           int aggsize = state_.aggregation_index_.size() - 1;
@@ -423,7 +423,7 @@ bool PhysicalAggregation::Next(BlockStreamBase *block) {
             key_in_output_tuple = state_.output_->getColumnAddess(
                 input_aggregation_to_output_[i], tuple);
             state_.output_->getcolumn(input_aggregation_to_output_[i])
-                .operate->assignment(key_in_hash_tuple, key_in_output_tuple);
+                .operate->Assign(key_in_hash_tuple, key_in_output_tuple);
           }
         } else {
           memcpy(tuple, cur_in_ht, state_.output_->getTupleMaxSize());

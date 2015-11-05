@@ -112,7 +112,7 @@ unsigned ExchangeSender::GetHashPartitionId(void* input_tuple, Schema* schema,
   const void* hash_key_address =
       schema->getColumnAddess(partition_key_index, input_tuple);
   return schema->getcolumn(partition_key_index)
-      .operate->getPartitionValue(hash_key_address, nuppers);
+      .operate->GetPartitionValue(hash_key_address, nuppers);
 }
 }  // namespace physical_operator
 }  // namespace claims

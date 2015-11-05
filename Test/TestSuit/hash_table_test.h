@@ -232,7 +232,7 @@ void* insert_into_hash_table_from_projection(void * argment){
 	arg.barrier->Arrive();
 
 	BlockStreamBase* fetched_block=BlockStreamBase::createBlockWithDesirableSerilaizedSize(arg.schema,block_size);
-	Operate* op=arg.schema->columns[0].operate->duplicateOperator();
+	Operate* op=arg.schema->columns[0].operate->DuplicateOperator();
 	unsigned nbuckets=arg.hash->getNumberOfPartitions();
 	unsigned long long int start=curtick();
 	printf("tuple length=%d\n",arg.schema->getTupleMaxSize());
@@ -347,7 +347,7 @@ BlockStreamBuffer* initial_input_date(Schema* schema,unsigned long total_data_si
 		void* tuple;
 		new_block->setEmpty();
 		while(tuple=new_block->allocateTuple(schema->getTupleMaxSize())){
-			schema->columns[0].operate->assignment(&value,tuple);
+			schema->columns[0].operate->Assign(&value,tuple);
 			value=random();
 //			value++;
 		}
@@ -377,7 +377,7 @@ void* insert_into_hash_table(void * argment){
 	}
 
 	BlockStreamBase* fetched_block=BlockStreamBase::createBlockWithDesirableSerilaizedSize(arg.schema,block_size);
-	Operate* op=arg.schema->columns[0].operate->duplicateOperator();
+	Operate* op=arg.schema->columns[0].operate->DuplicateOperator();
 	unsigned nbuckets=arg.hash->getNumberOfPartitions();
 	while(arg.buffer->getBlock(*fetched_block)){
 		void* tuple;
@@ -389,7 +389,7 @@ void* insert_into_hash_table(void * argment){
 //			if(op->getPartitionValue(tuple,arg.hash)==0){
 //				break;
 //			}
-			unsigned bn=arg.schema->columns[0].operate->getPartitionValue(tuple,arg.hash);
+			unsigned bn=arg.schema->columns[0].operate->GetPartitionValue(tuple,arg.hash);
 			void* new_tuple_in_hashtable=(*arg.hash_table)->atomicAllocate(bn,arg.tid);
 			arg.schema->copyTuple(tuple,new_tuple_in_hashtable);
 		}

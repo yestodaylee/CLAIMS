@@ -64,10 +64,10 @@ bool bottomLayerCollecting::Next(BlockStreamBase* block) {
 			if ((tuple_new = block->allocateTuple(bytes)) > 0)
 			{
 				// construct tuple_new <chunk_offset, key_index, block_offset, tuple_offset>
-				output_schema_->getcolumn(0).operate->assignment((void*)(& rb.chunk_offset), tuple_new);
-				output_schema_->getcolumn(1).operate->assignment(state_.schema_->getColumnAddess(state_.key_indexing_, original_tuple), output_schema_->getColumnAddess(1, tuple_new));
-				output_schema_->getcolumn(2).operate->assignment((void*)(& rb.block_offset), output_schema_->getColumnAddess(2, tuple_new));
-				output_schema_->getcolumn(3).operate->assignment((void*)(& rb.tuple_offset), output_schema_->getColumnAddess(3, tuple_new));
+				output_schema_->getcolumn(0).operate->Assign((void*)(& rb.chunk_offset), tuple_new);
+				output_schema_->getcolumn(1).operate->Assign(state_.schema_->getColumnAddess(state_.key_indexing_, original_tuple), output_schema_->getColumnAddess(1, tuple_new));
+				output_schema_->getcolumn(2).operate->Assign((void*)(& rb.block_offset), output_schema_->getColumnAddess(2, tuple_new));
+				output_schema_->getcolumn(3).operate->Assign((void*)(& rb.tuple_offset), output_schema_->getColumnAddess(3, tuple_new));
 				rb.iterator->increase_cur_();
 				rb.tuple_offset++;
 
@@ -99,10 +99,10 @@ bool bottomLayerCollecting::Next(BlockStreamBase* block) {
 			if ((tuple_new = block->allocateTuple(bytes)) > 0)
 			{
 				// construct tuple_new <chunk_offset, key_index, block_offset, tuple_offset>
-				output_schema_->getcolumn(0).operate->assignment((void*)(& rb.chunk_offset), tuple_new);
-				output_schema_->getcolumn(1).operate->assignment(state_.schema_->getColumnAddess(state_.key_indexing_, original_tuple), output_schema_->getColumnAddess(1, tuple_new));
-				output_schema_->getcolumn(2).operate->assignment((void*)(& rb.block_offset), output_schema_->getColumnAddess(2, tuple_new));
-				output_schema_->getcolumn(3).operate->assignment((void*)(& rb.tuple_offset), output_schema_->getColumnAddess(3, tuple_new));
+				output_schema_->getcolumn(0).operate->Assign((void*)(& rb.chunk_offset), tuple_new);
+				output_schema_->getcolumn(1).operate->Assign(state_.schema_->getColumnAddess(state_.key_indexing_, original_tuple), output_schema_->getColumnAddess(1, tuple_new));
+				output_schema_->getcolumn(2).operate->Assign((void*)(& rb.block_offset), output_schema_->getColumnAddess(2, tuple_new));
+				output_schema_->getcolumn(3).operate->Assign((void*)(& rb.tuple_offset), output_schema_->getColumnAddess(3, tuple_new));
 				rb.iterator->increase_cur_();
 				rb.tuple_offset++;
 
@@ -253,7 +253,7 @@ bool bottomLayerSorting::Open(const PartitionOffset& partition_offset)
 	block_for_asking->setEmpty();
 	BlockStreamBase::BlockStreamTraverseIterator* iterator = NULL;
 	void* current_chunk = new ChunkOffset;
-	Operate* op_ = state_.schema_->getcolumn(1).operate->duplicateOperator();
+	Operate* op_ = state_.schema_->getcolumn(1).operate->DuplicateOperator();
 	while (state_.child_->Next(block_for_asking))
 	{
 		iterator = block_for_asking->createIterator();
@@ -420,7 +420,7 @@ bool bottomLayerSorting::compare(const compare_node* a, const compare_node* b)
 {
 	const void* left = a->vector_schema_->getColumnAddess(0, a->tuple_);
 	const void* right = b->vector_schema_->getColumnAddess(0, b->tuple_);
-	return a->op_->less(left, right);
+	return a->op_->Less(left, right);
 
 }
 

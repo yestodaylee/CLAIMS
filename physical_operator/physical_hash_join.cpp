@@ -174,7 +174,7 @@ bool PhysicalHashJoin::Open(const PartitionOffset& partition_offset) {
 
   const Schema* input_schema = state_.input_schema_left_->duplicateSchema();
   const Operate* op = input_schema->getcolumn(state_.join_index_left_[0])
-                          .operate->duplicateOperator();
+                          .operate->DuplicateOperator();
   const unsigned buckets = state_.hashtable_bucket_num_;
 
   unsigned long long int start = curtick();
@@ -193,7 +193,7 @@ bool PhysicalHashJoin::Open(const PartitionOffset& partition_offset) {
 #endif
       const void* key_addr =
           input_schema->getColumnAddess(state_.join_index_left_[0], cur);
-      bn = op->getPartitionValue(key_addr, buckets);
+      bn = op->GetPartitionValue(key_addr, buckets);
       tuple_in_hashtable = hashtable_->atomicAllocate(bn);
       /* copy join index columns*/
       if (memcpy_)
@@ -265,7 +265,7 @@ bool PhysicalHashJoin::Next(BlockStreamBase* block) {
                         jtc->r_block_stream_iterator_->currentTuple())) {
       unsigned bn =
           state_.input_schema_right_->getcolumn(state_.join_index_right_[0])
-              .operate->getPartitionValue(
+              .operate->GetPartitionValue(
                   state_.input_schema_right_->getColumnAddess(
                       state_.join_index_right_[0], tuple_from_right_child),
                   state_.hashtable_bucket_num_);
@@ -301,7 +301,7 @@ bool PhysicalHashJoin::Next(BlockStreamBase* block) {
       if (NULL != (tuple_from_right_child =
                        jtc->r_block_stream_iterator_->currentTuple())) {
         bn = state_.input_schema_right_->getcolumn(state_.join_index_right_[0])
-                 .operate->getPartitionValue(
+                 .operate->GetPartitionValue(
                      state_.input_schema_right_->getColumnAddess(
                          state_.join_index_right_[0], tuple_from_right_child),
                      state_.hashtable_bucket_num_);
@@ -323,7 +323,7 @@ bool PhysicalHashJoin::Next(BlockStreamBase* block) {
              jtc->r_block_stream_iterator_->currentTuple())) {
       unsigned bn =
           state_.input_schema_right_->getcolumn(state_.join_index_right_[0])
-              .operate->getPartitionValue(
+              .operate->GetPartitionValue(
                   state_.input_schema_right_->getColumnAddess(
                       state_.join_index_right_[0], tuple_from_right_child),
                   state_.hashtable_bucket_num_);
@@ -370,7 +370,7 @@ inline void PhysicalHashJoin::IsMatch(void* l_tuple_addr, void* r_tuple_addr,
     void* key_in_hashtable =
         l_schema->getColumnAddess(l_join_index[i], l_tuple_addr);
     if (!r_schema->getcolumn(r_join_index[i])
-             .operate->equal(key_in_input, key_in_hashtable)) {
+             .operate->Equal(key_in_input, key_in_hashtable)) {
       key_exit = false;
       break;
     }

@@ -180,7 +180,7 @@ bool HdfsLoader::insertRecords(){
 
 	//add the row_id column
 	column_type* tmp = new column_type(t_u_long);
-	std::string tmp_str = tmp->operate->toString(&row_id);
+	std::string tmp_str = tmp->operate->ToString(&row_id);
 	delete tmp;
 	s_record = tmp_str + col_separator + s_record;
 	table_schema->toValue(s_record, tuple_buffer, col_separator);
@@ -203,7 +203,7 @@ bool HdfsLoader::insertRecords(){
 		int part = 0;
 		const int partition_key_local_index=partition_key_index[i];
 		void* partition_key_addr=projection_schema[i]->getColumnAddess(partition_key_local_index,target);
-		part=projection_schema[i]->getcolumn(partition_key_local_index).operate->getPartitionValue(partition_key_addr, partition_functin_list_[i]->getNumberOfPartitions());
+		part=projection_schema[i]->getcolumn(partition_key_local_index).operate->GetPartitionValue(partition_key_addr, partition_functin_list_[i]->getNumberOfPartitions());
 		tuples_per_partition[i][part]++;
 		void* block_tuple_addr = pj_buffer[i][part]->allocateTuple(projection_schema[i]->getTupleMaxSize());
 		if(block_tuple_addr == 0)

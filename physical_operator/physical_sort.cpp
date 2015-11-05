@@ -85,13 +85,13 @@ bool PhysicalSort::Compare(const void *a, const void *b) {
   if (sort_state_->direction_[*sort_order_by_key_pos_])
     return sort_state_->input_
         ->getcolumn(sort_state_->order_by_key_[*sort_order_by_key_pos_])
-        .operate->duplicateOperator()
-        ->greate(l, r);
+        .operate->DuplicateOperator()
+        ->Greate(l, r);
   else
     return sort_state_->input_
         ->getcolumn(sort_state_->order_by_key_[*sort_order_by_key_pos_])
-        .operate->duplicateOperator()
-        ->less(l, r);
+        .operate->DuplicateOperator()
+        ->Less(l, r);
 }
 
 void PhysicalSort::Order() {
