@@ -273,6 +273,7 @@ bool Environment::InitTxnManager() {
 }
 
 bool Environment::InitTxnLog() {
+  cout << "enable_txn_log:" << Config::enable_txn_log << endl;
   if (Config::enable_txn_log) {
     LOG(INFO) << "I'm txn log server";
     LogServer::Init(Config::txn_log_path);

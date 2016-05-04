@@ -41,7 +41,10 @@
 #include <sys/time.h>
 #include "caf/all.hpp"
 #include "caf/io/all.hpp"
-
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/vector.hpp>
 namespace claims {
 namespace txn{
 
@@ -178,6 +181,8 @@ class QueryReq{
   vector<UInt64> get_part_list() const { return part_list_;}
   void set_part_list(const vector<UInt64> & partList) { part_list_ = partList;}
   string ToString();
+  friend class boost::serialization::access;
+
 };
 inline bool operator == (const QueryReq & a, const QueryReq & b) {
   return a.part_list_ == b.part_list_;
@@ -187,6 +192,7 @@ inline bool operator == (const QueryReq & a, const QueryReq & b) {
 class Query{
  public:
    map<UInt64, vector<PStrip>> snapshot_;
+   vector<char> tmp_;
    map<UInt64, UInt64> cp_list_;
    void InsertStrip (UInt64 part, UInt64 pos, UInt64 offset){
     // if (Snapshot.find(part) == Snapshot.end())
@@ -208,6 +214,10 @@ class Query{
      cp_list_ = cplist;
    }
    string ToString();
+   template <class Archive>
+   void serialize(Archive& ar, const unsigned int version) {
+     ar & snapshot_ & cp_list_;
+   }
 };
 inline bool operator == (const Query & a, const Query & b) {
   return a.snapshot_ == b.snapshot_;
@@ -269,7 +279,7 @@ inline void SerConfig() {
 
 inline UInt64 GetGlobalPartId(UInt64 table_id, UInt64 projeciton_id,
                               UInt64 partition_id) {
-  return table_id + 1000 * (projeciton_id + 1000 * partition_id);
+  return partition_id + 1000 * (projeciton_id + 1000 * table_id);
 }
 
 inline UInt64 GetTableIdFromGlobalPartId(UInt64 global_partition_id) {

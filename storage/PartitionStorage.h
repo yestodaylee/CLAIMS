@@ -10,11 +10,17 @@
 #ifdef DMALLOC
 #include "dmalloc.h"
 #endif
+#include <vector>
+#include <map>
 #include "ChunkStorage.h"
 #include "StorageLevel.h"
 #include "PartitionReaderIterator.h"
 #include "../utility/lock.h"
-
+#include "../txn_manager/txn.hpp"
+using std::vector;
+using std::map;
+using claims::txn::UInt64;
+using claims::txn::PStrip;
 
 class PartitionStorage {
 public:
@@ -42,12 +48,34 @@ public:
 	};
   class TxnPartitionReaderIterator:public PartitionReaderItetaor{
   public:
-    TxnPartitionReaderIterator(PartitionStorage* partition_storage):PartitionReaderItetaor(partition_storage){};
+    TxnPartitionReaderIterator(PartitionStorage* partition_storage,
+                               UInt64 checkpoint, vector<PStrip> & strip_list):
+      PartitionReaderItetaor(partition_storage), checkpoint_(checkpoint) {
+         for (auto & strip : strip_list) {
+            auto begin = strip.first;
+            auto end = strip.first + strip.second;
+            while(begin < end) {
+                auto block_id = begin / (64 * 1024);
+                auto step = end <= block_id*1024*64 ? end - begin : 64 * 1024;
+                blockid_strips_[block_id].push_back(PStrip(begin, begin + step));
+                begin += step;
+                }
+           }
+    };
     virtual ~TxnPartitionReaderIterator();
     ChunkReaderIterator* nextChunk();
     virtual bool nextBlock(BlockStreamBase* &block);
   private:
     Lock lock_;
+    UInt64 checkpoint_;
+    map<unsigned, vector<PStrip>> blockid_strips_;
+    unsigned tuple_size_ = 10;
+
+
+    vector<BlockStreamFix *> block_buffer_;
+    BlockStreamFix * NewTmpFixBlock();
+    UInt64 getBlockBegin(ChunkReaderIterator* chunk, BlockStreamBase* block);
+
   };
 	friend class PartitionReaderItetaor;
 	PartitionStorage(const PartitionID &partition_id,const unsigned &number_of_chunks,const StorageLevel&);

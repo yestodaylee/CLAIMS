@@ -40,6 +40,7 @@
 #include <glog/logging.h>
 #include <string>
 #include <list>
+#include <vector>
 #include "../common/error_no.h"
 #include "../physical_operator/physical_operator_base.h"
 #include "../common/Schema/Schema.h"
@@ -47,7 +48,11 @@
 #include "../storage/PartitionStorage.h"
 #include "../physical_operator/physical_operator.h"
 #include "../common/ExpandedThreadTracker.h"
-
+#include "../txn_manager/txn.hpp"
+using std::vector;
+using claims::txn::UInt64;
+using claims::txn::PStrip;
+using claims::txn::Query;
 namespace claims {
 namespace physical_operator {
 
@@ -59,7 +64,7 @@ typedef std::list<ChunkReaderIterator::block_accessor*> assigned_data;
 struct input_dataset {
   assigned_data input_data_blocks_;
   SpineLock lock;
-  bool AtomicGet(assigned_data& target, unsigned number_of_block) {
+  bool AtomicGet(assigned_data & target, unsigned number_of_block) {
     lock.acquire();
     bool not_empty = !target.empty();
     while (number_of_block-- && (!input_data_blocks_.empty())) {
@@ -88,7 +93,7 @@ class PhysicalProjectionScan : public PhysicalOperator {
  public:
   class ScanThreadContext : public ThreadContext {
    public:
-    ~ScanThreadContext(){};
+    ~ScanThreadContext() {}
     assigned_data assigned_data_;
   };
 
@@ -102,17 +107,19 @@ class PhysicalProjectionScan : public PhysicalOperator {
    public:
     State(ProjectionID projection_id, Schema* schema, unsigned block_size,
           float sample_rate = 1);
-    State(){};
+    State() { }
+
 
    public:
     Schema* schema_;
     ProjectionID projection_id_;
     unsigned block_size_;
     float sample_rate_;
+    Query query_;
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version) {
-      ar& schema_& projection_id_& block_size_& sample_rate_;
+      ar & schema_ & projection_id_ & block_size_ & sample_rate_ & query_;
     }
   };
   PhysicalProjectionScan(State state);

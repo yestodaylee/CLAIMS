@@ -36,7 +36,8 @@
 #include "../catalog/table.h"
 #include "../logical_operator/logical_operator.h"
 #include "../physical_operator/physical_operator_base.h"
-
+#include "../txn_manager/txn.hpp"
+using claims::txn::Query;
 namespace claims {
 namespace logical_operator {
 

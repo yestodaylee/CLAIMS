@@ -5,10 +5,12 @@
  *      Author: wangli
  */
 
+#include <iostream>
 #include "PartitionStorage.h"
 #include "../Debug.h"
 #include "MemoryStore.h"
 #include "../Config.h"
+#include "stdlib.h"
 PartitionStorage::PartitionStorage(const PartitionID &partition_id,
                                    const unsigned &number_of_chunks,
                                    const StorageLevel& storage_level)
@@ -167,23 +169,56 @@ bool PartitionStorage::AtomicPartitionReaderIterator::nextBlock(
   }
 }
 PartitionStorage::TxnPartitionReaderIterator::~TxnPartitionReaderIterator() {
+    for (auto ptr : block_buffer_) {
+      free(ptr->getBlockDataAddress());
+      delete ptr;
+    }
 
 }
+
 PartitionStorage::PartitionReaderItetaor* PartitionStorage::createTxnReaderIterator() {
-  return new TxnPartitionReaderIterator(this);
+
+  vector<PStrip> v;
+  return new TxnPartitionReaderIterator(this, 1024*64*10, v);
 }
 
 bool PartitionStorage::TxnPartitionReaderIterator::nextBlock(
     BlockStreamBase*& block) {
-  lock_.acquire();
   ChunkReaderIterator::block_accessor* ba;
+  unsigned tuple_counts = 0;
+  BlockStreamFix * block_tmp = nullptr;
+  lock_.acquire();
   if (chunk_it_ != 0 && chunk_it_->getNextBlockAccessor(ba)) {
-    lock_.release();
     ba->getBlock(block);
-    auto block_addr = (char*)block->getBlock();
-    auto chunk_addr = (char*)((InMemoryChunkReaderItetaor*)chunk_it_)->getChunk();
-    //cout << (block_addr - chunk_addr) / (64 * 1024) << endl;
-    return true;
+    auto block_begin = getBlockBegin(chunk_it_, block);
+    auto block_end = block_begin + 64 * 1024;
+//    cout << "chunk_id:"<< "," <<  block_begin / (64 * 1024 * 1024) <<
+//        ",block_id:" << block_begin / (64 * 1024) << endl;
+    lock_.release();
+    if (block_begin >= checkpoint_) { /*checkpoint后的数据*/
+       if (blockid_strips_.find(block_begin/(64*1024)) != blockid_strips_.end()) {
+         block_tmp = block;
+         block = NewTmpFixBlock();
+         for (auto & strip : blockid_strips_[block_begin/ (64*1024)]) {
+           auto strip_begin = strip.first;
+           auto strip_end = strip.first + strip.second;
+           memcpy(block->getBlock() + tuple_counts * tuple_size_,
+                  block_tmp->getBlock() + strip_end - strip_begin,
+                  strip_end - strip_begin);
+           if (strip_end == block_end)
+             strip_end -= sizeof(unsigned);
+           auto tuple_count = (strip_end - strip_begin) / tuple_size_;
+           tuple_counts += tuple_count;
+            }
+         *(unsigned *)(block->getBlock() + 64 * 1024 - sizeof(unsigned)) =
+             tuple_counts;
+         return true;
+         }  /* 该block没有被任何strip投影到 */
+         else return nextBlock(block);
+     } else { /*checkpoint前的数据*/
+       return true;
+     }
+
   }
   else {
     if ((chunk_it_ = PartitionReaderItetaor::nextChunk()) > 0) {
@@ -205,4 +240,18 @@ ChunkReaderIterator* PartitionStorage::TxnPartitionReaderIterator::nextChunk() {
     ret = 0;
 //  lock_.release();
   return ret;
+}
+
+BlockStreamFix * PartitionStorage::TxnPartitionReaderIterator::NewTmpFixBlock() {
+  void *  data = (void *) malloc( 64 * 1024);
+  auto block = new BlockStreamFix(64 * 1024, 0, data, 0);
+  block_buffer_.push_back(block);
+  return block;
+}
+UInt64 PartitionStorage::TxnPartitionReaderIterator::getBlockBegin
+            (ChunkReaderIterator* chunk, BlockStreamBase* block) {
+  auto block_addr = (char*)block->getBlock();
+  auto chunk_addr = (char*)((InMemoryChunkReaderItetaor*)chunk)->getChunk();
+  auto chunk_id = ((InMemoryChunkReaderItetaor*)chunk)->chunk_id_.chunk_off;
+  return chunk_id * 64 * 1024 * 1024 + block_addr - chunk_addr;
 }

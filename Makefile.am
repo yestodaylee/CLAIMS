@@ -87,7 +87,8 @@ bin_PROGRAMS = claimsserver \
 				client \
 				test	\
 				txnclient \
-				txnserver
+				txnserver \
+				txntest
 				
 client_SOURCES = Client.cpp \
 					Environment.cpp \
@@ -107,6 +108,8 @@ test_SOURCES = Test/gtest_main.cpp\
 txnclient_SOURCES = txn_manager/txn_client_test.cpp 
 
 txnserver_SOURCES = txn_manager/txn_server_test.cpp 
+
+txntest_SOURCES = txn_manager/ser_test.cpp
 
 SUBDIRS=  catalog Client common Daemon Executor IndexManager\
 loader physical_operator logical_operator  Resource \
