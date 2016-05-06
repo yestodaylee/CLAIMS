@@ -109,7 +109,6 @@ class PhysicalProjectionScan : public PhysicalOperator {
           float sample_rate = 1);
     State() { }
 
-
    public:
     Schema* schema_;
     ProjectionID projection_id_;

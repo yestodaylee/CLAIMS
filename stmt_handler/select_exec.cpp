@@ -36,8 +36,15 @@
 #include "../logical_operator/logical_query_plan_root.h"
 #include "../physical_operator/physical_operator_base.h"
 #include "../stmt_handler/stmt_handler.h"
+#include "../txn_manager/txn.hpp"
+#include "../txn_manager/txn_server.hpp"
+#include "../txn_manager/txn_client.hpp"
 using claims::logical_operator::LogicalQueryPlanRoot;
 using claims::physical_operator::PhysicalOperatorBase;
+using claims::txn::Query;
+using claims::txn::QueryReq;
+using claims::txn::TxnServer;
+using claims::txn::TxnClient;
 using std::endl;
 using std::vector;
 using std::string;
@@ -107,6 +114,25 @@ RetCode SelectExec::Execute(ExecutedResult* exec_result) {
   logic_plan = new LogicalQueryPlanRoot(0, logic_plan, raw_sql_,
                                         LogicalQueryPlanRoot::kResultCollector);
   logic_plan->GetPlanContext();
+
+
+#ifndef PRINTCONTEXT
+  //logic_plan->Print();
+  cout << "--------------begin txn plan -------------------" << endl;
+#endif
+  QueryReq req;
+  Query query;
+  for (auto & cp : TxnServer::logic_cp_list_) {
+    //req.part_list_.push_back(cp.first);
+    //cout << cp.first << "," << cp.second << endl;
+  }
+//  cout << query.ToString() << endl;
+
+  logic_plan->GetTxnInfo(req);
+  TxnClient::BeginQuery(req, query);
+  logic_plan->SetTxnInfo(query);
+
+
 #ifndef PRINTCONTEXT
   logic_plan->Print();
   cout << "--------------begin physical plan -------------------" << endl;

@@ -442,5 +442,12 @@ void LogicalQueryPlanRoot::Print(int level) const {
   child_->Print(level);
 }
 
+//void LogicalQueryPlanRoot::GetTxnInfo(QueryReq & request) const {
+//
+//}
+//void LogicalQueryPlanRoot::SetTxnInfo(const Query & query) {
+//
+//}
+
 }  // namespace logical_operator
 }  // namespace claims

@@ -380,6 +380,12 @@ void LogicalFilter::Print(int level) const {
 
   child_->Print(level);
 }
+//void LogicalFilter::GetTxnInfo(QueryReq & request) const {
+//
+//}
+//void LogicalFilter::SetTxnInfo(const Query & query) {
+//
+//}
 
 }  // namespace logical_operator
 }  // namespace claims

@@ -134,5 +134,12 @@ const unsigned LogicalLimit::PredictCardinality(
   return plan_context.plan_partitioner_.GetPartition(i)->get_cardinality();
 }
 
+//void LogicalLimit::GetTxnInfo(QueryReq & request) const {
+//
+//}
+//void LogicalLimit::SetTxnInfo(const Query & query) {
+//
+//}
+
 }  // namespace logical_operator
 }  // namespace claims

@@ -60,18 +60,20 @@ class LogicalScan : public LogicalOperator {
               const std::vector<unsigned>& selected_attribute_index_list);
   virtual ~LogicalScan();
   PlanContext GetPlanContext();
-  PhysicalOperatorBase* GetPhysicalPlan(const unsigned&);
+  PhysicalOperatorBase* GetPhysicalPlan(const unsigned &);
   bool GetOptimalPhysicalPlan(Requirement requirement,
                               PhysicalPlanDescriptor& physical_plan_descriptor,
                               const unsigned& kBlock_size = 4096 * 1024);
   void ChangeAliasAttr();
-
+  virtual void GetTxnInfo(QueryReq & request) const;
+  virtual void SetTxnInfo(const Query & query);
  private:
   /**check whether all the involved attributes are in the same projection.*/
   bool IsInASingleProjection() const;
   void Print(int level = 0) const;
 
  private:
+  Query query_;
   std::vector<Attribute> scan_attribute_list_;
   ProjectionDescriptor* target_projection_;
   PlanContext* plan_context_;

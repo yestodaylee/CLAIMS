@@ -478,5 +478,13 @@ void LogicalAggregation::Print(int level) const {
   --level;
   child_->Print(level);
 }
+
+//void LogicalAggregation::GetTxnInfo(QueryReq & request) const{
+//
+//}
+//void LogicalAggregation:: SetTxnInfo(const Query & query){
+//
+//}
+
 }  // namespace logical_operator
 }  // namespace claims

@@ -32,18 +32,25 @@
 #include <vector>
 #include <string>
 #include <atomic>
+#include <assert.h>
 #include "../common/ids.h"
 #include "../common/Schema/SchemaFix.h"
 #include "../logical_operator/plan_context.h"
 #include "../logical_operator/Requirement.h"
 #include "../physical_operator/physical_operator_base.h"
 #include "../utility/lock.h"
-
+#include "../txn_manager/txn.hpp"
 static std::atomic_uint MIDINADE_TABLE_ID(1000000);
 namespace claims {
 namespace logical_operator {
 #define kTabSize 4
 using claims::physical_operator::PhysicalOperatorBase;
+using claims::txn::QueryReq;
+using claims::txn::Query;
+using claims::txn::GetGlobalPartId;
+using std::cin;
+using std::cout;
+using std::endl;
 enum OperatorType {
   kLogicalScan,
   kLogicalFilter,
@@ -112,6 +119,8 @@ class LogicalOperator {
 
   OperatorType get_operator_type() { return operator_type_; }
 
+  virtual void GetTxnInfo(QueryReq & request) const;
+  virtual void SetTxnInfo(const Query & query);
  protected:
   Schema* GetSchema(const std::vector<Attribute>&) const;
   Schema* GetSchema(const std::vector<Attribute>&,
@@ -134,6 +143,8 @@ class LogicalOperator {
  private:
   OperatorType operator_type_;
 };
+
+
 
 }  // namespace logical_operator
 }  // namespace claims

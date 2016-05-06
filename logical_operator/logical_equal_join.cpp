@@ -859,5 +859,12 @@ double LogicalEqualJoin::PredictEqualJoinSelectivityOnSingleJoinAttributePair(
   return ret;
 }
 
+//void LogicalEqualJoin::GetTxnInfo(QueryReq & request) const {
+//
+//}
+//void LogicalEqualJoin::SetTxnInfo(const Query & query) {
+//
+//}
+
 }  // namespace logical_operator
 }  // namespace claims

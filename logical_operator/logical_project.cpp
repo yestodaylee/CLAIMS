@@ -215,5 +215,12 @@ void LogicalProject::Print(int level) const {
   child_->Print(level);
 }
 
+//void LogicalProject::GetTxnInfo(QueryReq & request) const {
+//
+//}
+//void LogicalProject::SetTxnInfo(const Query & query) {
+//
+//}
+
 }  // namespace logical_operator
 }  // namespace claims

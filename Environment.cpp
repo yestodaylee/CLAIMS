@@ -241,7 +241,7 @@ bool Environment::InitTxnManager() {
   if (Config::enable_txn_server) {
     LOG(INFO) << "I'm txn manager server" ;
     TxnServer::Init(Config::txn_server_cores, Config::txn_server_port);
-    auto cat = Catalog::getInstance();
+    auto cat = catalog_;
     auto table_count = cat->getNumberOfTable();
     //cout << "table count:" << table_count << endl;
     for (auto table_id = 0; table_id < table_count; table_id ++) {

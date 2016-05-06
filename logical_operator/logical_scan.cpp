@@ -210,6 +210,7 @@ PhysicalOperatorBase* LogicalScan::GetPhysicalPlan(const unsigned& block_size) {
   state.projection_id_ = target_projection_->getProjectionID();
   state.schema_ = GetSchema(plan_context_->attribute_list_);
   state.sample_rate_ = sample_rate_;
+  state.query_ = query_;
   return new PhysicalProjectionScan(state);
 }
 
@@ -326,6 +327,21 @@ void LogicalScan::Print(int level) const {
        << Catalog::getInstance()
               ->getTable(target_projection_->getProjectionID().table_id)
               ->getTableName() << "   alias: " << table_alias_ << endl;
+}
+void LogicalScan::GetTxnInfo(QueryReq & request) const {
+  auto table_id = target_projection_->getProjectionID().table_id;
+  auto proj_id = target_projection_->getProjectionID().projection_off;
+  auto part_count = target_projection_->getPartitioner()->getNumberOfPartitions();
+  for (auto part_id=0; part_id<part_count; part_id++) {
+    request.part_list_.push_back(
+        GetGlobalPartId(table_id,proj_id,part_id)
+    );
+  }
+}
+void LogicalScan::SetTxnInfo(const Query & query) {
+//  cout << "*** set query ***" << endl;
+//  cout << query.ToString() << endl;
+  query_ = query;
 }
 
 }  // namespace logical_operator

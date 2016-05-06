@@ -112,6 +112,12 @@ void LogicalSubquery::Print(int level) const {
   cout << "--------------------------" << endl;
   child_->Print(level + 1);
 }
+//void LogicalSubquery::GetTxnInfo(QueryReq & request) const {
+//
+//}
+//void LogicalSubquery::SetTxnInfo(const Query & query) {
+//
+//}
 
 }  // namespace logical_operator
 

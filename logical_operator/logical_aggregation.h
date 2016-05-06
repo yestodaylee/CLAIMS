@@ -93,6 +93,8 @@ class LogicalAggregation : public LogicalOperator {
   LogicalAggregation(vector<ExprNode*> group_by_attrs,
                      vector<ExprUnary*> aggregation_attrs,
                      LogicalOperator* child);
+  virtual void GetTxnInfo(QueryReq & request) const {child_->GetTxnInfo(request);}
+  virtual void SetTxnInfo(const Query & query) {child_->SetTxnInfo(query);}
   virtual ~LogicalAggregation();
 
  protected:

@@ -92,7 +92,12 @@ class LogicalLimit : public LogicalOperator {
   virtual void Print(int level = 0) const;
 
   LogicalOperator* child_;
-
+  virtual void GetTxnInfo(QueryReq & request) const {
+    child_->GetTxnInfo(request);
+  }
+  virtual void SetTxnInfo(const Query & query) {
+    child_->SetTxnInfo(query);
+  }
  private:
   const unsigned PredictCardinality(unsigned i,
                                     const PlanContext& plan_context);

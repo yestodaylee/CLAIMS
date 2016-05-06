@@ -409,5 +409,13 @@ bool LogicalCrossJoin::CanLocalJoin(
          right_plan_context.plan_partitioner_.get_partition_list()[0]
              .get_location();
 }
+//
+//void LogicalCrossJoin::GetTxnInfo(QueryReq & request) const {
+//
+//}
+//void LogicalCrossJoin::SetTxnInfo(const Query & query) {
+//
+//}
+
 }  // namespace logical_operator
 }  // namespace claims

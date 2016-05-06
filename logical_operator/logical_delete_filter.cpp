@@ -960,5 +960,11 @@ void LogicalDeleteFilter::Print(int level = 0) const {
   left_child_->Print(level);
   right_child_->Print(level);
 }
+//void LogicalDeleteFilter::GetTxnInfo(QueryReq & request) const {
+//
+//}
+//void LogicalDeleteFilter::SetTxnInfo(const Query & query) {
+//
+//}
 }  // namespace logical_operator
 }  // namespace claims

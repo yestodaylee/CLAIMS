@@ -98,7 +98,12 @@ class LogicalQueryPlanRoot : public LogicalOperator {
    * @return  void
    */
   void Print(int level = 0) const;
-
+  virtual void GetTxnInfo(QueryReq & request) const {
+    child_->GetTxnInfo(request);
+  }
+  virtual void SetTxnInfo(const Query & query) {
+    child_->SetTxnInfo(query);
+  }
  private:
   /**
    * @brief Method description: get all attribute name from PlanContext

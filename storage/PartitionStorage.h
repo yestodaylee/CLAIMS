@@ -49,8 +49,8 @@ public:
   class TxnPartitionReaderIterator:public PartitionReaderItetaor{
   public:
     TxnPartitionReaderIterator(PartitionStorage* partition_storage,
-                               UInt64 checkpoint, vector<PStrip> & strip_list):
-      PartitionReaderItetaor(partition_storage), checkpoint_(checkpoint) {
+                         unsigned block_size , UInt64 checkpoint, vector<PStrip> & strip_list):
+     block_size_(block_size), PartitionReaderItetaor(partition_storage), checkpoint_(checkpoint) {
          for (auto & strip : strip_list) {
             auto begin = strip.first;
             auto end = strip.first + strip.second;
@@ -67,6 +67,7 @@ public:
     virtual bool nextBlock(BlockStreamBase* &block);
   private:
     Lock lock_;
+    unsigned block_size_;
     UInt64 checkpoint_;
     map<unsigned, vector<PStrip>> blockid_strips_;
     unsigned tuple_size_ = 10;
@@ -85,8 +86,12 @@ public:
 	void removeAllChunks(const PartitionID &partition_id);
 	PartitionReaderItetaor* createReaderIterator();
 	PartitionReaderItetaor* createAtomicReaderIterator();
-	PartitionReaderItetaor* createTxnReaderIterator();
+	PartitionReaderItetaor* createTxnReaderIterator(unsigned block_size,
+	                                                UInt64 checkpoint,
+	                                                vector<PStrip> & strip_list);
+
 protected:
+
 	PartitionID partition_id_;
 	unsigned number_of_chunks_;
 	std::vector<ChunkStorage*> chunk_list_;

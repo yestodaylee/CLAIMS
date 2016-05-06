@@ -127,7 +127,14 @@ class LogicalDeleteFilter : public LogicalOperator {
   bool GetOptimalPhysicalPlan(Requirement requirement,
                               PhysicalPlanDescriptor& physical_plan_descriptor,
                               const unsigned& block_size = 4096 * 1024);
-
+  virtual void GetTxnInfo(QueryReq & request) const {
+    left_child_->GetTxnInfo(request);
+    right_child_->GetTxnInfo(request);
+  }
+  virtual void SetTxnInfo(const Query & query) {
+   left_child_->SetTxnInfo(query);
+   right_child_->SetTxnInfo(query);
+  }
  private:
   std::vector<unsigned> GetLeftFilterKeyIds() const;
   std::vector<unsigned> GetRightFilterKeyIds() const;

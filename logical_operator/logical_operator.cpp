@@ -105,5 +105,17 @@ void LogicalOperator::GetColumnToId(const std::vector<Attribute>& attributes,
   }
 }
 
+void LogicalOperator::GetTxnInfo(QueryReq & request) const {
+  cout << "call GetTxnInfo base" << endl;
+  assert(false);
+}
+
+void LogicalOperator::SetTxnInfo(const Query &) {
+  cout << "cal SetTxnInfo base" << endl;
+  assert(false);
+}
+
+
+
 }  // namespace logical_operator
 }  // namespace claims

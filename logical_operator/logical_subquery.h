@@ -48,7 +48,12 @@ class LogicalSubquery : public LogicalOperator {
   PlanContext GetPlanContext();
   PhysicalOperatorBase *GetPhysicalPlan(const unsigned &blocksize);
   void Print(int level = 0) const;
-
+  virtual void GetTxnInfo(QueryReq & request) const {
+    child_->GetTxnInfo(request);
+  }
+  virtual void SetTxnInfo(const Query & query) {
+    child_->SetTxnInfo(query);
+  }
  private:
   vector<Attribute> subquery_attrs_;
   PlanContext *plan_context_;

@@ -47,7 +47,13 @@ class LogicalCrossJoin : public LogicalOperator {
   PlanContext GetPlanContext();
   PhysicalOperatorBase* GetPhysicalPlan(const unsigned& blocksize);
   void Print(int level = 0) const;
-
+  virtual void GetTxnInfo(QueryReq & request) const {
+    left_child_->GetTxnInfo(request);
+    right_child_->GetTxnInfo(request);}
+  virtual void SetTxnInfo(const Query & query) {
+    left_child_->SetTxnInfo(query);
+    right_child_->SetTxnInfo(query);
+  }
  protected:
   /**
    * The enum JoinPolicy is to enumerate the join policy used in the Cartesian

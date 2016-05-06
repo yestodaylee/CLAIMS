@@ -44,7 +44,10 @@
 #include "../logical_operator/Requirement.h"
 #include "../physical_operator/physical_operator_base.h"
 #include "../physical_operator/physical_project.h"
+#include "../txn_manager/txn.hpp"
 using claims::common::ExprNode;
+using claims::txn::UInt64;
+using std::vector;
 namespace claims {
 namespace logical_operator {
 
@@ -79,7 +82,12 @@ class LogicalProject : public LogicalOperator {
    * @param level:initialized to zero
    */
   void Print(int level = 0) const;
-
+  virtual void GetTxnInfo(QueryReq & request) const {
+    child_->GetTxnInfo(request);
+  }
+  virtual void SetTxnInfo(const Query & query) {
+    child_->SetTxnInfo(query);
+  }
  private:
   /**
    * @brief Method description:construct a schema from
@@ -93,6 +101,8 @@ class LogicalProject : public LogicalOperator {
   std::vector<ExprNode*> expr_list_;
   std::vector<QNode*> expression_tree_;
 };
+
+
 
 }  // namespace logical_operator
 }  // namespace claims

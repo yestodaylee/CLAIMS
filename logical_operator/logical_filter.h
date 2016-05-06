@@ -87,7 +87,12 @@ class LogicalFilter : public LogicalOperator {
    * @param level: As an index.
    */
   void Print(int level = 0) const;
-
+  virtual void GetTxnInfo(QueryReq & request) const {
+    child_->GetTxnInfo(request);
+  }
+  virtual void SetTxnInfo(const Query & query) {
+    child_->SetTxnInfo(query);
+  }
  private:
   /**
    * @brief Method description: Not used in the current version and remained to

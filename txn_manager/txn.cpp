@@ -141,6 +141,10 @@ string Query::ToString() {
      str += "Pos:" + to_string(strip.first) +
           ",Offset:" + to_string(strip.second) + "\n";
    }
+  str += "checkpoint:\n";
+  for (auto & cp : cp_list_) {
+    str += to_string(cp.first) + "=>" + to_string(cp.second) + "\n";
+  }
   return str;
 }
 

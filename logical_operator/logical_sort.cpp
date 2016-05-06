@@ -206,5 +206,13 @@ void LogicalSort::Print(int level) const {
   PrintOrderByAttr(level);
   child_->Print(level);
 }
+
+//void LogicalSort::GetTxnInfo(QueryReq & request) const {
+//
+//}
+//void LogicalSort::SetTxnInfo(const Query & query) {
+//
+//}
+
 }  // namespace logical_operator
 }  // namespace claims

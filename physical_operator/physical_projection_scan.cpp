@@ -44,7 +44,10 @@
 using claims::common::rNoPartitionIdScan;
 using claims::common::rSuccess;
 using claims::common::rCodegenFailed;
-
+using claims::txn::GetGlobalPartId;
+using claims::txn::GetTableIdFromGlobalPartId;
+using claims::txn::GetProjectionIdFromGlobalPartId;
+using claims::txn::GetPartitionIdFromGlobalPartId;
 namespace claims {
 namespace physical_operator {
 PhysicalProjectionScan::PhysicalProjectionScan(State state)
@@ -95,8 +98,14 @@ bool PhysicalProjectionScan::Open(const PartitionOffset& kPartitionOffset) {
                         .c_str() << CStrError(rNoPartitionIdScan) << std::endl;
       SetReturnStatus(false);
     } else {
+      auto table_id = state_.projection_id_.table_id;
+      auto proj_id = state_.projection_id_.projection_off;
+      auto part_id = kPartitionOffset;
+      auto global_part_id = GetGlobalPartId(table_id, proj_id, part_id);
       partition_reader_iterator_ =
-          partition_handle_->createTxnReaderIterator();
+          partition_handle_->createTxnReaderIterator(state_.block_size_,
+                                                     state_.query_.cp_list_[global_part_id],
+                                                     state_.query_.snapshot_[global_part_id]);
       SetReturnStatus(true);
     }
 
