@@ -34,6 +34,7 @@
 #include <map>
 #include <utility>
 #include <unordered_map>
+#include <mutex>
 #include <tuple>
 #include <time.h>
 #include <chrono>
@@ -143,6 +144,8 @@ using claims::txn::LogServer;
 using claims::txn::LogClient;
 char buffer[20*1024+10];
 int is_log = 0;
+std::mutex mt;
+unordered_map<UInt64, bool> id_list;
 void task2(int id, int times){
   std::default_random_engine e;
   std::uniform_int_distribution<int> rand_tuple_size(50, 150);
@@ -164,6 +167,14 @@ void task2(int id, int times){
       TxnClient::CommitIngest(ingest.id_);
       if (is_log == 1)
         LogClient::Refresh();
+      {
+        std::lock_guard<std::mutex> lck(mt);
+        if (id_list.find(ingest.id_) == id_list.end()) {
+            id_list[ingest.id_] = true;
+          } else {
+            cout << "replicated" << endl;
+             }
+      }
     }
 
 }

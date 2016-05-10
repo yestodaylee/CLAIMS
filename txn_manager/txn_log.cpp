@@ -37,7 +37,7 @@ UInt64 LogServer::file_size_ = 0;
 UInt64 LogServer::file_capacity_ = kMaxLogSize;
 char * LogServer::buffer_ = nullptr;
 UInt64 LogServer::buffer_size_  = 0;
-UInt64 LogServer::buffer_capacity_ = kMaxLogSize * 10;
+UInt64 LogServer::buffer_capacity_ = kMaxLogSize * 100;
 caf::actor LogServer::proxy_;
 bool LogServer::active_ = false;
 RetCode LogServer::Init(const string path) {

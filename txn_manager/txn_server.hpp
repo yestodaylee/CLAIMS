@@ -89,36 +89,36 @@ class TxnCore: public caf::event_based_actor {
   }
 };
 
-class Test:public caf::event_based_actor {
- public:
-  caf::behavior make_behavior() override;
-};
-
-
-class IngestCommitWorker:public caf::event_based_actor {
- public:
-  caf::behavior make_behavior() override;
-};
-
-class AbortWorker:public caf::event_based_actor {
- public:
-  caf::behavior make_behavior() override;
-};
-
-class QueryWorker:public caf::event_based_actor {
- public:
-  caf::behavior make_behavior() override;
-};
-
-class CheckpointWorker:public caf::event_based_actor {
- public:
-  caf::behavior make_behavior() override;
-};
-
-class CommitCPWorker:public caf::event_based_actor {
- public:
-  caf::behavior make_behavior() override;
-};
+//class Test:public caf::event_based_actor {
+// public:
+//  caf::behavior make_behavior() override;
+//};
+//
+//
+//class IngestCommitWorker:public caf::event_based_actor {
+// public:
+//  caf::behavior make_behavior() override;
+//};
+//
+//class AbortWorker:public caf::event_based_actor {
+// public:
+//  caf::behavior make_behavior() override;
+//};
+//
+//class QueryWorker:public caf::event_based_actor {
+// public:
+//  caf::behavior make_behavior() override;
+//};
+//
+//class CheckpointWorker:public caf::event_based_actor {
+// public:
+//  caf::behavior make_behavior() override;
+//};
+//
+//class CommitCPWorker:public caf::event_based_actor {
+// public:
+//  caf::behavior make_behavior() override;
+//};
 
 
 class TxnServer: public caf::event_based_actor{
@@ -136,12 +136,12 @@ class TxnServer: public caf::event_based_actor{
   static RetCode Init(int concurrency = kConcurrency , int port = kTxnPort);
 
   /**************** System APIs ***************/
-  static  RetCode BeginIngest(const FixTupleIngestReq & request, Ingest & ingest);
-  static  RetCode CommitIngest(const UInt64 id);
-  static  RetCode AbortIngest(const UInt64 id);
-  static  RetCode BeginQuery(const QueryReq & request, Query & snapshot);
-  static  RetCode BeginCheckpoint(Checkpoint & cp);
-  static  RetCode CommitCheckpoint(const Checkpoint & cp);
+//  static  RetCode BeginIngest(const FixTupleIngestReq & request, Ingest & ingest);
+//  static  RetCode CommitIngest(const UInt64 id);
+//  static  RetCode AbortIngest(const UInt64 id);
+//  static  RetCode BeginQuery(const QueryReq & request, Query & snapshot);
+//  static  RetCode BeginCheckpoint(Checkpoint & cp);
+//  static  RetCode CommitCheckpoint(const Checkpoint & cp);
   static  UInt64 GetCoreId(UInt64 id) {
     return id % 1000;
   }

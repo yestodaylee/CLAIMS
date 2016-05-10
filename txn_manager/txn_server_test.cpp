@@ -188,22 +188,44 @@ using claims::txn::TxnServer;
 using claims::txn::TxnClient;
 using claims::txn::LogServer;
 using claims::txn::LogClient;
-char buffer[3*1024+10];
-void task2(int times){
-for (auto i=0; i<times; i++) {
-    FixTupleIngestReq req;
-    Ingest ingest;
-    req.InsertStrip(0, 50, 10);
-    req.InsertStrip(1, 10 , 10);
-    TxnClient::BeginIngest(req, ingest);
-  //  cout << ingest.ToString() << endl;
-   // LogClient::Data(0,0,0,buffer,1*1024);
-    //LogClient::Data(0,0,0,buffer,1*1024);
-    TxnClient::CommitIngest(ingest.id_);
-  }
+char buffer[20*1024+10];
+int is_log = 0;
+std::mutex mt;
+unordered_map<UInt64, bool> id_list;
+void task2(int id, int times){
+  std::default_random_engine e;
+  std::uniform_int_distribution<int> rand_tuple_size(50, 150);
+  std::uniform_int_distribution<int> rand_tuple_count(10, 100);
+  std::uniform_int_distribution<int> rand_part_count(1, 10);
+  for (auto i=0; i<times; i++) {
+      FixTupleIngestReq req;
+      Ingest ingest;
+      auto part_count = rand_part_count(e);
+      auto tuple_size = rand_tuple_size(e);
+      auto tuple_count = rand_tuple_size(e);
+      for (auto i = 0; i < part_count; i++)
+        req.InsertStrip(i, part_count, tuple_count/part_count>0 ?tuple_count/part_count :1);
+      TxnClient::BeginIngest(req, ingest);
+      if (is_log == 1)
+      for (auto & strip : ingest.strip_list_)
+        LogClient::Data(strip.first,strip.second.first,strip.second.second,
+                        buffer, tuple_size*tuple_count/part_count);
+      TxnClient::CommitIngest(ingest.id_);
+      if (is_log == 1)
+        LogClient::Refresh();
+//      {
+//        std::lock_guard<std::mutex> lck(mt);
+//        if (id_list.find(ingest.id_) == id_list.end()) {
+//            id_list[ingest.id_] = true;
+//          } else {
+//            cout << "replicated" << endl;
+//             }
+//      }
+    }
+
 }
 
-int is_log = 0;
+
 int main(int argc,char *argv[]){
   int con = stoi(string(argv[1]));
   int port = stoi(string(argv[2]));
@@ -213,19 +235,22 @@ int main(int argc,char *argv[]){
   //TxnClient::Init();
   if (is_log == 1)
     LogServer::Init("txn-log");
-//  struct  timeval tv1, tv2;
-//  vector<std::thread> threads;
-//  int n,times;
-//  cin >> n >> times;
-//  for (auto i=0;i<n;i++)
-//    threads.push_back(std::thread(task2, times));
-//  gettimeofday(&tv1,NULL);
-//  for (auto i=0;i<n;i++)
-//    threads.push_back(std::thread(task2, times));
-//  for (auto i=0;i<n;i++)
-//    threads[i].join();
-//  gettimeofday(&tv2,NULL);
-//  cout << tv2.tv_sec - tv1.tv_sec << "-" << (tv2.tv_usec - tv1.tv_usec)/1000 <<endl;
+  TxnClient::Init("127.0.0.1", port);
+ // LogServer::Init("data-log");
+  struct  timeval tv1, tv2;
+  int n = 16;
+  int times = 100000;
+  vector<std::thread> threads;
+  for (auto i=0;i<n;i++)
+    threads.push_back(std::thread(task2, i, times));
+  gettimeofday(&tv1,NULL);
+  for (auto i=0;i<n;i++)
+    threads[i].join();
+  gettimeofday(&tv2,NULL);
+  UInt64 time_u = (tv2.tv_sec - tv1.tv_sec)*1000000 + (tv2.tv_usec - tv1.tv_usec);
+  cout << "Time:" << time_u / 1000000 << "." << time_u / 1000 << "s" << endl;
+  cout << "Delay:" << (time_u / times)/1000.0 << "ms" << endl;
+  cout << "TPS:" << (n * times * 1000000.0) / time_u << endl;;
   caf::await_all_actors_done();
   caf::shutdown();
 }

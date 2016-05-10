@@ -175,89 +175,89 @@ caf::behavior TxnCore::make_behavior() {
   };
 
 }
-
-caf::behavior Test::make_behavior() {
-  cout << "test init..." << endl;
-  return {
-    [=](int a)->int {cout << "receive int:" << a <<endl; return -a;},
-     caf::others >> [&](){ cout<<"test unkown message"<<endl;}
-  };
-}
-
-caf::behavior IngestWorker(caf::event_based_actor * self) {
-  return {
-      [=](IngestAtom, const FixTupleIngestReq & request)->caf::message {
-        Ingest ingest;
-        auto ret = TxnServer::BeginIngest(request, ingest);
-//        auto ret = 10;
-//        cout<<"new IngestWorker!!"<<endl;
-////        self->sync_send(test, 34).await(
-////            [&](int a) { ret = a;});
-////
-////         caf::scoped_actor self;
-////        self->sync_send(test, 34).await(
-////            [=](int a) { cout<<a<<endl;}
-////          );
-        cout<<"new IngestWorker send~~"<<endl;
-        //self->quit();
-        return caf::make_message(ingest, ret);
-       },
-     caf::others >> [] () { cout<<"IngestWorker unkown message"<<endl;}};
-}
-
-caf::behavior IngestCommitWorker::make_behavior(){
-  return {
-    [=](CommitIngestAtom, const UInt64 id)->RetCode {
-           quit();
-           return TxnServer::CommitIngest(id);
-         },
-     caf::others >> [] () { cout<<"IngestCommitWorker unkown message"<<endl;}
-  };
-}
-
-caf::behavior AbortWorker::make_behavior(){
-  return {
-    [=](AbortIngestAtom, const UInt64 id)->RetCode {
-           quit();
-           return TxnServer::AbortIngest(id);
-         },
-     caf::others >> [] () { cout<<"AbortWorker unkown message"<<endl;}
-  };
-}
-
-caf::behavior QueryWorker::make_behavior(){
-  return {
-    [=](QueryAtom, const QueryReq & request)->caf::message {
-          Query query;
-          auto ret = TxnServer::BeginQuery(request, query);
-          quit();
-          return caf::make_message(query, ret);
-        },
-     caf::others >> [] () { cout<<"QueryWorker unkown message"<<endl;}
-  };
-}
-
-caf::behavior CheckpointWorker::make_behavior() {
-  return {
-    [=](CheckpointAtom, const UInt64 part)->caf::message{
-         Checkpoint cp;
-         cp.part_ = part;
-         auto ret = TxnServer::BeginCheckpoint(cp);
-         quit();
-         return caf::make_message(cp, ret);
-       },
-     caf::others >> [] () { cout<<"CheckpointWorker unkown message"<<endl;}
-  };
-}
-caf::behavior CommitCPWorker::make_behavior() {
-  return {
-    [=](CommitCPAtom, const Checkpoint & cp)->RetCode {
-       quit();
-       return TxnServer::CommitCheckpoint(cp);
-     },
-     caf::others >> [] () { cout<<"CommitCPWorker unkown message"<<endl;}
-  };
-}
+//
+//caf::behavior Test::make_behavior() {
+//  cout << "test init..." << endl;
+//  return {
+//    [=](int a)->int {cout << "receive int:" << a <<endl; return -a;},
+//     caf::others >> [&](){ cout<<"test unkown message"<<endl;}
+//  };
+//}
+//
+//caf::behavior IngestWorker(caf::event_based_actor * self) {
+//  return {
+//      [=](IngestAtom, const FixTupleIngestReq & request)->caf::message {
+//        Ingest ingest;
+//        auto ret = TxnServer::BeginIngest(request, ingest);
+////        auto ret = 10;
+////        cout<<"new IngestWorker!!"<<endl;
+//////        self->sync_send(test, 34).await(
+//////            [&](int a) { ret = a;});
+//////
+//////         caf::scoped_actor self;
+//////        self->sync_send(test, 34).await(
+//////            [=](int a) { cout<<a<<endl;}
+//////          );
+//        cout<<"new IngestWorker send~~"<<endl;
+//        //self->quit();
+//        return caf::make_message(ingest, ret);
+//       },
+//     caf::others >> [] () { cout<<"IngestWorker unkown message"<<endl;}};
+//}
+//
+//caf::behavior IngestCommitWorker::make_behavior(){
+//  return {
+//    [=](CommitIngestAtom, const UInt64 id)->RetCode {
+//           quit();
+//           return TxnServer::CommitIngest(id);
+//         },
+//     caf::others >> [] () { cout<<"IngestCommitWorker unkown message"<<endl;}
+//  };
+//}
+//
+//caf::behavior AbortWorker::make_behavior(){
+//  return {
+//    [=](AbortIngestAtom, const UInt64 id)->RetCode {
+//           quit();
+//           return TxnServer::AbortIngest(id);
+//         },
+//     caf::others >> [] () { cout<<"AbortWorker unkown message"<<endl;}
+//  };
+//}
+//
+//caf::behavior QueryWorker::make_behavior(){
+//  return {
+//    [=](QueryAtom, const QueryReq & request)->caf::message {
+//          Query query;
+//          auto ret = TxnServer::BeginQuery(request, query);
+//          quit();
+//          return caf::make_message(query, ret);
+//        },
+//     caf::others >> [] () { cout<<"QueryWorker unkown message"<<endl;}
+//  };
+//}
+//
+//caf::behavior CheckpointWorker::make_behavior() {
+//  return {
+//    [=](CheckpointAtom, const UInt64 part)->caf::message{
+//         Checkpoint cp;
+//         cp.part_ = part;
+//         auto ret = TxnServer::BeginCheckpoint(cp);
+//         quit();
+//         return caf::make_message(cp, ret);
+//       },
+//     caf::others >> [] () { cout<<"CheckpointWorker unkown message"<<endl;}
+//  };
+//}
+//caf::behavior CommitCPWorker::make_behavior() {
+//  return {
+//    [=](CommitCPAtom, const Checkpoint & cp)->RetCode {
+//       quit();
+//       return TxnServer::CommitCheckpoint(cp);
+//     },
+//     caf::others >> [] () { cout<<"CommitCPWorker unkown message"<<endl;}
+//  };
+//}
 caf::behavior TxnServer::make_behavior() {
   try {
     caf::io::publish(proxy_, port_, nullptr, true);
@@ -310,87 +310,87 @@ RetCode TxnServer::Init(int concurrency, int port) {
   srand((unsigned) time(NULL));
   return 0;
 }
-
-RetCode TxnServer::BeginIngest(const FixTupleIngestReq & request, Ingest & ingest) {
-  RetCode ret = 0;
-  UInt64 core_id = SelectCoreId();
-  caf::scoped_actor self;
-  self->sync_send(cores_[core_id], IngestAtom::value, & request, & ingest).
-      await([&](int r) {ret = r;});
-  if (ret == 0) {
-  //  LogClient::Begin(ingest.Id);
-//    for (auto & strip : ingest.StripList)
-//      LogClient::Write(ingest.Id, strip.first, strip.second.first, strip.second.second);
-  }
-  return ret;
-}
-RetCode TxnServer::CommitIngest(const UInt64 id) {
-  RetCode ret = 0;
-  UInt64 core_id = GetCoreId(id);
-  caf::scoped_actor self;
-  self->sync_send(cores_[core_id], CommitIngestAtom::value, id).
-      await([&](int r) { ret = r;});
- if (ret == 0) {
-//   LogClient::Commit(ingest.Id);
-//   LogClient::Refresh();
-  }
-  return ret;
-}
-RetCode TxnServer::AbortIngest(const UInt64 id) {
-  RetCode ret;
-  UInt64 core_id = GetCoreId(id);
-  caf::scoped_actor self;
-  self->sync_send(cores_[core_id], AbortIngestAtom::value, id).
-      await([&](int r) { ret = r;});
-  if (ret == 0) {
-//    LogClient::Abort(ingest.Id);
-//    LogClient::Refresh();
-  }
-  return ret;
-}
-RetCode TxnServer::BeginQuery(const QueryReq & request, Query & query) {
-  RetCode ret;
-  caf::scoped_actor self;
-  for (auto & part : request.part_list_)
-    query.cp_list_[part] = TxnServer::logic_cp_list_[part];
-  for (auto & core : cores_)
-    self->sync_send(core, QueryAtom::value, & request, & query).
-    await([&](int r) {r = ret;});
-  for (auto & part : query.snapshot_) {
-    Strip::Sort(part.second);
-    Strip::Merge(part.second);
-  }
-  return ret;
-}
-RetCode TxnServer::BeginCheckpoint(Checkpoint & cp) {
-  RetCode ret = 0;
-  if (TxnServer::pos_list_.find(cp.part_) == TxnServer::pos_list_.end())
-    return -1;
-  cp.logic_cp_ = TxnServer::logic_cp_list_[cp.part_];
-  cp.phy_cp_ = TxnServer::phy_cp_list_[cp.part_];
-
-  caf::scoped_actor self;
-  for (auto & core : cores_)
-    self->sync_send(core,CheckpointAtom::value, &cp).
-    await([&]( int r) {  r = ret;});
-  Strip::Sort(cp.commit_strip_list_);
-  Strip::Merge(cp.commit_strip_list_);
-  Strip::Sort(cp.abort_strip_list_);
-  Strip::Merge(cp.abort_strip_list_);
-  return ret;
-}
-RetCode TxnServer::CommitCheckpoint(const Checkpoint & cp) {
-  RetCode ret = 0;
-  if (TxnServer::pos_list_.find(cp.part_) == TxnServer::pos_list_.end())
-       return -1;
-     TxnServer::logic_cp_list_[cp.part_] = cp.logic_cp_;
-     TxnServer::phy_cp_list_[cp.part_] = cp.phy_cp_;
-  if (ret == 0) {
-//    LogClient::Checkpoint(cp.Part, cp.LogicCP, cp.PhyCP);
-//    LogClient::Refresh();
-  }
-  return ret;
-}
+//
+//RetCode TxnServer::BeginIngest(const FixTupleIngestReq & request, Ingest & ingest) {
+//  RetCode ret = 0;
+//  UInt64 core_id = SelectCoreId();
+//  caf::scoped_actor self;
+//  self->sync_send(cores_[core_id], IngestAtom::value, & request, & ingest).
+//      await([&](int r) {ret = r;});
+//  if (ret == 0) {
+//  //  LogClient::Begin(ingest.Id);
+////    for (auto & strip : ingest.StripList)
+////      LogClient::Write(ingest.Id, strip.first, strip.second.first, strip.second.second);
+//  }
+//  return ret;
+//}
+//RetCode TxnServer::CommitIngest(const UInt64 id) {
+//  RetCode ret = 0;
+//  UInt64 core_id = GetCoreId(id);
+//  caf::scoped_actor self;
+//  self->sync_send(cores_[core_id], CommitIngestAtom::value, id).
+//      await([&](int r) { ret = r;});
+// if (ret == 0) {
+////   LogClient::Commit(ingest.Id);
+////   LogClient::Refresh();
+//  }
+//  return ret;
+//}
+//RetCode TxnServer::AbortIngest(const UInt64 id) {
+//  RetCode ret;
+//  UInt64 core_id = GetCoreId(id);
+//  caf::scoped_actor self;
+//  self->sync_send(cores_[core_id], AbortIngestAtom::value, id).
+//      await([&](int r) { ret = r;});
+//  if (ret == 0) {
+////    LogClient::Abort(ingest.Id);
+////    LogClient::Refresh();
+//  }
+//  return ret;
+//}
+//RetCode TxnServer::BeginQuery(const QueryReq & request, Query & query) {
+//  RetCode ret;
+//  caf::scoped_actor self;
+//  for (auto & part : request.part_list_)
+//    query.cp_list_[part] = TxnServer::logic_cp_list_[part];
+//  for (auto & core : cores_)
+//    self->sync_send(core, QueryAtom::value, & request, & query).
+//    await([&](int r) {r = ret;});
+//  for (auto & part : query.snapshot_) {
+//    Strip::Sort(part.second);
+//    Strip::Merge(part.second);
+//  }
+//  return ret;
+//}
+//RetCode TxnServer::BeginCheckpoint(Checkpoint & cp) {
+//  RetCode ret = 0;
+//  if (TxnServer::pos_list_.find(cp.part_) == TxnServer::pos_list_.end())
+//    return -1;
+//  cp.logic_cp_ = TxnServer::logic_cp_list_[cp.part_];
+//  cp.phy_cp_ = TxnServer::phy_cp_list_[cp.part_];
+//
+//  caf::scoped_actor self;
+//  for (auto & core : cores_)
+//    self->sync_send(core,CheckpointAtom::value, &cp).
+//    await([&]( int r) {  r = ret;});
+//  Strip::Sort(cp.commit_strip_list_);
+//  Strip::Merge(cp.commit_strip_list_);
+//  Strip::Sort(cp.abort_strip_list_);
+//  Strip::Merge(cp.abort_strip_list_);
+//  return ret;
+//}
+//RetCode TxnServer::CommitCheckpoint(const Checkpoint & cp) {
+//  RetCode ret = 0;
+//  if (TxnServer::pos_list_.find(cp.part_) == TxnServer::pos_list_.end())
+//       return -1;
+//     TxnServer::logic_cp_list_[cp.part_] = cp.logic_cp_;
+//     TxnServer::phy_cp_list_[cp.part_] = cp.phy_cp_;
+//  if (ret == 0) {
+////    LogClient::Checkpoint(cp.Part, cp.LogicCP, cp.PhyCP);
+////    LogClient::Refresh();
+//  }
+//  return ret;
+//}
 
 
 Strip TxnServer::AtomicMalloc(UInt64 part, UInt64 TupleSize, UInt64 TupleCount) {

@@ -64,7 +64,7 @@ namespace txn{
 
 using UInt64 = unsigned long long;
 using UInt32 = unsigned int;
-const UInt64 kMaxLogSize = 16 * 1024 * 1024;
+const UInt64 kMaxLogSize = 4 * 1024 * 1024;
 const string kTxnLogFileName = "txn_log_";
 const string kDataLogFileName = "data_log_";
 const int kTypeBegin = 1;
