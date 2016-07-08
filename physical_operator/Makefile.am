@@ -48,7 +48,7 @@ libphysicalqueryplan_a_SOURCES = \
 	physical_projection_scan.cpp 			physical_projection_scan.h \
 	physical_nest_loop_join.h				physical_nest_loop_join.cpp	\
 	physical_delete_filter.h                physical_delete_filter.cpp \
-	physical_txn_scan.hpp            physical_txn_scan.cpp	\
+	physical_outer_hash_join.h              physical_outer_hash_join.cpp\
 	segment.cpp 							segment.h
 			
 SUBDIRS = 

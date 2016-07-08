@@ -25,9 +25,9 @@
 #include <gtest/gtest.h>
 #include <string>
 // #include "../codegen/codegen_test.h"
-#include "./common/errno_test.h"
-#include "../common/test/operate_test.h"
-#include "../common/types/Test/data_type_test.h"
+//#include "./common/errno_test.h"
+//#include "../common/test/operate_test.h"
+//#include "../common/types/Test/data_type_test.h"
 // #include "../common/file_handle/test/disk_file_handle_imp_test.h"
 // #include "../common/file_handle/test/hdfs_file_handle_imp_test.h"
 // #include "../loader/test/single_thread_single_file_connector_test.h"
