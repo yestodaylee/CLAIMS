@@ -381,16 +381,16 @@ RetCode MasterLoader::Ingest(const string& message,
   /// start transaction from here
   claims::txn::Ingest ingest;
   EXEC_AND_LOG(ret, ApplyTransaction(table, partition_buffers, ingest),
-               "applied transaction: " << ingest.id_,
+               "applied transaction: " << ingest.ts_,
                "failed to apply transaction");
 
   commit_info_spin_lock_.acquire();
   txn_commint_info_.insert(std::pair<const uint64_t, CommitInfo>(
-      ingest.id_, CommitInfo(ingest.strip_list_.size())));
+      ingest.ts_, CommitInfo(ingest.strip_list_.size())));
 
-  txn_start_time_.insert(pair<uint64_t, uint64_t>(ingest.id_, GetCurrentUs()));
+  txn_start_time_.insert(pair<uint64_t, uint64_t>(ingest.ts_, GetCurrentUs()));
   commit_info_spin_lock_.release();
-  DLOG(INFO) << "insert txn " << ingest.id_ << " into map ";
+  DLOG(INFO) << "insert txn " << ingest.ts_ << " into map ";
 
   /// write data log
   EXEC_AND_DLOG(ret, WriteLog(table, partition_buffers, ingest), "written log",
@@ -701,7 +701,7 @@ RetCode MasterLoader::SendPartitionTupleToSlave(
 
 #ifdef SEND_THREAD
       LoadPacket* packet =
-          new LoadPacket(socket_fd, ingest.id_, global_part_id,
+          new LoadPacket(socket_fd, ingest.ts_, global_part_id,
                          ingest.strip_list_.at(global_part_id).first,
                          ingest.strip_list_.at(global_part_id).second,
                          partition_buffers[prj_id][part_id].length_,
@@ -719,7 +719,7 @@ RetCode MasterLoader::SendPartitionTupleToSlave(
       }
       packet_queue_to_send_count_[queue_index].post();
 #else
-      LoadPacket packet(socket_fd, ingest.id_, global_part_id,
+      LoadPacket packet(socket_fd, ingest.ts_, global_part_id,
                         ingest.strip_list_.at(global_part_id).first,
                         ingest.strip_list_.at(global_part_id).second,
                         partition_buffers[prj_id][part_id].length_,

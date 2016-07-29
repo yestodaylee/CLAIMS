@@ -52,9 +52,9 @@ RetCode LogServer::Init(const string path) {
 caf::behavior LogServer::make_behavior() {
   return {
       [=](IngestAtom, shared_ptr<Ingest> ingest) -> caf::message {
-        Append(BeginLog(ingest->id_));
+        Append(BeginLog(ingest->ts_));
         for (auto& strip : ingest->strip_list_)
-          Append(WriteLog(ingest->id_, strip.first, strip.second.first,
+          Append(WriteLog(ingest->ts_, strip.first, strip.second.first,
                           strip.second.second));
         // cout << "begin" << endl;
         return caf::make_message(0, *ingest);

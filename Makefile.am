@@ -90,7 +90,8 @@ include_HEADERS = Config.h \
 				
 bin_PROGRAMS = claimsserver \
 				client \
-				test
+				test  \
+				txntest
 				
 client_SOURCES = Client.cpp \
 					Environment.cpp \
@@ -106,6 +107,8 @@ test_SOURCES = Test/gtest_main.cpp\
 				Environment.cpp \
 				IDsGenerator.cpp \
 				Config.cpp
+				
+txntest_SOURCES = txn_manager/txn_client_test.cpp
 				
 
 SUBDIRS=  catalog Client common Daemon Executor IndexManager\

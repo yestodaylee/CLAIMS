@@ -29,6 +29,8 @@
 #ifndef TXN_HPP_
 #define TXN_HPP_
 #include <vector>
+#include <set>
+#include <tuple>
 #include <iostream>
 #include <functional>
 #include <algorithm>
@@ -41,7 +43,8 @@
 #include <sys/time.h>
 #include "caf/all.hpp"
 #include "caf/io/all.hpp"
-
+#include "../common/error_define.h"
+#include "../utility/Timer.h"
 namespace claims {
 namespace txn {
 
@@ -52,16 +55,23 @@ using std::vector;
 using std::string;
 using std::map;
 using std::pair;
+using std::set;
+using std::tuple;
+using std::get;
 using std::unordered_map;
 using std::to_string;
 using std::function;
 using std::sort;
 using std::make_pair;
+using std::make_tuple;
+using claims::common::rSuccess;
+
 using UInt64 = unsigned long long;
 using UInt32 = unsigned int;
 using UInt16 = unsigned short;
 using UInt8 = char;
 using RetCode = int;
+using TimerAtom = caf::atom_constant<caf::atom("Timer")>;
 using BeginAtom = caf::atom_constant<caf::atom("Begin")>;
 using CommitAtom = caf::atom_constant<caf::atom("Commit")>;
 using AbortAtom = caf::atom_constant<caf::atom("Abort")>;
@@ -82,7 +92,7 @@ using AbortCPAtom = caf::atom_constant<caf::atom("AbortCP")>;
 using QuitAtom = caf::atom_constant<caf::atom("Quit")>;
 using LinkAtom = caf::atom_constant<caf::atom("Link")>;
 using RefreshAtom = caf::atom_constant<caf::atom("Refresh")>;
-using MergeAtom = caf::atom_constant<caf::atom("merge")>;
+using MergeAtom = caf::atom_constant<caf::atom("Merge")>;
 
 static const int kTxnPort = 8089;
 static const string kTxnIp = "127.0.0.1";
@@ -94,7 +104,7 @@ static const int kGCTime = 5;
 static const int kTimeout = 3;
 static const int kBlockSize = 64 * 1024;
 static const int kTailSize = sizeof(unsigned);
-
+static const int kTxnBinSize = 1024;
 inline UInt64 GetGlobalPartId(UInt64 table_id, UInt64 projeciton_id,
                               UInt64 partition_id) {
   return partition_id + 1000 * (projeciton_id + 1000 * table_id);
@@ -110,8 +120,10 @@ inline UInt64 GetProjectionIdFromGlobalPartId(UInt64 global_partition_id) {
 inline UInt64 GetPartitionIdFromGlobalPartId(UInt64 global_partition_id) {
   return global_partition_id % (1000);
 }
+
 /********Strip******/
 using PStrip = pair<UInt64, UInt64>;
+
 class Strip {
  public:
   UInt64 part_;
@@ -132,51 +144,113 @@ class Strip {
   static void Sort(vector<PStrip> &input);
   static void Merge(vector<Strip> &input);
   static void Merge(vector<PStrip> &input);
-  static void Filter(vector<Strip> &input,
-                     function<bool(const Strip &)> predicate);
+  static void Filter(vector<Strip> &input, function<bool(Strip &)> predicate);
+  static void Filter(vector<PStrip> &input, function<bool(PStrip &)> predicate);
 };
+
 inline bool operator==(const Strip &a, const Strip &b) {
   return a.part_ == b.part_ && a.pos_ == b.pos_ && a.offset_ == b.offset_;
 }
 
-/***********FixTupleIngestReq************/
+class Txn {
+ public:
+  static const int kActive = 0;
+  static const int kCommit = 1;
+  static const int kAbort = 2;
+  int status_ = kActive;
+  long realtime_;
+  unordered_map<UInt64, PStrip> strip_list_;
+  Txn() { realtime_ = GetCurrents(); }
+  Txn(const unordered_map<UInt64, PStrip> &strip_list) {
+    strip_list_ = strip_list;
+    // realtime_ = GetCurrents();
+  }
+  void Commit() { status_ = kCommit; }
+  void Abort() { status_ = kAbort; }
+  bool isCommit() { return status_ == kCommit; }
+  bool isAbort() { return status_ == kAbort; }
+  bool isActive() { return status_ == kActive; }
+};
+
+class Snapshot {
+ public:
+  unordered_map<UInt64, UInt64> his_cp_list_;
+  /**
+   * real-time checkpoint will never be send.
+   */
+  unordered_map<UInt64, UInt64> rt_cp_list_;
+  unordered_map<UInt64, vector<PStrip>> part_pstrips_;
+  string ToString() const;
+  void setRtCPS(const unordered_map<UInt64, UInt64> &cps) { rt_cp_list_ = cps; }
+  void setHisCPS(const unordered_map<UInt64, UInt64> &cps) {
+    his_cp_list_ = cps;
+  };
+  unordered_map<UInt64, UInt64> getHisCPS() const { return his_cp_list_; }
+  void setPStrips(const unordered_map<UInt64, vector<PStrip>> &part_pstrips) {
+    if (rt_cp_list_.size() > 0) {
+      /**
+       * Need to cut off all strip before ahead real-time checkpoint
+       */
+      for (auto &pstrips : part_pstrips)
+        for (auto &pstrip : pstrips.second)
+          if (pstrip.first >= rt_cp_list_[pstrips.first])
+            part_pstrips_[pstrips.first].push_back(pstrip);
+    } else {
+      part_pstrips_ = part_pstrips;
+    }
+  }
+  unordered_map<UInt64, vector<PStrip>> getPStrps() const {
+    return part_pstrips_;
+  }
+  void Merge(const vector<Strip> &strips);
+  void Merge(const Snapshot &snapshot);
+};
+
+inline bool operator==(const Snapshot &lhs, const Snapshot &rhs) {
+  return lhs.his_cp_list_ == rhs.his_cp_list_ &&
+         lhs.part_pstrips_ == rhs.part_pstrips_;
+}
 
 class FixTupleIngestReq {
  public:
   /*fix tuple part -> <tuple_size, tuple_count> */
-  map<UInt64, PStrip> content_;
+  unordered_map<UInt64, PStrip> content_;
   void InsertStrip(UInt64 part, UInt64 tuple_size, UInt64 tuple_count) {
     content_[part] = make_pair(tuple_size, tuple_count);
   }
-  map<UInt64, PStrip> get_content() const { return content_; }
-  void set_content(const map<UInt64, PStrip> &content) { content_ = content; }
+  unordered_map<UInt64, PStrip> get_content() const { return content_; }
+  void set_content(const unordered_map<UInt64, PStrip> &content) {
+    content_ = content;
+  }
   string ToString();
 };
 inline bool operator==(const FixTupleIngestReq &a, const FixTupleIngestReq &b) {
   return a.content_ == b.content_;
 }
 
-/****************Ingest***************/
 class Ingest {
  public:
-  UInt64 id_;
-  map<UInt64, PStrip> strip_list_;
+  UInt64 ts_;
+  unordered_map<UInt64, PStrip> strip_list_;
+  Ingest() {}
+  Ingest(const unordered_map<UInt64, PStrip> &strip_list, UInt64 ts)
+      : strip_list_(strip_list), ts_(ts) {}
   void InsertStrip(UInt64 part, UInt64 pos, UInt64 offset) {
     strip_list_[part] = make_pair(pos, offset);
   }
   void InsertStrip(const Strip &strip) {
     strip_list_[strip.part_] = make_pair(strip.pos_, strip.offset_);
   }
-  UInt64 get_id() const { return id_; }
-  map<UInt64, PStrip> get_strip_list() const { return strip_list_; }
-  void set_id(const UInt64 &id) { id_ = id; }
-  void set_strip_list(const map<UInt64, PStrip> &stripList) {
+  UInt64 get_id() const { return ts_; }
+  unordered_map<UInt64, PStrip> get_strip_list() const { return strip_list_; }
+  void set_id(const UInt64 &id) { ts_ = id; }
+  void set_strip_list(const unordered_map<UInt64, PStrip> &stripList) {
     strip_list_ = stripList;
   }
   string ToString();
 };
-inline bool operator==(const Ingest &a, const Ingest &b) {
-  return a.id_ == b.id_;
+inline bool operator==(const Ingest &lhs, const Ingest &rhs) {
+  return lhs.ts_ == rhs.ts_;
 }
 
 /************QueryReq************/
@@ -188,66 +262,116 @@ class QueryReq {
   void set_part_list(const vector<UInt64> &partList) { part_list_ = partList; }
   string ToString();
 };
-inline bool operator==(const QueryReq &a, const QueryReq &b) {
-  return a.part_list_ == b.part_list_;
+
+inline bool operator==(const QueryReq &lhs, const QueryReq &rhs) {
+  return lhs.part_list_ == rhs.part_list_;
 }
 
 /***********Snapshot***********/
 class Query {
  public:
-  map<UInt64, vector<PStrip>> snapshot_;
-  map<UInt64, UInt64> cp_list_;
-  void InsertStrip(UInt64 part, UInt64 pos, UInt64 offset) {
-    // if (Snapshot.find(part) == Snapshot.end())
-    //   Snapshot[part] = vector<pair<UInt64, UInt64>>();
-    // else
-    snapshot_[part].push_back(make_pair(pos, offset));
+  UInt64 ts_;
+  unordered_map<UInt64, vector<PStrip>> snapshot_;
+  unordered_map<UInt64, UInt64> his_cp_list_;
+  /**
+   *  real-time checkpoint will never be send
+   */
+  unordered_map<UInt64, UInt64> rt_cp_list_;
+  Query() {}
+  Query(UInt64 ts, const unordered_map<UInt64, UInt64> &his_cp_list,
+        const unordered_map<UInt64, UInt64> &rt_cp_list)
+      : ts_(ts), his_cp_list_(his_cp_list), rt_cp_list_(rt_cp_list) {}
+  UInt64 getTS() const { return ts_; }
+  unordered_map<UInt64, vector<PStrip>> getSnapshot() const {
+    return snapshot_;
   }
-  void InsertCP(UInt64 part, UInt64 cp) { cp_list_[part] = cp; }
-  map<UInt64, vector<PStrip>> get_snapshot() const { return snapshot_; }
-  map<UInt64, UInt64> get_cp_list() const { return cp_list_; }
-  void set_snapshot(const map<UInt64, vector<PStrip>> &sp) { snapshot_ = sp; }
-  void set_cp_list(const map<UInt64, UInt64> &cplist) { cp_list_ = cplist; }
+  unordered_map<UInt64, UInt64> getCPList() const { return his_cp_list_; }
+  void setTS(UInt64 ts) { ts_ = ts; }
+  void setSnapshot(const unordered_map<UInt64, vector<PStrip>> &sp) {
+    snapshot_ = sp;
+  }
+  void setCPList(const unordered_map<UInt64, UInt64> &cplist) {
+    his_cp_list_ = cplist;
+  }
   string ToString();
 };
-inline bool operator==(const Query &a, const Query &b) {
-  return a.snapshot_ == b.snapshot_;
+inline bool operator==(const Query &lhs, const Query &rhs) {
+  return lhs.snapshot_ == rhs.snapshot_ && lhs.his_cp_list_ == rhs.his_cp_list_;
 }
 
 /*********Checkpoint***********/
 class Checkpoint {
  public:
-  UInt64 id_;
-  UInt64 part_;
-  UInt64 logic_cp_;
-  UInt64 phy_cp_;
-  vector<PStrip> commit_strip_list_;
-  vector<PStrip> abort_strip_list_;
-  Checkpoint() {}
-  Checkpoint(UInt64 part, UInt64 newLogicCP, UInt64 oldPhyCP)
-      : part_(part), logic_cp_(newLogicCP), phy_cp_(oldPhyCP) {}
-  UInt64 get_id() const { return id_; }
-  UInt64 get_part() const { return part_; }
-  UInt64 get_logic_cp() const { return logic_cp_; }
-  UInt64 get_phy_cp() const { return phy_cp_; }
-  vector<PStrip> get_commit_strip_list() const { return commit_strip_list_; };
-  vector<PStrip> get_abort_strip_list() const { return abort_strip_list_; };
-  void set_part(UInt64 part) { part_ = part; }
-  void set_Logic_cp(UInt64 logicCP) { logic_cp_ = logicCP; }
-  void set_Phy_cp(UInt64 phyCP) { phy_cp_ = phyCP; }
-  void set_commit_strip_list(const vector<PStrip> &commitstripList) {
-    commit_strip_list_ = commitstripList;
+  UInt64 GetHisCP(UInt64 ts) {
+    UInt64 cp;
+    for (auto &ver_cp : vers_his_cp_)
+      if (ver_cp.first > ts)
+        break;
+      else
+        cp = ver_cp.second;
+    return cp;
   }
-  void set_abort_strip_list(const vector<PStrip> &abortstripList) {
-    abort_strip_list_ = abortstripList;
+  UInt64 GetRtCP(UInt64 ts) {
+    UInt64 cp;
+    for (auto &ver_cp : vers_rt_cp_)
+      if (ver_cp.first > ts)
+        break;
+      else
+        cp = ver_cp.second;
+    return cp;
   }
+  void SetHisCP(UInt64 ts, UInt64 cp) { vers_his_cp_[ts] = cp; }
+  void SetRtCP(UInt64 ts, UInt64 cp) { vers_rt_cp_[ts] = cp; }
   string ToString();
-};
-inline bool operator==(const Checkpoint &a, const Checkpoint &b) {
-  return a.id_ == b.id_;
-}
 
-inline void SerConfig() {
+ private:
+  map<UInt64, UInt64> vers_his_cp_;
+  map<UInt64, UInt64> vers_rt_cp_;
+};
+
+class TxnBin {
+ public:
+  Txn GetTxn(int pos) const { return txn_list_[pos]; }
+  void SetTxn(int pos, const Txn &txn) {
+    txn_list_[pos] = txn;
+    ct_++;
+  }
+  void SetTxn(int pos, const unordered_map<UInt64, PStrip> &strip_list) {
+    txn_list_[pos] = Txn(strip_list);
+    ct_++;
+  }
+  void CommitTxn(int pos) {
+    txn_list_[pos].Commit();
+    ct_commit_++;
+  }
+  void AbortTxn(int pos) {
+    txn_list_[pos].Abort();
+    ct_abort_++;
+  }
+  bool IsFull() const { return ct_commit_ + ct_abort_ == kTxnBinSize; }
+  int Count() const { return ct_; }
+  int CountCommit() const { return ct_commit_; }
+  int CountAbort() const { return ct_abort_; }
+  void MergeSnapshot(Query &query) const;
+  void MergeTxn(Query &query, int pos) const;
+  static UInt64 GetTxnBinID(UInt64 ts, UInt64 core_num) {
+    return (ts / core_num) / kTxnBinSize;
+  }
+  static UInt64 GetTxnBinPos(UInt64 ts, UInt64 core_num) {
+    return (ts / core_num) % kTxnBinSize;
+  }
+
+  Txn txn_list_[kTxnBinSize];
+
+ private:
+  int ct_ = 0;
+  int ct_commit_ = 0;
+  int ct_abort_ = 0;
+  unordered_map<UInt64, vector<PStrip>>
+      snapshot_;  // If bin is full, a snapshot is generated.
+};
+
+inline void CAFSerConfig() {
   caf::announce<FixTupleIngestReq>("FixTupleIngestReq",
                                    make_pair(&FixTupleIngestReq::get_content,
                                              &FixTupleIngestReq::set_content));
@@ -256,17 +380,20 @@ inline void SerConfig() {
       make_pair(&Ingest::get_strip_list, &Ingest::set_strip_list));
   caf::announce<QueryReq>("QueryReq", make_pair(&QueryReq::get_part_list,
                                                 &QueryReq::set_part_list));
-  caf::announce<Query>("Query",
-                       make_pair(&Query::get_snapshot, &Query::set_snapshot),
-                       make_pair(&Query::get_cp_list, &Query::set_cp_list));
-  caf::announce<Checkpoint>(
-      "Checkpoint", make_pair(&Checkpoint::get_part, &Checkpoint::set_part),
-      make_pair(&Checkpoint::get_logic_cp, &Checkpoint::set_Logic_cp),
-      make_pair(&Checkpoint::get_phy_cp, &Checkpoint::set_Phy_cp),
-      make_pair(&Checkpoint::get_commit_strip_list,
-                &Checkpoint::set_commit_strip_list),
-      make_pair(&Checkpoint::get_abort_strip_list,
-                &Checkpoint::set_abort_strip_list));
+  caf::announce<Query>("Query", make_pair(&Query::getTS, &Query::setTS),
+                       make_pair(&Query::getSnapshot, &Query::setSnapshot),
+                       make_pair(&Query::getCPList, &Query::setCPList));
+  /*  caf::announce<Checkpoint>(
+        "Checkpoint", make_pair(&Checkpoint::get_part, &Checkpoint::set_part),
+        make_pair(&Checkpoint::get_logic_cp, &Checkpoint::set_Logic_cp),
+        make_pair(&Checkpoint::get_phy_cp, &Checkpoint::set_Phy_cp),
+        make_pair(&Checkpoint::get_commit_strip_list,
+                  &Checkpoint::set_commit_strip_list),
+        make_pair(&Checkpoint::get_abort_strip_list,
+                  &Checkpoint::set_abort_strip_list));*/
+  caf::announce<Snapshot>(
+      "Snapshot", make_pair(&Snapshot::getHisCPS, &Snapshot::setHisCPS),
+      make_pair(&Snapshot::getPStrps, &Snapshot::setPStrips));
 }
 }
 }

@@ -55,6 +55,7 @@ using claims::common::rSuccess;
 using claims::loader::LoadPacket;
 using claims::loader::MasterLoader;
 using claims::loader::SlaveLoader;
+using claims::txn::UInt64;
 using claims::txn::TxnServer;
 using claims::txn::TxnClient;
 using claims::txn::LogServer;
@@ -257,6 +258,7 @@ bool Environment::InitLoader() {
 
 bool Environment::InitTxnManager() {
   if (Config::enable_txn_server) {
+    unordered_map<UInt64, UInt64> pos_list, his_cp_list, rt_cp_list;
     LOG(INFO) << "I'm txn manager server";
     TxnServer::Init(Config::txn_server_cores, Config::txn_server_port);
     auto cat = Catalog::getInstance();
@@ -284,14 +286,18 @@ bool Environment::InitTxnManager() {
         for (auto part_id = 0; part_id < part_count; part_id++) {
           auto global_part_id = GetGlobalPartId(table_id, proj_id, part_id);
           cout << global_part_id << endl;
-          TxnServer::pos_list_[global_part_id] =
-              TxnServer::logic_cp_list_[global_part_id] =
-                  TxnServer::phy_cp_list_[global_part_id] =
-                      part->getPartitionBlocks(part_id) * 64 * 1024;
+          //          TxnServer::pos_list_[global_part_id] =
+          //              TxnServer::his_cp_list_[global_part_id] =
+          //                  TxnServer::rt_cp_list_[global_part_id] =
+          //                      part->getPartitionBlocks(part_id) * 64 * 1024;
+          pos_list[global_part_id] = his_cp_list[global_part_id] =
+              rt_cp_list[global_part_id] =
+                  part->getPartitionBlocks(part_id) * 64 * 1024;
         }
       }
     }
-
+    TxnServer::LoadCPList(0, his_cp_list, rt_cp_list);
+    TxnServer::LoadPos(pos_list);
     cout << "*******pos_list*******" << endl;
     for (auto& pos : TxnServer::pos_list_)
       cout << "partition[" << pos.first << "] => " << pos.second << endl;

@@ -199,7 +199,7 @@ for (auto i=0; i<times; i++) {
   //  cout << ingest.ToString() << endl;
    // LogClient::Data(0,0,0,buffer,1*1024);
     //LogClient::Data(0,0,0,buffer,1*1024);
-    TxnClient::CommitIngest(ingest.id_);
+    TxnClient::CommitIngest(ingest.ts_);
   }
 }
 

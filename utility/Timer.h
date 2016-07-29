@@ -13,6 +13,13 @@
 #include <time.h>
 
 int gettimeofday(struct timeval *tv, struct timezone *tz);
+
+static inline double GetCurrents() {
+  timeval t_start;
+  gettimeofday(&t_start, NULL);
+  return t_start.tv_sec + 1.0 * t_start.tv_usec / 1000000;
+}
+
 static inline double GetCurrentMs() {
   timeval t_start;
   gettimeofday(&t_start, NULL);

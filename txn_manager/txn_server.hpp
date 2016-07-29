@@ -34,8 +34,11 @@
 #include <algorithm>
 #include <memory>
 #include <map>
+#include <unordered_map>
+#include <set>
 #include <utility>
 #include <unordered_map>
+#include <mutex>
 #include <time.h>
 #include <stdlib.h>
 #include <chrono>
@@ -44,9 +47,9 @@
 #include "stdlib.h"
 #include "caf/all.hpp"
 #include "caf/io/all.hpp"
-#include "txn.hpp"
+#include "../txn_manager/txn.hpp"
+#include "../utility/Timer.h"
 //#include "txn_log.hpp"
-#include <chrono>
 
 namespace claims {
 namespace txn {
@@ -56,60 +59,69 @@ using std::endl;
 using std::vector;
 using std::string;
 using std::map;
+using std::unordered_map;
 using std::pair;
 using std::to_string;
 using std::function;
 using std::sort;
 using std::atomic;
+using std::mutex;
+using std::lock_guard;
 using std::chrono::seconds;
 using std::chrono::milliseconds;
 using std::make_shared;
 using std::shared_ptr;
+using std::atomic;
 // UInt64 txn_id;
+class TimeStamp {
+ public:
+  static UInt64 Init(UInt64 ts) { now_.store(ts); }
+  static UInt64 Gen() { return now_.load(); }
+  static UInt64 GenAdd() { return now_.fetch_add(1); }
+  static UInt64 TSLow(UInt64 ts, int num) { return ts % num; }
+  static UInt64 TSHigh(UInt64 ts, int num) { return ts / num; }
+
+ private:
+  static atomic<UInt64> now_;
+};
+
+class QueryTracker : public caf::event_based_actor {
+ public:
+  static RetCode Init() {
+    tracker_ = caf::spawn<QueryTracker>();
+    return rSuccess;
+  }
+  static RetCode Begin(UInt64 ts) {
+    caf::anon_send(tracker_, BeginAtom::value, ts);
+  }
+  static RetCode Commit(UInt64 ts) {
+    caf::anon_send(tracker_, CommitAtom::value, ts);
+  }
+  caf::behavior make_behavior() override;
+
+ private:
+  static caf::actor tracker_;
+  static set<UInt64> active_querys_;
+};
+
+class CheckpointTracker : public caf::event_based_actor {
+ public:
+  static RetCode Init() {
+    tracker_ = caf::spawn<CheckpointTracker>();
+    return rSuccess;
+  }
+  caf::behavior make_behavior() override;
+
+ private:
+  static caf::actor tracker_;
+};
+
 class TxnCore : public caf::event_based_actor {
  public:
-  static int capacity_;
   UInt64 core_id_;
-  UInt64 txn_id_ = 0;
-  UInt64 size_;
-  map<UInt64, UInt64> txn_index_;
-  bool* commit_ = nullptr;
-  bool* abort_ = nullptr;
-  vector<Strip>* strip_list_;
+  map<UInt64, TxnBin> txnbin_list_;
   caf::behavior make_behavior() override;
-  void ReMalloc();
-  TxnCore(int coreId) : core_id_(coreId) { ReMalloc(); }
-  UInt64 GetId();
-};
-
-class Test : public caf::event_based_actor {
- public:
-  caf::behavior make_behavior() override;
-};
-
-class IngestCommitWorker : public caf::event_based_actor {
- public:
-  caf::behavior make_behavior() override;
-};
-
-class AbortWorker : public caf::event_based_actor {
- public:
-  caf::behavior make_behavior() override;
-};
-
-class QueryWorker : public caf::event_based_actor {
- public:
-  caf::behavior make_behavior() override;
-};
-
-class CheckpointWorker : public caf::event_based_actor {
- public:
-  caf::behavior make_behavior() override;
-};
-
-class CommitCPWorker : public caf::event_based_actor {
- public:
-  caf::behavior make_behavior() override;
+  TxnCore(int coreId) : core_id_(coreId) {}
 };
 
 class TxnServer : public caf::event_based_actor {
@@ -119,34 +131,26 @@ class TxnServer : public caf::event_based_actor {
   static int concurrency_;
   static caf::actor proxy_;
   static vector<caf::actor> cores_;
-  static std::unordered_map<UInt64, atomic<UInt64>> pos_list_;
-  static std::unordered_map<UInt64, UInt64> logic_cp_list_;
-  static std::unordered_map<UInt64, UInt64> phy_cp_list_;
-  static std::unordered_map<UInt64, atomic<UInt64>> CountList;
+  static unordered_map<UInt64, atomic<UInt64>> pos_list_;
+  static unordered_map<UInt64, Checkpoint> cp_list_;
+  // static unordered_map<UInt64, atomic<UInt64>> CountList;
   /**************** User APIs ***************/
   static RetCode Init(int concurrency = kConcurrency, int port = kTxnPort);
-
+  static RetCode LoadCPList(UInt64 ts,
+                            const unordered_map<UInt64, UInt64>& his_cp_list,
+                            const unordered_map<UInt64, UInt64>& rt_cp_list);
+  static RetCode LoadPos(const unordered_map<UInt64, UInt64>& pos_list);
+  static int GetCoreID(UInt64 ts) { return ts % concurrency_; }
+  static string ToString();
   /**************** System APIs ***************/
-  static RetCode BeginIngest(const FixTupleIngestReq& request, Ingest& ingest);
-  static RetCode CommitIngest(const UInt64 id);
-  static RetCode AbortIngest(const UInt64 id);
-  static RetCode BeginQuery(const QueryReq& request, Query& snapshot);
-  static RetCode BeginCheckpoint(Checkpoint& cp);
-  static RetCode CommitCheckpoint(const Checkpoint& cp);
-  static UInt64 GetCoreId(UInt64 id) { return id % 1000; }
-  static inline UInt64 SelectCoreId() { return rand() % concurrency_; }
+ private:
   caf::behavior make_behavior() override;
-
-  static RetCode RecoveryFromCatalog();
-  static RetCode RecoveryFromTxnLog();
+  static unordered_map<UInt64, UInt64> GetHisCPList(
+      UInt64 ts, const vector<UInt64>& parts);
+  static unordered_map<UInt64, UInt64> GetRtCPList(UInt64 ts,
+                                                   const vector<UInt64>& parts);
   static inline Strip AtomicMalloc(UInt64 part, UInt64 TupleSize,
                                    UInt64 TupleCount);
-  static inline bool IsStripListGarbage(const vector<Strip>& striplist) {
-    for (auto& strip : striplist) {
-      if (strip.pos_ >= TxnServer::logic_cp_list_[strip.part_]) return false;
-    }
-    return true;
-  }
 };
 }
 }

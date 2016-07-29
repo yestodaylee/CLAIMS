@@ -51,7 +51,7 @@ caf::actor TxnClient::proxy_;
 RetCode TxnClient::Init(string ip, int port) {
   ip_ = ip;
   port_ = port;
-  SerConfig();
+  CAFSerConfig();
   try {
     proxy_ = caf::io::remote_actor(ip_, port);
   } catch (...) {
@@ -77,8 +77,6 @@ RetCode TxnClient::BeginIngest(const FixTupleIngestReq& request,
                [&](RetCode r) { ret = r; },
                caf::others >> []() { cout << " unkown message" << endl; },
                caf::after(seconds(kTimeout)) >> [&] {
-                                                  //              ret =
-                                                  //              rLinkTmTimeout;
                                                   ret = -1;
                                                   cout << "time out" << endl;
                                                 });
@@ -90,14 +88,14 @@ RetCode TxnClient::BeginIngest(const FixTupleIngestReq& request,
   return ret;
 }
 
-RetCode TxnClient::CommitIngest(const UInt64 id) {
+RetCode TxnClient::CommitIngest(const UInt64 ts) {
   //  RetCode ret = rSuccess;
   RetCode ret = 0;
   try {
     caf::scoped_actor self;
 
     self->sync_send(TxnServer::active_ ? TxnServer::proxy_ : proxy_,
-                    CommitIngestAtom::value, id)
+                    CommitIngestAtom::value, ts)
         .await([&](RetCode r) { ret = r; },
                caf::others >> []() { cout << " unkown message" << endl; },
                caf::after(seconds(kTimeout)) >> [&] {
@@ -162,25 +160,26 @@ RetCode TxnClient::BeginQuery(const QueryReq& request, Query& query) {
 RetCode TxnClient::BeginCheckpoint(Checkpoint& cp) {
   //  RetCode ret = rSuccess;
   RetCode ret = 0;
-  try {
-    caf::scoped_actor self;
-    self->sync_send(TxnServer::active_ ? TxnServer::proxy_ : proxy_,
-                    CheckpointAtom::value, cp.part_)
-        .await([&](const Checkpoint& checkpoint, RetCode r) {
-                 cp = checkpoint;
-                 ret = r;
-               },
-               caf::after(seconds(kTimeout)) >> [&] {
-                                                  //                  ret =
-                                                  //                  rLinkTmTimeout;
-                                                  ret = -1;
-                                                  cout << "time out" << endl;
-                                                });
-  } catch (...) {
-    cout << "link fail" << endl;
-    //    return rLinkTmFail;
-    return -1;
-  }
+  //  try {
+  //    caf::scoped_actor self;
+  //    self->sync_send(TxnServer::active_ ? TxnServer::proxy_ : proxy_,
+  //                    CheckpointAtom::value, cp.part_)
+  //        .await([&](const Checkpoint& checkpoint, RetCode r) {
+  //                 cp = checkpoint;
+  //                 ret = r;
+  //               },
+  //               caf::after(seconds(kTimeout)) >> [&] {
+  //                                                  //                  ret =
+  //                                                  // rLinkTmTimeout;
+  //                                                  ret = -1;
+  //                                                  cout << "time out" <<
+  //                                                  endl;
+  //                                                });
+  //  } catch (...) {
+  //    cout << "link fail" << endl;
+  //    //    return rLinkTmFail;
+  //    return -1;
+  //  }
   return ret;
 }
 
