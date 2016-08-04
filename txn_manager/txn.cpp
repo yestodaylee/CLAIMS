@@ -32,6 +32,14 @@ namespace txn {
 
 using claims::txn::Strip;
 
+string Txn::ToString() {
+  string str = "";
+  for (auto &strip : strip_list_)
+    str += "<" + to_string(strip.first) + "," + to_string(strip.second.first) +
+           "," + to_string(strip.second.second) + ">,";
+  str += "\n";
+  return str;
+}
 string Snapshot::ToString() const {
   string str = "*****snapshot*****\n";
   for (auto part_cp : part_pstrips_) {
@@ -150,12 +158,13 @@ string QueryReq::ToString() {
 }
 
 string Query::ToString() {
-  string str = "******Query*******\n";
+  string str = "******Query:" + to_string(ts_) + "*******\n";
   for (auto &part : snapshot_) {
-    str += "part:" + to_string(part.first) + "\n";
+    str += "part:" + to_string(part.first) + " ";
     for (auto &strip : part.second)
-      str += "Pos:" + to_string(strip.first) + ",Offset:" +
-             to_string(strip.second) + "\n";
+      str +=
+          "<" + to_string(strip.first) + "," + to_string(strip.second) + ">,";
+    str += "\n";
   }
   return str;
 }
@@ -193,14 +202,14 @@ void Snapshot::Merge(const Snapshot &snapshot) {
 }
 void TxnBin::MergeSnapshot(Query &query) const {
   for (auto &part_cp : query.rt_cp_list_) {
-    UInt64 checkpoint = part_cp.second;
-    query.snapshot_[part_cp.first].insert(query.snapshot_[part_cp.first].end(),
-                                          snapshot_[part_cp.first].begin(),
-                                          snapshot_[part_cp.first].end());
-    Strip::Sort(query.snapshot_[part_cp.first]);
-    Strip::Merge(query.snapshot_[part_cp.first]);
-    Strip::Filter(query.snapshot_[part_cp.first],
-                  [checkpoint](PStrip &pstrip) -> bool {
+    auto part = part_cp.first;
+    auto checkpoint = part_cp.second;
+    query.snapshot_[part].insert(query.snapshot_[part].end(),
+                                 snapshot_[part].begin(),
+                                 snapshot_[part].end());
+    Strip::Sort(query.snapshot_[part]);
+    Strip::Merge(query.snapshot_[part]);
+    Strip::Filter(query.snapshot_[part], [checkpoint](PStrip &pstrip) -> bool {
       if (pstrip.first + pstrip.second <= checkpoint) {
         return false;
       } else {
@@ -214,19 +223,21 @@ void TxnBin::MergeSnapshot(Query &query) const {
   }
 }
 
-void TxnBin::MergeTxn(Query &query, int pos) const {
-  for (auto i = 0; i <= pos; i++) {
-    if (txn_list_[i].isCommit())
+void TxnBin::MergeTxn(Query &query, int len) const {
+  for (auto i = 0; i < len; i++) {
+    if (txn_list_[i].IsCommit())
       for (auto &strip : txn_list_[i].strip_list_)
         query.snapshot_[strip.first].push_back(strip.second);
   }
   for (auto &part_cp : query.rt_cp_list_) {
-    UInt64 checkpoint = part_cp.first;
-    Strip::Sort(query.snapshot_[part_cp.first]);
-    Strip::Merge(query.snapshot_[part_cp.first]);
-    Strip::Filter(query.snapshot_[part_cp.first],
-                  [checkpoint](PStrip &pstrip) -> bool {
+    auto part = part_cp.first;
+    auto checkpoint = part_cp.second;
+    Strip::Sort(query.snapshot_[part]);
+    Strip::Merge(query.snapshot_[part]);
+    Strip::Filter(query.snapshot_[part], [checkpoint](PStrip &pstrip) -> bool {
       if (pstrip.first + pstrip.second <= checkpoint) {
+        cout << "fail:<" << pstrip.first << "," << pstrip.second << ">"
+             << pstrip.second << endl;
         return false;
       } else {
         if (pstrip.first < checkpoint &&
@@ -236,6 +247,39 @@ void TxnBin::MergeTxn(Query &query, int pos) const {
         return true;
       }
     });
+  }
+}
+
+string TxnBin::ToString() {
+  string str = "";
+  for (auto i = 0; i < kTxnBinSize; i++)
+    if (txn_list_[i].IsCommit() || txn_list_[i].IsAbort())
+      str += "txnbin_pos:" + to_string(i) + txn_list_[i].ToString();
+  return str;
+}
+
+void TxnBin::GenSnapshot(const TxnBin &prev) {
+  status_ = true;
+  snapshot_ = prev.snapshot_;
+  for (auto &txn : txn_list_)
+    if (txn.IsCommit())
+      for (auto &strip : txn.strip_list_)
+        snapshot_[strip.first].push_back(strip.second);
+  for (auto &part : snapshot_) {
+    Strip::Sort(part.second);
+    Strip::Merge(part.second);
+  }
+}
+
+void TxnBin::GenSnapshot() {
+  status_ = true;
+  for (auto &txn : txn_list_)
+    if (txn.IsCommit())
+      for (auto &strip : txn.strip_list_)
+        snapshot_[strip.first].push_back(strip.second);
+  for (auto &part : snapshot_) {
+    Strip::Sort(part.second);
+    Strip::Merge(part.second);
   }
 }
 }

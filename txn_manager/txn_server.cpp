@@ -58,26 +58,36 @@ bool TxnServer::active_ = false;
 
 unordered_map<UInt64, atomic<UInt64>> TxnServer::pos_list_;
 unordered_map<UInt64, Checkpoint> TxnServer::cp_list_;
+set<UInt64> TxnServer::active_querys_;
 caf::actor test;
 
 caf::behavior QueryTracker::make_behavior() {
-  this->delayed_send(this, seconds(3), TimerAtom::value);
+  this->delayed_send(this, seconds(3), GCAtom::value);
   return {[](BeginAtom, UInt64 ts) { active_querys_.insert(ts); },
           [](CommitAtom, UInt64 ts) { active_querys_.erase(ts); },
-          [this](TimerAtom) {
+          [this](GCAtom) {
             /**
              * TODO broadcast all components what minimum timestamp
              *   is still alive.
              */
-            this->delayed_send(this, seconds(3), TimerAtom::value);
+            UInt64 ts;
+            if (active_querys_.size() > 0)
+              ts = *active_querys_.begin();
+            else
+              ts = TimeStamp::Gen();
+            for (auto& core : TxnServer::cores_)
+              caf::anon_send(core, GCAtom::value, ts);
+            this->delayed_send(this, seconds(3), GCAtom::value);
           }};
 }
 
 caf::behavior CheckpointTracker::make_behavior() {}
 
 caf::behavior TxnCore::make_behavior() {
-  // this->delayed_send(this, seconds(kGCTime + CoreId), GCAtom::value);
+  this->delayed_send(this, seconds(3 + core_id_), MergeAtom::value);
+
   return {
+      [this](DebugAtom, string flag) { cout << ToString() << endl; },
       [this](IngestAtom, shared_ptr<Ingest> ingest) -> caf::message {
         RetCode ret = rSuccess;
         // cout << "begin ingestion" << endl << ingest->ToString() << endl;
@@ -95,20 +105,95 @@ caf::behavior TxnCore::make_behavior() {
         return caf::make_message(rSuccess);
       },
       [this](AbortIngestAtom, const UInt64 ts) -> caf::message {
-        cout << "abort:" << ts << endl;
+        // cout << "abort:" << ts << endl;
         RetCode ret = rSuccess;
         auto id = TxnBin::GetTxnBinID(ts, TxnServer::concurrency_);
         auto pos = TxnBin::GetTxnBinPos(ts, TxnServer::concurrency_);
         txnbin_list_[id].AbortTxn(pos);
         return caf::make_message(rSuccess);
       },
-      [](QueryAtom, const QueryReq& request, shared_ptr<Query> query) {
-
+      [this](QueryAtom, shared_ptr<Query> query) -> caf::message {
+        auto id = TxnBin::GetTxnBinID(query->ts_, TxnServer::concurrency_);
+        auto pos = TxnBin::GetTxnBinPos(query->ts_, TxnServer::concurrency_);
+        auto ts = TxnBin::GetTxnBinMaxTs(id, TxnServer::concurrency_, core_id_);
+        auto remain = kTxnBinSize - (ts - query->ts_) / TxnServer::concurrency_;
+        //        cout << "query core:" << core_id_ << endl;
+        //        cout << query->ts_ << "," << id << "," << pos << "," << ts <<
+        //        ","
+        //             << remain << endl;
+        if (remain > 0) {
+          txnbin_list_[id].MergeTxn(*query, remain);
+          // cout << "first txnbin<" << core_id_ << "," << id << ">txn<" << 0
+          //       << "," << remain << ">" << endl;
+        }
+        while (id > 0) {
+          --id;
+          if (txnbin_list_[id].IsSnapshot()) {
+            //  cout << "txnbin<" << core_id_ << "," << id << ">snapshot" <<
+            //  endl;
+            txnbin_list_[id].MergeSnapshot(*query);
+            break;
+          } else {
+            //  cout << "txnbin<" << core_id_ << "," << id << ">full" << endl;
+            txnbin_list_[id].MergeTxn(*query, kTxnBinSize);
+          }
+        }
+        auto next_core_id = (core_id_ + 1) % TxnServer::concurrency_;
+        if (next_core_id != TxnServer::GetCoreID(query->ts_))
+          this->forward_to(TxnServer::cores_[next_core_id]);
+        return caf::make_message(*query);
       },
-      [](MergeAtom, const QueryReq& request, shared_ptr<Query> query) {
-
+      [this](MergeAtom) {
+        // cout << "start merge @ core:" << core_id_ << endl;
+        while (txnbin_list_[txnbin_cur_].IsFull()) {
+          if (txnbin_cur_ == 0) {
+            // cout << ToString() << endl;
+            txnbin_list_[txnbin_cur_].GenSnapshot();
+            //  cout << "merge: <" << core_id_ << "," << txnbin_cur_ << ","
+            //      << txnbin_list_[txnbin_cur_].IsSnapshot() << ">\n";
+          } else {
+            txnbin_list_[txnbin_cur_].GenSnapshot(
+                txnbin_list_[txnbin_cur_ - 1]);
+            //  cout << "merge: <" << core_id_ << "," << txnbin_cur_ << ","
+            //        << txnbin_list_[txnbin_cur_].IsSnapshot() << ">\n";
+          }
+          // cout << ToString() << endl;
+          txnbin_cur_++;
+        }
+        this->delayed_send(this, seconds(3 + core_id_), MergeAtom::value);
       },
-      [](MergeAtom, shared_ptr<Checkpoint> cp) {
+      [this](GCAtom, UInt64 min_ts_remain) {
+        // cout << "core:" << core_id_ << " gc:" << min_ts << endl;
+        //      if (core_id_ == 0)
+        map<UInt64, TxnBin> new_txnbin_list;
+        auto ct = 0;
+        for (auto it = txnbin_list_.rbegin(); it != txnbin_list_.rend(); it++) {
+          auto id = it->first;
+          auto max_ts =
+              TxnBin::GetTxnBinMaxTs(id, TxnServer::concurrency_, core_id_);
+          if (txnbin_list_[id].IsSnapshot()) {
+            if (ct == 0) {
+              new_txnbin_list[id] = txnbin_list_[id];
+              ct++;
+            } else {
+              break;
+            }
+          } else {
+            new_txnbin_list[id] = txnbin_list_[id];
+          }
+        }
+
+        //        if (core_id_ == 0 && new_txnbin_list.size() <
+        //        txnbin_list_.size()) {
+        //          cout << "gc :" << endl;
+        //          for (auto& txnbin : txnbin_list_)
+        //            if (new_txnbin_list.find(txnbin.first) ==
+        //            new_txnbin_list.end())
+        //              cout << "<" << core_id_ << "," << txnbin.first << ">";
+        //          cout << endl;
+        //        }
+        if (new_txnbin_list.size() < txnbin_list_.size())
+          txnbin_list_ = new_txnbin_list;
 
       },
       [](CheckpointAtom, shared_ptr<Checkpoint> cp) {
@@ -149,8 +234,19 @@ caf::behavior TxnCore::make_behavior() {
                      << endl;*/
         // this->delayed_send(this, seconds(kGCTime), GCAtom::value);
       },
-      caf::others >>
-          [&]() { cout << "core:" << core_id_ << " unkown message" << endl; }};
+      caf::others >> [&]() {
+                       cout << "core:" << core_id_ << " unkown message "
+                            << to_string(current_message()) << endl;
+                     }};
+}
+
+string TxnCore::ToString() {
+  string str = "core_id:" + to_string(core_id_) + "\n";
+  for (auto& txnbin : txnbin_list_) {
+    str += "txnbin_id:" + to_string(txnbin.first) + "\n";
+    str += txnbin.second.ToString();
+  }
+  return str;
 }
 
 caf::behavior TxnServer::make_behavior() {
@@ -160,40 +256,60 @@ caf::behavior TxnServer::make_behavior() {
   } catch (...) {
     cout << "txn server bind to port:" << port_ << " fail" << endl;
   }
-  // this->delayed_send(this, seconds(3), CheckpointAtom::value);
-  // this->delayed_send(this, seconds(3));
-  return {[this](IngestAtom, const FixTupleIngestReq& request) {
-            auto ts = TimeStamp::GenAdd();
-            auto ingest = make_shared<Ingest>(request.content_, ts);
-            for (auto& part : ingest->strip_list_)
-              ingest->InsertStrip(AtomicMalloc(part.first, part.second.first,
-                                               part.second.second));
-            current_message() = caf::make_message(IngestAtom::value, ingest);
-            forward_to(cores_[GetCoreID(ts)]);
-          },
-          [this](CommitIngestAtom,
-                 const UInt64 ts) { forward_to(cores_[GetCoreID(ts)]); },
-          [this](AbortIngestAtom,
-                 const UInt64 ts) { forward_to(cores_[GetCoreID(ts)]); },
-          [this](QueryAtom, const QueryReq& request) {
-            auto ts = TimeStamp::Gen();
-            auto query =
-                make_shared<Query>(ts, GetHisCPList(ts, request.part_list_),
-                                   GetRtCPList(ts, request.part_list_));
-            current_message() =
-                caf::make_message(QueryAtom::value, request, query);
-            forward_to(cores_[GetCoreID(ts)]);
-          },
-          [this](CommitCPAtom, UInt64 ts, UInt64 part, UInt64 his_cp,
-                 UInt64 rt_cp) -> caf::message {
+  this->delayed_send(this, seconds(3), GCAtom::value);
+  return {
+      [this](DebugAtom, string flag) -> caf::message {
+        cout << "debug begin" << endl;
+        for (auto& core : cores_) caf::anon_send(core, DebugAtom::value, flag);
+        return caf::make_message(rSuccess);
+      },
+      [this](IngestAtom, const FixTupleIngestReq& request) {
+        auto ts = TimeStamp::GenAdd();
+        auto ingest = make_shared<Ingest>(request.content_, ts);
+        for (auto& part : ingest->strip_list_)
+          ingest->InsertStrip(
+              AtomicMalloc(part.first, part.second.first, part.second.second));
+        current_message() = caf::make_message(IngestAtom::value, ingest);
+        forward_to(cores_[GetCoreID(ts)]);
+      },
+      [this](CommitIngestAtom,
+             const UInt64 ts) { forward_to(cores_[GetCoreID(ts)]); },
+      [this](AbortIngestAtom,
+             const UInt64 ts) { forward_to(cores_[GetCoreID(ts)]); },
+      [this](QueryAtom, const QueryReq& request) {
+        auto ts = TimeStamp::Gen();
+        active_querys_.insert(ts);
+        auto query =
+            make_shared<Query>(ts, GetHisCPList(ts, request.part_list_),
+                               GetRtCPList(ts, request.part_list_));
+        current_message() = caf::make_message(QueryAtom::value, query);
+        forward_to(cores_[GetCoreID(ts)]);
+        // cout << "**********query:" << ts << " begin**************" << endl;
+      },
+      [this](CommitQueryAtom, UInt64 ts) -> caf::message {
+        active_querys_.erase(ts);
+        return caf::make_message(rSuccess);
+      },
+      [this](CommitCPAtom, UInt64 ts, UInt64 part, UInt64 his_cp, UInt64 rt_cp)
+          -> caf::message {
             cp_list_[part].SetHisCP(ts, his_cp);
             cp_list_[part].SetRtCP(ts, rt_cp);
             return caf::make_message(OkAtom::value);
           },
-          caf::others >> [this]() {
-                           cout << "server unkown message:"
-                                << to_string(current_message()) << endl;
-                         }};
+      [this](GCAtom) {
+        UInt64 ts;
+        if (active_querys_.size() > 0)
+          ts = *active_querys_.begin();
+        else
+          ts = TimeStamp::Gen();
+        for (auto& core : TxnServer::cores_)
+          caf::anon_send(core, GCAtom::value, ts);
+        this->delayed_send(this, seconds(3), GCAtom::value);
+      },
+      caf::others >> [this]() {
+                       cout << "server unkown message:"
+                            << to_string(current_message()) << endl;
+                     }};
 }
 
 RetCode TxnServer::Init(int concurrency, int port) {
@@ -267,7 +383,5 @@ RetCode TxnServer::LoadPos(const unordered_map<UInt64, UInt64>& pos_list) {
   for (auto& pos : pos_list) pos_list_[pos.first].store(pos.second);
   return rSuccess;
 }
-
-string TxnServer::ToString() {}
 }
 }

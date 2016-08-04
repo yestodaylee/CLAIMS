@@ -119,9 +119,12 @@ class CheckpointTracker : public caf::event_based_actor {
 class TxnCore : public caf::event_based_actor {
  public:
   UInt64 core_id_;
+  UInt64 txnbin_cur_ = 0;
+  // txnbin id <=> txnbin object
   map<UInt64, TxnBin> txnbin_list_;
   caf::behavior make_behavior() override;
   TxnCore(int coreId) : core_id_(coreId) {}
+  string ToString();
 };
 
 class TxnServer : public caf::event_based_actor {
@@ -141,10 +144,10 @@ class TxnServer : public caf::event_based_actor {
                             const unordered_map<UInt64, UInt64>& rt_cp_list);
   static RetCode LoadPos(const unordered_map<UInt64, UInt64>& pos_list);
   static int GetCoreID(UInt64 ts) { return ts % concurrency_; }
-  static string ToString();
+  caf::behavior make_behavior() override;
   /**************** System APIs ***************/
  private:
-  caf::behavior make_behavior() override;
+  static set<UInt64> active_querys_;
   static unordered_map<UInt64, UInt64> GetHisCPList(
       UInt64 ts, const vector<UInt64>& parts);
   static unordered_map<UInt64, UInt64> GetRtCPList(UInt64 ts,

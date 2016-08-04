@@ -45,6 +45,10 @@
 #include "caf/io/all.hpp"
 #include "../common/error_define.h"
 #include "../utility/Timer.h"
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/vector.hpp>
 namespace claims {
 namespace txn {
 
@@ -82,7 +86,9 @@ using FailAtom = caf::atom_constant<caf::atom("Fail")>;
 using IngestAtom = caf::atom_constant<caf::atom("Ingest")>;
 using WriteAtom = caf::atom_constant<caf::atom("Write")>;
 
+using DebugAtom = caf::atom_constant<caf::atom("Debug")>;
 using QueryAtom = caf::atom_constant<caf::atom("Query")>;
+using CommitQueryAtom = caf::atom_constant<caf::atom("CommitQu")>;
 using CheckpointAtom = caf::atom_constant<caf::atom("Checkpoint")>;
 using GCAtom = caf::atom_constant<caf::atom("GC")>;
 using CommitIngestAtom = caf::atom_constant<caf::atom("CommitIngt")>;
@@ -104,7 +110,7 @@ static const int kGCTime = 5;
 static const int kTimeout = 3;
 static const int kBlockSize = 64 * 1024;
 static const int kTailSize = sizeof(unsigned);
-static const int kTxnBinSize = 1024;
+static const int kTxnBinSize = 3;  // 1024;
 inline UInt64 GetGlobalPartId(UInt64 table_id, UInt64 projeciton_id,
                               UInt64 partition_id) {
   return partition_id + 1000 * (projeciton_id + 1000 * table_id);
@@ -167,9 +173,10 @@ class Txn {
   }
   void Commit() { status_ = kCommit; }
   void Abort() { status_ = kAbort; }
-  bool isCommit() { return status_ == kCommit; }
-  bool isAbort() { return status_ == kAbort; }
-  bool isActive() { return status_ == kActive; }
+  bool IsCommit() { return status_ == kCommit; }
+  bool IsAbort() { return status_ == kAbort; }
+  bool IsActive() { return status_ == kActive; }
+  string ToString();
 };
 
 class Snapshot {
@@ -257,6 +264,8 @@ inline bool operator==(const Ingest &lhs, const Ingest &rhs) {
 class QueryReq {
  public:
   vector<UInt64> part_list_;
+  QueryReq() {}
+  QueryReq(const vector<UInt64> &part_list) : part_list_(part_list) {}
   void InsertPart(UInt64 part) { part_list_.push_back(part); }
   vector<UInt64> get_part_list() const { return part_list_; }
   void set_part_list(const vector<UInt64> &partList) { part_list_ = partList; }
@@ -277,6 +286,7 @@ class Query {
    *  real-time checkpoint will never be send
    */
   unordered_map<UInt64, UInt64> rt_cp_list_;
+
   Query() {}
   Query(UInt64 ts, const unordered_map<UInt64, UInt64> &his_cp_list,
         const unordered_map<UInt64, UInt64> &rt_cp_list)
@@ -294,6 +304,18 @@ class Query {
     his_cp_list_ = cplist;
   }
   string ToString();
+  void GenTxnInfo() {
+    for (auto &part_strips : snapshot_)
+      scan_snapshot_[part_strips.first] = part_strips.second;
+    for (auto &part_cp : his_cp_list_)
+      scan_cp_list_[part_cp.first] = part_cp.second;
+  }
+  map<UInt64, vector<PStrip>> scan_snapshot_;
+  map<UInt64, UInt64> scan_cp_list_;
+  template <class Archive>
+  void serialize(Archive &ar, const unsigned int version) {
+    ar &scan_snapshot_ &scan_cp_list_;
+  }
 };
 inline bool operator==(const Query &lhs, const Query &rhs) {
   return lhs.snapshot_ == rhs.snapshot_ && lhs.his_cp_list_ == rhs.his_cp_list_;
@@ -349,21 +371,30 @@ class TxnBin {
     ct_abort_++;
   }
   bool IsFull() const { return ct_commit_ + ct_abort_ == kTxnBinSize; }
+  bool IsSnapshot() const { return status_ == true; }
   int Count() const { return ct_; }
   int CountCommit() const { return ct_commit_; }
   int CountAbort() const { return ct_abort_; }
+  void GenSnapshot();
+  void GenSnapshot(const TxnBin &prev);
   void MergeSnapshot(Query &query) const;
-  void MergeTxn(Query &query, int pos) const;
+  void MergeTxn(Query &query, int len) const;
+  string ToString();
   static UInt64 GetTxnBinID(UInt64 ts, UInt64 core_num) {
     return (ts / core_num) / kTxnBinSize;
   }
   static UInt64 GetTxnBinPos(UInt64 ts, UInt64 core_num) {
     return (ts / core_num) % kTxnBinSize;
   }
+  static UInt64 GetTxnBinMaxTs(UInt64 txnbin_id, UInt64 core_num,
+                               UInt64 core_id) {
+    return (txnbin_id + 1) * kTxnBinSize * core_num + core_id;
+  }
 
   Txn txn_list_[kTxnBinSize];
 
  private:
+  bool status_ = false;
   int ct_ = 0;
   int ct_commit_ = 0;
   int ct_abort_ = 0;

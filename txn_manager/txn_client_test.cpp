@@ -74,6 +74,7 @@ using FailAtom = caf::atom_constant<caf::atom("fail")>;
 using QuitAtom = caf::atom_constant<caf::atom("quit")>;
 using claims::txn::Snapshot;
 using claims::txn::CAFSerConfig;
+using claims::txn::QueryTracker;
 class Foo {
  public:
   vector<UInt64> request1;
@@ -294,31 +295,38 @@ int main(int argc, const char **argv) {
     s1.Merge(s2);
     cout << s1.ToString() << endl;
   } else if (type == "txnserver") {
-    unordered_map<UInt64, UInt64> pos_list = {
-        {1, 10}, {2, 20}, {3, 16}, {4, 19}};
+    unordered_map<UInt64, UInt64> pos_list = {{1, 0}, {2, 0}, {3, 0}, {4, 0}};
     TxnServer::Init(4, 8089);
-    cout << "1:" << endl;
     TxnServer::LoadPos(pos_list);
-    cout << "2:" << endl;
     TxnServer::LoadCPList(0, pos_list, pos_list);
-    cout << "3:" << endl;
+    // QueryTracker::Init();
+    sleep(1);
+    FixTupleIngestReq request;
+    Ingest ingest;
+    request.InsertStrip(1, 2, 2);
+    request.InsertStrip(2, 2, 2);
+    request.InsertStrip(3, 2, 2);
+    request.InsertStrip(4, 2, 2);
+    for (auto i = 0; i < 40; i++) {
+      TxnClient::BeginIngest(request, ingest);
+      //  if (i % 10 != 0)
+      TxnClient::CommitIngest(ingest.ts_);
+      //  else
+      //    TxnClient::AbortIngest(ingest.ts_);
+    }
+    TxnClient::Debug("core");
   } else if (type == "txnclient") {
     TxnClient::Init("127.0.0.1", 8089);
     auto job = []() {
-      FixTupleIngestReq request;
-      Ingest ingest;
-      request.InsertStrip(1, 2, 2);
-      request.InsertStrip(2, 2, 2);
-      request.InsertStrip(3, 2, 2);
-      request.InsertStrip(4, 2, 2);
-      for (auto i = 0; i < 100000; i++) {
-        TxnClient::BeginIngest(request, ingest);
-        TxnClient::CommitIngest(ingest.ts_);
-      }
-      // cout << ingest.ToString() << endl;
+      QueryReq req({1, 2, 3, 4});
+      Query query;
+      TxnClient::BeginQuery(req, query);
+      // sleep(3);
+      TxnClient::CommitQuery(query.ts_);
+      cout << query.ToString() << endl;
     };
     vector<thread> jobs;
-    for (auto i = 0; i < 12; i++) jobs.push_back(thread(job));
+    for (auto i = 0; i < 1; i++) jobs.push_back(thread(job));
     for (auto &j : jobs) j.join();
   }
   caf::await_all_actors_done();

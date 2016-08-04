@@ -62,6 +62,25 @@ RetCode TxnClient::Init(string ip, int port) {
   return 0;
 }
 
+RetCode TxnClient::Debug(string flag) {
+  RetCode ret = 0;
+  try {
+    caf::scoped_actor self;
+    self->sync_send(TxnServer::active_ ? TxnServer::proxy_ : proxy_,
+                    DebugAtom::value, flag)
+        .await([&ret](RetCode r) { ret = r; },
+               caf::others >> []() { cout << " unkown message" << endl; },
+               caf::after(seconds(kTimeout)) >> [&ret] {
+                                                  ret = -1;
+                                                  cout << "time out" << endl;
+                                                });
+  } catch (...) {
+    cout << "link fail" << endl;
+    return -1;
+  }
+  return ret;
+}
+
 RetCode TxnClient::BeginIngest(const FixTupleIngestReq& request,
                                Ingest& ingest) {
   //  RetCode ret = rSuccess;
@@ -142,10 +161,8 @@ RetCode TxnClient::BeginQuery(const QueryReq& request, Query& query) {
     caf::scoped_actor self;
     self->sync_send(TxnServer::active_ ? TxnServer::proxy_ : proxy_,
                     QueryAtom::value, request)
-        .await([&](const Query& q) { query = q; },
-               caf::after(seconds(kTimeout)) >> [&] {
-                                                  //              ret =
-                                                  //              rLinkTmTimeout;
+        .await([&query](const Query& q) { query = q; },
+               caf::after(seconds(kTimeout)) >> [&ret] {
                                                   ret = -1;
                                                   cout << "time out" << endl;
                                                 });
@@ -153,6 +170,23 @@ RetCode TxnClient::BeginQuery(const QueryReq& request, Query& query) {
     cout << "link fail" << endl;
     //    return rLinkTmFail;
     return -1;
+  }
+  return ret;
+}
+
+RetCode TxnClient::CommitQuery(UInt64 ts) {
+  RetCode ret = 0;
+  try {
+    caf::scoped_actor self;
+    self->sync_send(TxnServer::active_ ? TxnServer::proxy_ : proxy_,
+                    CommitQueryAtom::value, ts)
+        .await([&ret](RetCode r) { ret = r; },
+               caf::after(seconds(kTimeout)) >> [&ret] {
+                                                  ret = -1;
+                                                  cout << "time out" << endl;
+                                                });
+  } catch (...) {
+    cout << "link to proxy fail in commitQuery" << endl;
   }
   return ret;
 }

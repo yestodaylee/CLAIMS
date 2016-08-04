@@ -73,10 +73,12 @@ class TxnClient{
   static int port_;
   static caf::actor proxy_;
   static RetCode Init(string ip = kTxnIp, int port = kTxnPort);
+  static RetCode Debug(string flag);
   static RetCode BeginIngest(const FixTupleIngestReq & request, Ingest & ingest);
   static RetCode CommitIngest(const UInt64 id);
   static RetCode AbortIngest(const UInt64 id);
   static RetCode BeginQuery(const QueryReq & request, Query & query);
+  static RetCode CommitQuery(UInt64 ts);
   static RetCode BeginCheckpoint(Checkpoint & cp);
   static RetCode CommitCheckpoint(const UInt64 logic_cp, const UInt64 phy_cp);
 };
