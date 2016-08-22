@@ -33,7 +33,7 @@
 #include <vector>
 
 #include "../common/error_define.h"
-#include "../Debug.h"
+// #include "../Debug.h"
 #include "./MemoryManager.h"
 #include "../common/memory_handle.h"
 #include "../Config.h"
@@ -62,10 +62,16 @@ PartitionStorage::PartitionStorage(const PartitionID& partition_id,
     MemoryChunkStore::GetInstance()->SetFreeAlgorithm(0);
   else
     MemoryChunkStore::GetInstance()->SetFreeAlgorithm(1);
-  for (unsigned i = 0; i < number_of_chunks_; i++) {
-    chunk_list_.push_back(new ChunkStorage(
-        ChunkID(partition_id_, i), BLOCK_SIZE, desirable_storage_level_));
-  }
+  /* for (unsigned i = 0; i < number_of_chunks_; i++) {
+     chunk_list_.push_back(new ChunkStorage(
+         ChunkID(partition_id_, i), BLOCK_SIZE, desirable_storage_level_));
+     rt_chunk_list_.push_back(new ChunkStorage(
+         ChunkID(partition_id_, i, true), BLOCK_SIZE,
+   desirable_storage_level_));
+   }*/
+  CheckAndAppendChunkList(number_of_chunks_, false);
+  CheckAndAppendChunkList(number_of_chunks_, true);
+  // cout << "*******chunk_list_" << chunk_list_.size() << endl;
 }
 
 PartitionStorage::~PartitionStorage() {
@@ -213,5 +219,118 @@ bool PartitionStorage::AtomicPartitionReaderIterator::NextBlock(
       lock_.release();
       return false;
     }
+  }
+}
+
+PartitionStorage::TxnPartitionReaderIterator::TxnPartitionReaderIterator(
+    PartitionStorage* partition_storage, uint64_t his_cp,
+    const vector<PStrip>& rt_strip_list)
+    : PartitionReaderIterator(partition_storage),
+      last_his_block_(his_cp / BLOCK_SIZE),
+      block_cur_(0),
+      chunk_cur_(-1),
+      rt_block_index_(0),
+      rt_chunk_cur_(-1),
+      rt_chunk_it_(nullptr) {
+  for (auto& strip : rt_strip_list) {
+    auto begin = strip.first;
+    auto end = begin + strip.second;
+    while (begin < end) {
+      auto block = begin / BLOCK_SIZE;
+      auto len = (block + 1) * BLOCK_SIZE <= end
+                     ? (block + 1) * BLOCK_SIZE - begin
+                     : end - begin;
+      rt_strip_list_.push_back(PStrip(begin, len));
+      begin += len;
+    }
+  }
+}
+
+PartitionStorage::TxnPartitionReaderIterator::~TxnPartitionReaderIterator() {
+  for (auto block : rt_block_buffer_) free(block);
+}
+
+bool PartitionStorage::TxnPartitionReaderIterator::NextBlock(
+    BlockStreamBase*& block) {
+  LockGuard<Lock> guard(lock_);
+  ChunkReaderIterator::block_accessor* ba = nullptr;
+  if (block_cur_ < last_his_block_) {  // scan historical data
+    int64_t chunk_cur = block_cur_ / (CHUNK_SIZE / BLOCK_SIZE);
+    if (chunk_cur > chunk_cur_) {  // update chunk_it_
+      chunk_cur_ = chunk_cur;
+      ps_->CheckAndAppendChunkList(chunk_cur_ + 1, false);
+      if (chunk_it_ != nullptr) delete chunk_it_;
+      chunk_it_ = ps_->chunk_list_[chunk_cur_]->CreateChunkReaderIterator();
+    }
+    chunk_it_->GetNextBlockAccessor(ba);
+    if (ba == nullptr) {
+      if (chunk_it_ != nullptr) delete chunk_it_;
+      return false;
+    } else {
+      assert(ba != nullptr);
+      ba->GetBlock(block);
+      delete ba;
+      ba = nullptr;
+      block_cur_++;
+      return true;
+    }
+  } else if (rt_block_index_ < rt_strip_list_.size()) {  // scan real-time data
+    auto pos = rt_strip_list_[rt_block_index_].first;
+    auto offset_in_block = pos - (pos / BLOCK_SIZE) * BLOCK_SIZE;
+    auto len = rt_strip_list_[rt_block_index_].second;
+    auto rt_block_cur = pos / BLOCK_SIZE;
+    auto rt_chunk_cur = pos / CHUNK_SIZE;
+    if (rt_chunk_cur > rt_chunk_cur_) {  // move to new rt chunk
+      rt_chunk_cur_ = rt_chunk_cur;
+      rt_block_cur_ = rt_chunk_cur_ * (CHUNK_SIZE / BLOCK_SIZE);
+      ps_->CheckAndAppendChunkList(rt_chunk_cur_ + 1, true);
+      if (rt_chunk_it_ != nullptr) delete rt_chunk_it_;
+      rt_chunk_it_ =
+          ps_->rt_chunk_list_[rt_chunk_cur_]->CreateChunkReaderIterator();
+      assert(rt_chunk_it_ != nullptr);
+    }
+
+    do {  // move to rt_block_cur
+      rt_chunk_it_->GetNextBlockAccessor(ba);
+      rt_block_cur_++;
+    } while (rt_block_cur_ <= rt_block_cur);
+
+    if (len == BLOCK_SIZE) {  // directly return pointer
+      ba->GetBlock(block);
+    } else {
+      auto tuple_size =
+          reinterpret_cast<BlockStreamFix*>(block)->getTupleSize();
+      if (pos + len % BLOCK_SIZE == 0)
+        len = ((len - sizeof(unsigned)) / tuple_size) * tuple_size;
+      auto tuple_count = len / tuple_size;
+ //     cout << "tuple_size:" << tuple_size << endl;
+ //     cout << "tuple_count:" << tuple_count << endl;
+      ba->GetBlock(block);
+      auto des_addr = reinterpret_cast<void*>(malloc(BLOCK_SIZE));
+      auto scr_addr = block->getBlockDataAddress() + offset_in_block;
+      memcpy(des_addr, scr_addr, len);
+      reinterpret_cast<BlockStreamFix*>(block)->setBlockDataAddress(des_addr);
+      reinterpret_cast<BlockStreamFix*>(block)->setTuplesInBlock(tuple_count);
+      rt_block_buffer_.push_back(des_addr);
+    }
+    delete ba;
+    ba = nullptr;
+    rt_block_index_++;
+    return true;
+  }
+  return false;
+}
+void PartitionStorage::CheckAndAppendChunkList(unsigned number_of_chunk,
+                                               bool is_rt) {
+  LockGuard<Lock> guard(write_lock_);
+  if (!is_rt) {
+    for (auto size = chunk_list_.size(); size < number_of_chunk; size++)
+      chunk_list_.push_back(new ChunkStorage(
+          ChunkID(partition_id_, size), BLOCK_SIZE, desirable_storage_level_));
+  } else {
+    for (auto size = rt_chunk_list_.size(); size < number_of_chunk; size++)
+      rt_chunk_list_.push_back(
+          new ChunkStorage(ChunkID(partition_id_, size, true), BLOCK_SIZE,
+                           desirable_storage_level_));
   }
 }

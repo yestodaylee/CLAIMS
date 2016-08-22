@@ -31,14 +31,15 @@
 #define PARTITIONSTORAGE_H_
 #include <atomic>
 #include <vector>
-
+#include <unordered_map>
 #include "../common/error_define.h"
-
+#include "../txn_manager/txn.hpp"
 #include "ChunkStorage.h"
 #include "StorageLevel.h"
 #include "./PartitionReaderIterator.h"
 #include "../utility/lock.h"
-
+#include "../Debug.h"
+using claims::txn::PStrip;
 // namespace claims {
 // namespace storage {
 /**
@@ -105,6 +106,46 @@ class PartitionStorage {
    private:
     Lock lock_;
   };
+  /**********************************************************************/
+  class TxnPartitionReaderIterator : public PartitionReaderIterator {
+   public:
+    /**
+     * @brief Method description: Construct the Iterator. Different from
+     * PartitionReaderIterator and AtomicPartitionReaditerator.
+     * It support scan from  both chunk_list_ and rt_chunk_list_ ,
+     * write into rt_chunk_list rather than chunk_list_ in
+     * AtomicPartitionReaderIterator
+     */
+
+    TxnPartitionReaderIterator(PartitionStorage* partition_storage,
+                               uint64_t his_cp,
+                               const vector<PStrip>& rt_strip_list);
+    ~TxnPartitionReaderIterator() override;
+    bool NextBlock(BlockStreamBase*& block) override;
+
+   private:
+    void* CreateEmptyBlock() {
+      void* data = reinterpret_cast<void*>(malloc(BLOCK_SIZE));
+      // auto block = new BlockStreamFix(BLOCK_SIZE, 0, data, 0);
+      return data;
+    }
+    void SetBlockTail(void* block, unsigned tuple_num) {
+      *reinterpret_cast<unsigned*>(block + 64 * 1024 - sizeof(unsigned)) =
+          tuple_num;
+    }
+    int64_t last_his_block_;
+    int64_t block_cur_;
+    int64_t chunk_cur_;
+
+    vector<PStrip> rt_strip_list_;  // splited by block
+    int64_t rt_block_index_;
+    int64_t rt_block_cur_;
+    int64_t rt_chunk_cur_;
+    ChunkReaderIterator* rt_chunk_it_;
+    vector<void*> rt_block_buffer_;
+
+    Lock lock_;
+  };
 
   /**
    * @brief Method description: construct the partition container.
@@ -155,10 +196,18 @@ class PartitionStorage {
    */
   PartitionStorage::PartitionReaderIterator* CreateAtomicReaderIterator();
 
+  PartitionStorage::PartitionReaderIterator* CreateTxnReaderIterator(
+      uint64_t his_cp, const vector<PStrip>& rt_strip_list) {
+    return new TxnPartitionReaderIterator(this, his_cp, rt_strip_list);
+  }
+  void CheckAndAppendChunkList(unsigned number_of_chunk, bool is_rt);
+
  protected:
   PartitionID partition_id_;
   atomic<unsigned> number_of_chunks_;
   std::vector<ChunkStorage*> chunk_list_;
+  // add it for txn scan
+  std::vector<ChunkStorage*> rt_chunk_list_;
   StorageLevel desirable_storage_level_;
 
   Lock write_lock_;

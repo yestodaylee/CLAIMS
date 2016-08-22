@@ -235,7 +235,7 @@ RetCode SelectExec::Execute() {
   logic_plan->GetTxnInfo(request);
   TxnClient::BeginQuery(request, query);
   logic_plan->SetTxnInfo(query);
-  cout << request.ToString() << endl;
+ // cout << request.ToString() << endl;
   PhysicalOperatorBase* physical_plan = logic_plan->GetPhysicalPlan(64 * 1024);
 #ifndef PRINTCONTEXT
   physical_plan->Print();

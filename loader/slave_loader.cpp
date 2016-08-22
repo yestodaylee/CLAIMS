@@ -366,7 +366,7 @@ RetCode SlaveLoader::StoreDataInMemory(const LoadPacket& packet) {
     /// get start position of current chunk
     if (BlockManager::getInstance()->getMemoryChunkStore()->GetChunk(
             ChunkID(PartitionID(ProjectionID(table_id, prj_id), part_id),
-                    cur_chunk_id),
+                    cur_chunk_id, true),
             chunk_info)) {
       // In this version, the last chunk info don't updated their member: length
       // after inserting data,

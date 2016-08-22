@@ -93,6 +93,8 @@ class Environment {
 
   bool InitTxnLog();
 
+  bool AdvancedBindAllPart();
+
  private:
   static Environment* _instance;
   PortManager* portManager;

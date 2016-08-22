@@ -120,12 +120,6 @@ Environment::Environment(bool ismaster) : ismaster_(ismaster) {
   logging_->log("Initializing the BufferManager...");
   initializeBufferManager();
 
-  logging_->log("Initializing txn manager");
-  if (!InitTxnManager()) LOG(ERROR) << "failed to initialize txn manager";
-
-  logging_->log("Initializing txn log server");
-  if (!InitTxnLog()) LOG(ERROR) << "failed to initialize txn log";
-
   logging_->log("Initializing the ExecutorMaster...");
   iteratorExecutorMaster = new IteratorExecutorMaster();
 
@@ -134,6 +128,21 @@ Environment::Environment(bool ismaster) : ismaster_(ismaster) {
 
   exchangeTracker = new ExchangeTracker();
   expander_tracker_ = ExpanderTracker::getInstance();
+
+  logging_->log("Initializing txn manager");
+  if (!InitTxnManager()) LOG(ERROR) << "failed to initialize txn manager";
+
+  logging_->log("Initializing txn log server");
+  if (!InitTxnLog()) LOG(ERROR) << "failed to initialize txn log";
+
+  /**
+   *  Binding all partition for each projection
+   *  Because
+   */
+  sleep(3);
+  logging_->log("Advanced Bind all partition for each projection");
+  if (!AdvancedBindAllPart()) LOG(ERROR) << "failed to bing partitions";
+
 #ifndef DEBUG_MODE
   if (ismaster) {
     initializeClientListener();
@@ -263,16 +272,16 @@ bool Environment::InitTxnManager() {
     TxnServer::Init(Config::txn_server_cores, Config::txn_server_port);
     auto cat = Catalog::getInstance();
     auto table_count = cat->getNumberOfTable();
-    cout << "table count:" << table_count << endl;
+    // cout << "table count:" << table_count << endl;
     for (unsigned table_id : cat->getAllTableIDs()) {
-      cout << "table id :" << table_id << endl;
+      // cout << "table id :" << table_id << endl;
       auto table = cat->getTable(table_id);
       if (NULL == table) {
         cout << " No table whose id is:" << table_id << endl;
         assert(false);
       }
       auto proj_count = table->getNumberOfProjection();
-      cout << "proj_count:" << proj_count << endl;
+      // cout << "proj_count:" << proj_count << endl;
       for (auto proj_id = 0; proj_id < proj_count; proj_id++) {
         auto proj = table->getProjectoin(proj_id);
         if (NULL == proj) {
@@ -282,17 +291,12 @@ bool Environment::InitTxnManager() {
         }
         auto part = proj->getPartitioner();
         auto part_count = part->getNumberOfPartitions();
-        cout << "part_count:" << part_count << endl;
+        // cout << "part_count:" << part_count << endl;
         for (auto part_id = 0; part_id < part_count; part_id++) {
           auto global_part_id = GetGlobalPartId(table_id, proj_id, part_id);
-          cout << global_part_id << endl;
-          //          TxnServer::pos_list_[global_part_id] =
-          //              TxnServer::his_cp_list_[global_part_id] =
-          //                  TxnServer::rt_cp_list_[global_part_id] =
-          //                      part->getPartitionBlocks(part_id) * 64 * 1024;
           pos_list[global_part_id] = his_cp_list[global_part_id] =
               rt_cp_list[global_part_id] =
-                  part->getPartitionBlocks(part_id) * 64 * 1024;
+                  part->getPartitionBlocks(part_id) * BLOCK_SIZE;
         }
       }
     }
@@ -303,6 +307,21 @@ bool Environment::InitTxnManager() {
       cout << "partition[" << pos.first << "] => " << pos.second << endl;
   }
   TxnClient::Init(Config::txn_server_ip, Config::txn_server_port);
+  return true;
+}
+
+bool Environment::AdvancedBindAllPart() {
+  for (auto table_id : Catalog::getInstance()->getAllTableIDs()) {
+    auto table = Catalog::getInstance()->getTable(table_id);
+    auto proj_count = table->getNumberOfProjection();
+    for (auto proj_id = 0; proj_id < proj_count; proj_id++) {
+      auto proj = table->getProjectoin(proj_id);
+      if (!proj->AllPartitionBound()) {
+        Catalog::getInstance()->getBindingModele()->BindingEntireProjection(
+            proj->getPartitioner(), DESIRIABLE_STORAGE_LEVEL);
+      }
+    }
+  }
   return true;
 }
 
