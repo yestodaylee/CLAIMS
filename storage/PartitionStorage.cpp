@@ -39,8 +39,13 @@
 #include "../Config.h"
 #include "../Resource/BufferManager.h"
 #include "../utility/lock_guard.h"
-
+#include "../storage/BlockManager.h"
+#include "../common/file_handle/file_handle_imp.h"
+#include "../common/file_handle/hdfs_file_handle_imp.h"
+#include "../common/file_handle/file_handle_imp_factory.h"
 using claims::common::rSuccess;
+using claims::common::FileHandleImpFactory;
+using claims::common::kHdfs;
 using claims::utility::LockGuard;
 
 /**
@@ -94,8 +99,8 @@ RetCode PartitionStorage::AddChunkWithMemoryToNum(
   if (number_of_chunks_ >= expected_number_of_chunks) return ret;
 
   for (unsigned i = number_of_chunks_; i < expected_number_of_chunks; i++) {
-    ChunkStorage* chunk =
-        new ChunkStorage(ChunkID(partition_id_, i), BLOCK_SIZE, storage_level);
+    ChunkStorage* chunk = new ChunkStorage(ChunkID(partition_id_, i, true),
+                                           BLOCK_SIZE, storage_level);
     EXEC_AND_DLOG(ret, chunk->ApplyMemory(), "applied memory for chunk("
                                                  << partition_id_.getName()
                                                  << "," << i << ")",
@@ -303,8 +308,8 @@ bool PartitionStorage::TxnPartitionReaderIterator::NextBlock(
       if (pos + len % BLOCK_SIZE == 0)
         len = ((len - sizeof(unsigned)) / tuple_size) * tuple_size;
       auto tuple_count = len / tuple_size;
- //     cout << "tuple_size:" << tuple_size << endl;
- //     cout << "tuple_count:" << tuple_count << endl;
+      //     cout << "tuple_size:" << tuple_size << endl;
+      //     cout << "tuple_count:" << tuple_count << endl;
       ba->GetBlock(block);
       auto des_addr = reinterpret_cast<void*>(malloc(BLOCK_SIZE));
       auto scr_addr = block->getBlockDataAddress() + offset_in_block;
@@ -334,3 +339,84 @@ void PartitionStorage::CheckAndAppendChunkList(unsigned number_of_chunk,
                            desirable_storage_level_));
   }
 }
+
+UInt64 PartitionStorage::MergeToHis(UInt64 old_his_cp,
+                                    const vector<PStrip>& strip_list) {
+  auto new_his_cp = old_his_cp;
+  auto table_id = partition_id_.projection_id.table_id;
+  auto proj_id = partition_id_.projection_id.projection_off;
+  auto tuple_size = Catalog::getInstance()
+                        ->getTable(table_id)
+                        ->getProjectoin(proj_id)
+                        ->getSchema()
+                        ->getTupleMaxSize();
+  HdfsInMemoryChunk chunk_rt, chunk_his;
+  for (auto& strip : strip_list) {
+    auto begin = strip.first;
+    auto end = strip.first + strip.second;
+    while (begin < end) {
+      // update historical chunk cur
+      if (!BlockManager::getInstance()->getMemoryChunkStore()->GetChunk(
+              ChunkID(partition_id_, begin / CHUNK_SIZE), chunk_his))
+        return old_his_cp;
+      // update real time chunk cur
+      if (!BlockManager::getInstance()->getMemoryChunkStore()->GetChunk(
+              ChunkID(partition_id_, new_his_cp / CHUNK_SIZE), chunk_rt))
+        return old_his_cp;
+      // each step move just one full block or even partly block
+      auto move = BLOCK_SIZE - (begin + BLOCK_SIZE) % BLOCK_SIZE;
+      if (move == BLOCK_SIZE) {  // full block
+        memcpy(chunk_his.hook + new_his_cp % CHUNK_SIZE,
+               chunk_rt.hook + begin % CHUNK_SIZE, move);
+      } else {
+        auto tuple_count = (move - sizeof(unsigned)) / tuple_size;
+        if ((begin + move) % BLOCK_SIZE == 0) {
+          auto real_move = tuple_count * tuple_size;
+          memcpy(chunk_his.hook + new_his_cp % CHUNK_SIZE,
+                 chunk_rt.hook + begin % CHUNK_SIZE, real_move);
+        } else {
+          memcpy(chunk_his.hook + new_his_cp % CHUNK_SIZE,
+                 chunk_rt.hook + begin % CHUNK_SIZE, move);
+        }
+        auto tail_offset =
+            (begin / BLOCK_SIZE + 1) * BLOCK_SIZE - sizeof(unsigned);
+        *reinterpret_cast<unsigned*>(chunk_his.hook + tail_offset) +=
+            tuple_count;
+      }
+      begin += move;
+      new_his_cp += BLOCK_SIZE;
+    }
+  }
+  return new_his_cp;
+}
+
+bool PartitionStorage::Persist(UInt64 old_his_cp, UInt64 new_his_cp) {
+  if (!Config::local_disk_mode)
+    return PersistHDFS(old_his_cp, new_his_cp);
+  else
+    return PersistDisk(old_his_cp, new_his_cp);
+}
+
+bool PartitionStorage::PersistHDFS(UInt64 old_his_cp, UInt64 new_his_cp) {
+  /*
+   * ToDo Truncate need to be implemented
+   */
+  auto file_handle = FileHandleImpFactory::Instance().CreateFileHandleImp(
+      kHdfs, partition_id_.getPathAndName());
+  if (file_handle == nullptr)
+    return false;
+  HdfsInMemoryChunk chunk_his;
+  auto begin = old_his_cp;
+  auto end = new_his_cp;
+  while (begin < end) {
+    if (!BlockManager::getInstance()->getMemoryChunkStore()->GetChunk(
+            ChunkID(partition_id_, begin / CHUNK_SIZE), chunk_his))
+      return false;
+    auto move = CHUNK_SIZE - (begin + CHUNK_SIZE) % CHUNK_SIZE;
+    file_handle->Append(chunk_his.hook, move);
+    begin += move;
+  }
+  return true;
+}
+
+bool PartitionStorage::PersistDisk(UInt64 old_his_cp, UInt64 new_his_cp) {}

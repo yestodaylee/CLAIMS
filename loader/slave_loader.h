@@ -32,18 +32,29 @@
 #include <iostream>
 #include <queue>
 #include <string>
+#include <atomic>
+#include <unordered_map>
 #include "../catalog/catalog.h"
 #include "../storage/BlockManager.h"
+#include "../txn_manager/txn.hpp"
+#include "../txn_manager/txn_client.hpp"
 #include "caf/all.hpp"
 
 namespace claims {
 namespace loader {
 
+using std::unordered_map;
+
 using caf::behavior;
 using caf::event_based_actor;
 using std::string;
 using claims::catalog::Catalog;
-
+using claims::txn::CheckpointAtom;
+using claims::txn::UInt64;
+using claims::txn::Query;
+using claims::txn::QueryReq;
+using claims::txn::GetGlobalPartId;
+using claims::txn::TxnClient;
 class LoadPacket;
 
 class SlaveLoader {
@@ -77,6 +88,7 @@ class SlaveLoader {
                                        bool is_commited);
 
   static behavior WorkInCAF(event_based_actor* self);
+  static behavior PersistInCAF(event_based_actor* self);
   static void WorkInAsync(LoadPacket* packet);
   static void* HandleWork(void* arg);
 
@@ -91,6 +103,7 @@ class SlaveLoader {
  private:
   static caf::actor handle;
   static caf::actor* handles_;
+  static caf::actor persistor;
 
  private:
   queue<LoadPacket*> packet_queue_;

@@ -23,9 +23,11 @@
 #include "../common/ids.h"
 #include "../common/Message.h"
 #include "../common/Logging.h"
+#include "../txn_manager/txn.hpp"
 #include "../utility/lock.h"
 using namespace std;
-
+using claims::txn::UInt64;
+using claims::txn::PStrip;
 struct ChunkInfo {
   ChunkID chunkId;
   void *hook;
@@ -93,6 +95,9 @@ class BlockManager {
                     const StorageLevel &desirable_storage_level);
   bool RemovePartition(const PartitionID &);
   PartitionStorage *GetPartitionHandle(const PartitionID &partition_id) const;
+
+  vector<PartitionID> GetAllPartition();
+  UInt64 MergeHisToRt(PartitionID, const vector<PStrip> &strip_list, UInt64 rt);
 
  private:
   BlockManager();

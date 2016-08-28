@@ -34,12 +34,14 @@
 #include <unordered_map>
 #include "../common/error_define.h"
 #include "../txn_manager/txn.hpp"
-#include "ChunkStorage.h"
-#include "StorageLevel.h"
-#include "./PartitionReaderIterator.h"
+#include "../storage/ChunkStorage.h"
+#include "../storage/StorageLevel.h"
+#include "../storage/PartitionReaderIterator.h"
 #include "../utility/lock.h"
 #include "../Debug.h"
 using claims::txn::PStrip;
+using claims::txn::UInt64;
+
 // namespace claims {
 // namespace storage {
 /**
@@ -201,7 +203,10 @@ class PartitionStorage {
     return new TxnPartitionReaderIterator(this, his_cp, rt_strip_list);
   }
   void CheckAndAppendChunkList(unsigned number_of_chunk, bool is_rt);
-
+  UInt64 MergeToHis(UInt64 old_his_cp, const vector<PStrip>& strip_list);
+  bool Persist(UInt64 old_his_cp, UInt64 new_his_cp);
+  bool PersistHDFS(UInt64 old_his_cp, UInt64 new_his_cp);
+  bool PersistDisk(UInt64 old_his_cp, UInt64 new_his_cp);
  protected:
   PartitionID partition_id_;
   atomic<unsigned> number_of_chunks_;

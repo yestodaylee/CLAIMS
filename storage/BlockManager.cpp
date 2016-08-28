@@ -403,3 +403,12 @@ PartitionStorage* BlockManager::GetPartitionHandle(
   }
   return it->second;
 }
+
+vector<PartitionID> BlockManager::GetAllPartition() {
+  LockGuard<Lock> guard(lock);
+  vector<PartitionID> part_list;
+  for (auto itr = partition_id_to_storage_.begin();
+       itr != partition_id_to_storage_.end(); itr++) {
+  }
+  return part_list;
+}

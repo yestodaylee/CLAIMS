@@ -79,6 +79,13 @@ RetCode ChunkStorage::ApplyMemory() {
      * shifted.*/
     current_storage_level_ = MEMORY;
 
+    /*
+     * set each block tail to "zero" in new chunk
+     */
+    for (auto offset = 0; offset < CHUNK_SIZE; offset += BLOCK_SIZE)
+      *reinterpret_cast<unsigned*>(chunk_info.hook + offset -
+                                   sizeof(unsigned)) = 0;
+
     /* update the chunk info in the Chunk store in case that the
      * chunk_info is updated.*/
     BlockManager::getInstance()->getMemoryChunkStore()->UpdateChunkInfo(

@@ -88,6 +88,7 @@ using std::chrono::seconds;
 
 caf::actor SlaveLoader::handle;
 caf::actor* SlaveLoader::handles_;
+caf::actor SlaveLoader::persistor;
 
 static const int txn_count_for_debug = 5000;
 static const char* txn_count_string = "5000";
@@ -437,7 +438,7 @@ RetCode SlaveLoader::SendAckToMasterLoader(const uint64_t& txn_id,
 }
 
 // this method has the best performance
-static behavior SlaveLoader::WorkInCAF(event_based_actor* self) {
+behavior SlaveLoader::WorkInCAF(event_based_actor* self) {
   return {[=](LoadPacketAtom, LoadPacket* packet) {  // NOLINT
     RetCode ret = rSuccess;
     EXEC_AND_DLOG(ret, StoreDataInMemory(*packet), "stored data",
@@ -448,6 +449,40 @@ static behavior SlaveLoader::WorkInCAF(event_based_actor* self) {
                                           << " to master loader",
                  "failed to send commit res to master loader");
     DELETE_PTR(packet);
+  }};
+}
+
+behavior SlaveLoader::PersistInCAF(event_based_actor* self) {
+  self->delayed_send(self, seconds(3), CheckpointAtom::value);
+  return {[self](CheckpointAtom) {
+    cout << "slave persist.." << endl;
+    QueryReq query_req;
+    query_req.include_abort_ = true;
+    Query query;
+    auto part_list =
+        Environment::getInstance()->get_block_manager()->GetAllPartition();
+    for (auto& part : part_list)
+      query_req.part_list_.push_back(GetGlobalPartId(part));
+    TxnClient::BeginQuery(query_req, query);
+    for (auto& part : part_list) {
+      UInt64 g_part_id = GetGlobalPartId(part);
+      if (query.snapshot_[g_part_id].size() > 0) {
+        auto part_handler =
+            Environment::getInstance()->get_block_manager()->GetPartitionHandle(
+                part);
+        auto new_rt_cp = query.snapshot_[g_part_id].rbegin()->first +
+                         query.snapshot_[g_part_id].rbegin()->second;
+        // merge from historical to real time
+        auto old_his_cp = query.his_cp_list_[g_part_id];
+        auto new_his_cp =
+            part_handler->MergeToHis(old_his_cp, query.snapshot_[g_part_id]);
+        if (new_his_cp == old_his_cp) continue;
+        if (!part_handler->Persist(old_his_cp, new_his_cp)) continue;
+        TxnClient::CommitCheckpoint(query.ts_, g_part_id, new_his_cp,
+                                    new_rt_cp);
+      }
+    }
+    self->delayed_send(self, seconds(3), CheckpointAtom::value);
   }};
 }
 
@@ -523,6 +558,7 @@ void* SlaveLoader::StartSlaveLoader(void* arg) {
     SlaveLoader::handles_[i] = caf::spawn(SlaveLoader::WorkInCAF);
   }
 #endif
+  persistor = caf::spawn(SlaveLoader::PersistInCAF);
 
   slave_loader->ReceiveAndWorkLoop();
   assert(false);

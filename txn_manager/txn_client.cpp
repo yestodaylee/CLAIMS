@@ -107,7 +107,7 @@ RetCode TxnClient::BeginIngest(const FixTupleIngestReq& request,
   return ret;
 }
 
-RetCode TxnClient::CommitIngest(const UInt64 ts) {
+RetCode TxnClient::CommitIngest(UInt64 ts) {
   //  RetCode ret = rSuccess;
   RetCode ret = 0;
   try {
@@ -131,7 +131,7 @@ RetCode TxnClient::CommitIngest(const UInt64 ts) {
   return ret;
 }
 
-RetCode TxnClient::AbortIngest(const UInt64 id) {
+RetCode TxnClient::AbortIngest(UInt64 id) {
   //  RetCode ret = rSuccess;
   RetCode ret = 0;
   try {
@@ -191,44 +191,18 @@ RetCode TxnClient::CommitQuery(UInt64 ts) {
   return ret;
 }
 
-RetCode TxnClient::BeginCheckpoint(Checkpoint& cp) {
-  //  RetCode ret = rSuccess;
-  RetCode ret = 0;
-  //  try {
-  //    caf::scoped_actor self;
-  //    self->sync_send(TxnServer::active_ ? TxnServer::proxy_ : proxy_,
-  //                    CheckpointAtom::value, cp.part_)
-  //        .await([&](const Checkpoint& checkpoint, RetCode r) {
-  //                 cp = checkpoint;
-  //                 ret = r;
-  //               },
-  //               caf::after(seconds(kTimeout)) >> [&] {
-  //                                                  //                  ret =
-  //                                                  // rLinkTmTimeout;
-  //                                                  ret = -1;
-  //                                                  cout << "time out" <<
-  //                                                  endl;
-  //                                                });
-  //  } catch (...) {
-  //    cout << "link fail" << endl;
-  //    //    return rLinkTmFail;
-  //    return -1;
-  //  }
-  return ret;
-}
-
-RetCode TxnClient::CommitCheckpoint(const UInt64 logic_cp,
-                                    const UInt64 phy_cp) {
+RetCode TxnClient::CommitCheckpoint(UInt64 ts, UInt64 part, UInt64 his_cp,
+                                    UInt64 rt_cp) {
   //  RetCode ret = rSuccess;
   RetCode ret = 0;
   try {
     caf::scoped_actor self;
     self->sync_send(TxnServer::active_ ? TxnServer::proxy_ : proxy_,
-                    CommitCPAtom::value, logic_cp, phy_cp)
-        .await([&](RetCode r) { ret = r; },
-               caf::after(seconds(kTimeout)) >> [&] {
-                                                  //                ret =
-                                                  //                rLinkTmTimeout;
+                    CommitCPAtom::value, his_cp, rt_cp)
+        .await([&ret](RetCode r) { ret = r; },
+               caf::after(seconds(kTimeout)) >> [&ret] {
+                                                  //   ret =
+                                                  //   rLinkTmTimeout;
                                                   ret = -1;
                                                   cout << "time out" << endl;
                                                 });
@@ -239,5 +213,5 @@ RetCode TxnClient::CommitCheckpoint(const UInt64 logic_cp,
   }
   return ret;
 }
-}
-}
+}  // namespace txn
+}  // namespace claims

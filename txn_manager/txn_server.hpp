@@ -85,37 +85,6 @@ class TimeStamp {
   static atomic<UInt64> now_;
 };
 
-class QueryTracker : public caf::event_based_actor {
- public:
-  static RetCode Init() {
-    tracker_ = caf::spawn<QueryTracker>();
-    return rSuccess;
-  }
-  static RetCode Begin(UInt64 ts) {
-    caf::anon_send(tracker_, BeginAtom::value, ts);
-  }
-  static RetCode Commit(UInt64 ts) {
-    caf::anon_send(tracker_, CommitAtom::value, ts);
-  }
-  caf::behavior make_behavior() override;
-
- private:
-  static caf::actor tracker_;
-  static set<UInt64> active_querys_;
-};
-
-class CheckpointTracker : public caf::event_based_actor {
- public:
-  static RetCode Init() {
-    tracker_ = caf::spawn<CheckpointTracker>();
-    return rSuccess;
-  }
-  caf::behavior make_behavior() override;
-
- private:
-  static caf::actor tracker_;
-};
-
 class TxnCore : public caf::event_based_actor {
  public:
   UInt64 core_id_;
@@ -135,7 +104,7 @@ class TxnServer : public caf::event_based_actor {
   static caf::actor proxy_;
   static vector<caf::actor> cores_;
   static unordered_map<UInt64, atomic<UInt64>> pos_list_;
-  static unordered_map<UInt64, Checkpoint> cp_list_;
+  static unordered_map<UInt64, TsCheckpoint> cp_list_;
   // static unordered_map<UInt64, atomic<UInt64>> CountList;
   /**************** User APIs ***************/
   static RetCode Init(int concurrency = kConcurrency, int port = kTxnPort);

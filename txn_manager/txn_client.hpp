@@ -20,8 +20,8 @@
  *
  *  Created on: 2016年4月10日
  *      Author: imdb
- *		   Email: 
- * 
+ *		   Email:
+ *
  * Description:
  *
  */
@@ -62,28 +62,25 @@ using std::atomic;
 using std::chrono::seconds;
 using std::chrono::milliseconds;
 
-namespace claims{
-namespace txn{
+namespace claims {
+namespace txn {
 
-
-
-class TxnClient{
+class TxnClient {
  public:
   static string ip_;
   static int port_;
   static caf::actor proxy_;
   static RetCode Init(string ip = kTxnIp, int port = kTxnPort);
   static RetCode Debug(string flag);
-  static RetCode BeginIngest(const FixTupleIngestReq & request, Ingest & ingest);
-  static RetCode CommitIngest(const UInt64 id);
-  static RetCode AbortIngest(const UInt64 id);
-  static RetCode BeginQuery(const QueryReq & request, Query & query);
+  static RetCode BeginIngest(const FixTupleIngestReq& request, Ingest& ingest);
+  static RetCode CommitIngest(UInt64 id);
+  static RetCode AbortIngest(UInt64 id);
+  static RetCode BeginQuery(const QueryReq& request, Query& query);
   static RetCode CommitQuery(UInt64 ts);
-  static RetCode BeginCheckpoint(Checkpoint & cp);
-  static RetCode CommitCheckpoint(const UInt64 logic_cp, const UInt64 phy_cp);
+  static RetCode CommitCheckpoint(UInt64 ts, UInt64 part, UInt64 his_cp,
+                                  UInt64 rt_cp);
 };
-
 }
 }
 
-#endif //  TXN_CLIENT_HPP_ 
+#endif  //  TXN_CLIENT_HPP_

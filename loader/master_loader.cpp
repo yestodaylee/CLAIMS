@@ -888,15 +888,14 @@ void* MasterLoader::StartMasterLoader(void* arg) {
 
   //  AMQConsumer consumer(brokerURI, destURI, use_topics, client_ack);
   //  consumer.run(master_loader);
+  WorkerPara para(master_loader, brokerURI, destURI, use_topics, client_ack);
   for (int i = 0; i < Config::master_loader_thread_num - 1; ++i) {
-    WorkerPara para(master_loader, brokerURI, destURI, use_topics, client_ack);
     //    Environment::getInstance()->getThreadPool()->AddTaskInCpu(
     //        MasterLoader::Work, &para, (i + 1) % GetNumberOfCpus());
     Environment::getInstance()->getThreadPool()->AddTask(MasterLoader::Work,
                                                          &para);
   }
   // i am also a worker
-  WorkerPara para(master_loader, brokerURI, destURI, use_topics, client_ack);
   Work(&para);
 
   while (1) sleep(10);

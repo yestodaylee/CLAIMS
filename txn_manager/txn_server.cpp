@@ -45,8 +45,6 @@ namespace txn {
 
 /***************/
 atomic<UInt64> TimeStamp::now_;
-caf::actor QueryTracker::tracker_;
-set<UInt64> QueryTracker::active_querys_;
 
 /**************/
 
@@ -57,31 +55,9 @@ vector<caf::actor> TxnServer::cores_;
 bool TxnServer::active_ = false;
 
 unordered_map<UInt64, atomic<UInt64>> TxnServer::pos_list_;
-unordered_map<UInt64, Checkpoint> TxnServer::cp_list_;
+unordered_map<UInt64, TsCheckpoint> TxnServer::cp_list_;
 set<UInt64> TxnServer::active_querys_;
 caf::actor test;
-
-caf::behavior QueryTracker::make_behavior() {
-  this->delayed_send(this, seconds(3), GCAtom::value);
-  return {[](BeginAtom, UInt64 ts) { active_querys_.insert(ts); },
-          [](CommitAtom, UInt64 ts) { active_querys_.erase(ts); },
-          [this](GCAtom) {
-            /**
-             * TODO broadcast all components what minimum timestamp
-             *   is still alive.
-             */
-            UInt64 ts;
-            if (active_querys_.size() > 0)
-              ts = *active_querys_.begin();
-            else
-              ts = TimeStamp::Gen();
-            for (auto& core : TxnServer::cores_)
-              caf::anon_send(core, GCAtom::value, ts);
-            this->delayed_send(this, seconds(3), GCAtom::value);
-          }};
-}
-
-caf::behavior CheckpointTracker::make_behavior() {}
 
 caf::behavior TxnCore::make_behavior() {
   this->delayed_send(this, seconds(3 + core_id_), MergeAtom::value);
@@ -112,35 +88,62 @@ caf::behavior TxnCore::make_behavior() {
         txnbin_list_[id].AbortTxn(pos);
         return caf::make_message(rSuccess);
       },
-      [this](QueryAtom, shared_ptr<Query> query) -> caf::message {
+      [this](QueryAtom, shared_ptr<Query> query,
+             bool include_abort) -> caf::message {
         auto id = TxnBin::GetTxnBinID(query->ts_, TxnServer::concurrency_);
         auto pos = TxnBin::GetTxnBinPos(query->ts_, TxnServer::concurrency_);
         auto ts = TxnBin::GetTxnBinMaxTs(id, TxnServer::concurrency_, core_id_);
         auto remain = kTxnBinSize - (ts - query->ts_) / TxnServer::concurrency_;
-        //        cout << "query core:" << core_id_ << endl;
-        //        cout << query->ts_ << "," << id << "," << pos << "," << ts <<
-        //        ","
-        //             << remain << endl;
         if (remain > 0) {
           txnbin_list_[id].MergeTxn(*query, remain);
-          // cout << "first txnbin<" << core_id_ << "," << id << ">txn<" << 0
-          //       << "," << remain << ">" << endl;
         }
         while (id > 0) {
           --id;
           if (txnbin_list_[id].IsSnapshot()) {
-            //  cout << "txnbin<" << core_id_ << "," << id << ">snapshot" <<
-            //  endl;
             txnbin_list_[id].MergeSnapshot(*query);
             break;
           } else {
-            //  cout << "txnbin<" << core_id_ << "," << id << ">full" << endl;
             txnbin_list_[id].MergeTxn(*query, kTxnBinSize);
           }
         }
         auto next_core_id = (core_id_ + 1) % TxnServer::concurrency_;
-        if (next_core_id != TxnServer::GetCoreID(query->ts_))
+        if (next_core_id != TxnServer::GetCoreID(query->ts_)) {
+          // scan next core
           this->forward_to(TxnServer::cores_[next_core_id]);
+        } else if (include_abort) {  // process the final query
+          for (auto& part_cp : query->rt_cp_list_) {
+            auto part = part_cp.first;
+            auto checkpoint = part_cp.second;
+            query->abort_list_[part].insert(query->abort_list_[part].end(),
+                                            query->snapshot_[part].begin(),
+                                            query->snapshot_[part].end());
+            Strip::Sort(query->abort_list_[part]);
+            Strip::Merge(query->abort_list_[part]);
+            Strip::Filter(query->abort_list_[part],
+                          [checkpoint](PStrip& pstrip) -> bool {
+              if (pstrip.first + pstrip.second <= checkpoint) {
+                return false;
+              } else {
+                if (pstrip.first < checkpoint &&
+                    pstrip.first + pstrip.second > checkpoint)
+                  pstrip = make_pair(checkpoint,
+                                     pstrip.first + pstrip.second - checkpoint);
+                return true;
+              }
+            });
+            auto abort_pos = query->abort_list_[part][0].first +
+                             query->abort_list_[part][0].second;
+            if (query->abort_list_[part].size() > 0) {
+              Strip::Filter(query->snapshot_[part],
+                            [abort_pos](PStrip& pstrip) -> bool {
+                if (pstrip.first + pstrip.second <= abort_pos)
+                  return true;
+                else
+                  return false;
+              });
+            }
+          }
+        }
         return caf::make_message(*query);
       },
       [this](MergeAtom) {
@@ -195,28 +198,6 @@ caf::behavior TxnCore::make_behavior() {
         if (new_txnbin_list.size() < txnbin_list_.size())
           txnbin_list_ = new_txnbin_list;
 
-      },
-      [](CheckpointAtom, shared_ptr<Checkpoint> cp) {
-        /*        for (auto i = 0; i < size_; i++)
-                  if (commit_[i]) {
-                    for (auto& strip : strip_list_[i])
-                      if (strip.part_ == cp->part_ && strip.pos_ >=
-           cp->logic_cp_)
-                        cp->commit_strip_list_.push_back(
-                            PStrip(strip.pos_, strip.offset_));
-                  } else if (abort_[i]) {
-                    for (auto& strip : strip_list_[i])
-                      if (strip.part_ == cp->part_ && strip.pos_ >=
-           cp->logic_cp_)
-                        cp->abort_strip_list_.push_back(
-                            PStrip(strip.pos_, strip.offset_));
-                  }
-                if (core_id_ != TxnServer::cores_.size() - 1)
-                  this->forward_to(TxnServer::cores_[core_id_ + 1]);
-                else {
-                  current_message() = caf::make_message(MergeAtom::value, cp);
-                  this->forward_to(TxnServer::cores_[TxnServer::SelectCoreId()]);
-                }*/
       },
       [](GCAtom) {
         /*        auto size_old = size_;
@@ -282,7 +263,8 @@ caf::behavior TxnServer::make_behavior() {
         auto query =
             make_shared<Query>(ts, GetHisCPList(ts, request.part_list_),
                                GetRtCPList(ts, request.part_list_));
-        current_message() = caf::make_message(QueryAtom::value, query);
+        current_message() =
+            caf::make_message(QueryAtom::value, query, request.include_abort_);
         forward_to(cores_[GetCoreID(ts)]);
         // cout << "**********query:" << ts << " begin**************" << endl;
       },

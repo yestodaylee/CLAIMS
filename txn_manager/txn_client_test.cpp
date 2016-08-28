@@ -74,7 +74,7 @@ using FailAtom = caf::atom_constant<caf::atom("fail")>;
 using QuitAtom = caf::atom_constant<caf::atom("quit")>;
 using claims::txn::Snapshot;
 using claims::txn::CAFSerConfig;
-using claims::txn::QueryTracker;
+// using claims::txn::QueryTracker;
 class Foo {
  public:
   vector<UInt64> request1;
@@ -309,12 +309,12 @@ int main(int argc, const char **argv) {
     request.InsertStrip(4, 2, 2);
     for (auto i = 0; i < 40; i++) {
       TxnClient::BeginIngest(request, ingest);
-      //  if (i % 10 != 0)
-      TxnClient::CommitIngest(ingest.ts_);
-      //  else
-      //    TxnClient::AbortIngest(ingest.ts_);
+      if (i % 10 != 0)
+        TxnClient::CommitIngest(ingest.ts_);
+      else
+        TxnClient::AbortIngest(ingest.ts_);
     }
-    TxnClient::Debug("core");
+    // TxnClient::Debug("core");
   } else if (type == "txnclient") {
     TxnClient::Init("127.0.0.1", 8089);
     auto job = []() {

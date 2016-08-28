@@ -45,6 +45,7 @@
 #include "caf/io/all.hpp"
 #include "../common/error_define.h"
 #include "../utility/Timer.h"
+#include "../common/ids.h"
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/map.hpp>
@@ -91,8 +92,9 @@ using QueryAtom = caf::atom_constant<caf::atom("Query")>;
 using CommitQueryAtom = caf::atom_constant<caf::atom("CommitQu")>;
 using CheckpointAtom = caf::atom_constant<caf::atom("Checkpoint")>;
 using GCAtom = caf::atom_constant<caf::atom("GC")>;
-using CommitIngestAtom = caf::atom_constant<caf::atom("CommitIngt")>;
+using CommitIngestAtom = caf::atom_constant<caf::atom("CommitInge")>;
 using AbortIngestAtom = caf::atom_constant<caf::atom("AbortInge")>;
+using CheckpointAtom = caf::atom_constant<caf::atom("Checkpoint")>;
 using CommitCPAtom = caf::atom_constant<caf::atom("CommitCP")>;
 using AbortCPAtom = caf::atom_constant<caf::atom("AbortCP")>;
 using QuitAtom = caf::atom_constant<caf::atom("Quit")>;
@@ -111,9 +113,17 @@ static const int kTimeout = 3;
 static const int kBlockSize = 64 * 1024;
 static const int kTailSize = sizeof(unsigned);
 static const int kTxnBinSize = 3;  // 1024;
+
 inline UInt64 GetGlobalPartId(UInt64 table_id, UInt64 projeciton_id,
                               UInt64 partition_id) {
   return partition_id + 1000 * (projeciton_id + 1000 * table_id);
+}
+
+inline UInt64 GetGlobalPartId(PartitionID part) {
+  auto table_id = part.projection_id.table_id;
+  auto proj_id = part.projection_id.projection_off;
+  auto part_id = part.partition_off;
+  return GetGlobalPartId(table_id, proj_id, part_id);
 }
 
 inline UInt64 GetTableIdFromGlobalPartId(UInt64 global_partition_id) {
@@ -264,11 +274,14 @@ inline bool operator==(const Ingest &lhs, const Ingest &rhs) {
 class QueryReq {
  public:
   vector<UInt64> part_list_;
+  bool include_abort_ = false;
   QueryReq() {}
   QueryReq(const vector<UInt64> &part_list) : part_list_(part_list) {}
   void InsertPart(UInt64 part) { part_list_.push_back(part); }
   vector<UInt64> get_part_list() const { return part_list_; }
+  bool get_include_abort() const { return include_abort_; }
   void set_part_list(const vector<UInt64> &partList) { part_list_ = partList; }
+  void set_include_abort(bool include_abort) { include_abort_ = include_abort; }
   string ToString();
 };
 
@@ -282,10 +295,12 @@ class Query {
   UInt64 ts_;
   unordered_map<UInt64, vector<PStrip>> snapshot_;
   unordered_map<UInt64, UInt64> his_cp_list_;
+
   /**
-   *  real-time checkpoint will never be send
+   *  rt_cp_list_  and abort_list_ will never be serialized and send,
    */
   unordered_map<UInt64, UInt64> rt_cp_list_;
+  unordered_map<UInt64, vector<PStrip>> abort_list_;
 
   Query() {}
   Query(UInt64 ts, const unordered_map<UInt64, UInt64> &his_cp_list,
@@ -296,12 +311,19 @@ class Query {
     return snapshot_;
   }
   unordered_map<UInt64, UInt64> getCPList() const { return his_cp_list_; }
+  unordered_map<UInt64, vector<PStrip>> getAbortList() const {
+    return abort_list_;
+  }
+
   void setTS(UInt64 ts) { ts_ = ts; }
   void setSnapshot(const unordered_map<UInt64, vector<PStrip>> &sp) {
     snapshot_ = sp;
   }
   void setCPList(const unordered_map<UInt64, UInt64> &cplist) {
     his_cp_list_ = cplist;
+  }
+  void setAbortList(const unordered_map<UInt64, vector<PStrip>> &abort_list) {
+    abort_list_ = abort_list;
   }
   string ToString();
   void GenTxnInfo() {
@@ -321,8 +343,32 @@ inline bool operator==(const Query &lhs, const Query &rhs) {
   return lhs.snapshot_ == rhs.snapshot_ && lhs.his_cp_list_ == rhs.his_cp_list_;
 }
 
+class CheckpointReq {
+ public:
+  UInt64 ts_;
+  UInt64 part_;
+  vector<PStrip> strip_list_;
+  UInt64 old_his_cp_;
+  CheckpointReq() {}
+  CheckpointReq(UInt64 ts, UInt64 part) : ts_(ts), part_(part) {}
+  string ToString() const;
+  UInt64 getTs() const { return ts_; }
+  UInt64 getPart() const { return part_; }
+  vector<PStrip> getStripList() const { return strip_list_; }
+  UInt64 getOldHisCP() const { old_his_cp_; }
+  void setTs(UInt64 ts) { ts_ = ts; }
+  void setPart(UInt64 part) { part_ = part; }
+  vector<PStrip> setStripList(const vector<PStrip> &strip_list) {
+    strip_list_ = strip_list;
+  }
+  void setOldHisCP(UInt64 old_his_cp) { old_his_cp_ = old_his_cp; }
+};
+inline bool operator==(const CheckpointReq &lhs, const CheckpointReq &rhs) {
+  return lhs.ts_ == rhs.ts_ && lhs.part_ == rhs.part_;
+}
+
 /*********Checkpoint***********/
-class Checkpoint {
+class TsCheckpoint {
  public:
   UInt64 GetHisCP(UInt64 ts) {
     UInt64 cp;
@@ -398,8 +444,9 @@ class TxnBin {
   int ct_ = 0;
   int ct_commit_ = 0;
   int ct_abort_ = 0;
-  unordered_map<UInt64, vector<PStrip>>
-      snapshot_;  // If bin is full, a snapshot is generated.
+  // If bin is full, a snapshot is generated.
+  unordered_map<UInt64, vector<PStrip>> snapshot_;
+  unordered_map<UInt64, vector<PStrip>> abort_list_;
 };
 
 inline void CAFSerConfig() {
@@ -409,22 +456,20 @@ inline void CAFSerConfig() {
   caf::announce<Ingest>(
       "Ingest", make_pair(&Ingest::get_id, &Ingest::set_id),
       make_pair(&Ingest::get_strip_list, &Ingest::set_strip_list));
-  caf::announce<QueryReq>("QueryReq", make_pair(&QueryReq::get_part_list,
-                                                &QueryReq::set_part_list));
+  caf::announce<QueryReq>(
+      "QueryReq", make_pair(&QueryReq::get_part_list, &QueryReq::set_part_list),
+      make_pair(&QueryReq::get_include_abort, &QueryReq::set_include_abort));
   caf::announce<Query>("Query", make_pair(&Query::getTS, &Query::setTS),
                        make_pair(&Query::getSnapshot, &Query::setSnapshot),
                        make_pair(&Query::getCPList, &Query::setCPList));
-  /*  caf::announce<Checkpoint>(
-        "Checkpoint", make_pair(&Checkpoint::get_part, &Checkpoint::set_part),
-        make_pair(&Checkpoint::get_logic_cp, &Checkpoint::set_Logic_cp),
-        make_pair(&Checkpoint::get_phy_cp, &Checkpoint::set_Phy_cp),
-        make_pair(&Checkpoint::get_commit_strip_list,
-                  &Checkpoint::set_commit_strip_list),
-        make_pair(&Checkpoint::get_abort_strip_list,
-                  &Checkpoint::set_abort_strip_list));*/
   caf::announce<Snapshot>(
       "Snapshot", make_pair(&Snapshot::getHisCPS, &Snapshot::setHisCPS),
       make_pair(&Snapshot::getPStrps, &Snapshot::setPStrips));
+  caf::announce<CheckpointReq>(
+      "CheckpointReq", make_pair(&CheckpointReq::getTs, &CheckpointReq::setTs),
+      make_pair(&CheckpointReq::getPart, &CheckpointReq::setPart),
+      make_pair(&CheckpointReq::getStripList, &CheckpointReq::setStripList),
+      make_pair(&CheckpointReq::getOldHisCP, &CheckpointReq::setOldHisCP));
 }
 }
 }
