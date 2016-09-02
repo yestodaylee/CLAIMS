@@ -104,7 +104,8 @@ void claims::loader::AMQConsumer::onMessage(const Message* message) {
 
     if (textMessage != NULL) {
       text = textMessage->getText();
-
+      //  message->acknowledge();
+      //  cout << "<packet>" << endl << text << endl;
       bool client_ack = client_ack_;
       mloader_->Ingest(text, [message, client_ack]() -> int {
         if (client_ack) {

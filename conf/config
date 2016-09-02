@@ -27,7 +27,12 @@ client_listener_port = 10000
 #data="/home/imdb/data/wangli/"
 #data="/home/imdb/data/POC/sample/"
 #data="/home/minqi/git/Data/data/tpc-h/1-partition/sf-1/"
+
+
 data="/home/imdb/config/tpc-h/1-partition/sf-1/"
+#data="/home/claims/data/tpc-h/sf1/1partition/"
+
+
 #data="/home/imdb/data/SF-1/"
 #data="/home/imdb/data/SF-1/"
 #data="/home/imdb/data/stock/"
@@ -37,10 +42,9 @@ data="/home/imdb/config/tpc-h/1-partition/sf-1/"
 #data="/home/fish/data/test/"
 #data="/home/imdb/data/POC/"
 #data="/home/imdb/data/POC/"
+
 #hdfs主节点
-
-
-hdfs_master_ip="127.0.0.1"
+hdfs_master_ip="58.198.176.92"
 
 #hdfs主节点端口
 hdfs_master_port=9000
@@ -66,6 +70,11 @@ is_master_loader=1
 master_loader_ip="127.0.0.1"
 
 master_loader_port=9002
+
+master_loader_thread_num=1
+
+slave_loader_thread_num=1
+
 
 #事务服务器
 txn_server=1

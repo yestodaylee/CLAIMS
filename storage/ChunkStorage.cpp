@@ -73,6 +73,10 @@ RetCode ChunkStorage::ApplyMemory() {
   RetCode ret = claims::common::rSuccess;
   HdfsInMemoryChunk chunk_info;
   chunk_info.length = CHUNK_SIZE;
+  cout << "apply memory:<" << chunk_id_.partition_id.projection_id.table_id
+       << "," << chunk_id_.partition_id.projection_id.projection_off << ","
+       << chunk_id_.partition_id.partition_off << "," << chunk_id_.chunk_off
+       << ">" << endl;
   if (BlockManager::getInstance()->getMemoryChunkStore()->ApplyChunk(
           chunk_id_, chunk_info.hook)) {
     /* there is enough memory storage space, so the storage level can be

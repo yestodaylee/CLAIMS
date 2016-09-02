@@ -241,15 +241,21 @@ RetCode SlaveLoader::ReceiveAndWorkLoop() {
     if (-1 == (real_read_num = recv(master_fd_, head_buffer,
                                     LoadPacket::kHeadLength, MSG_WAITALL))) {
       PLOG(ERROR) << "failed to receive message length from master";
+      cout << "1 received_data_size:" << real_read_num << endl;
       return rFailure;
     } else if (0 == real_read_num) {
       PLOG(ERROR) << "master loader socket has been closed";
+      cout << "2 received_data_size:" << real_read_num << endl;
+      cout << "listen fd:" << listening_fd_ << ",master fd:" << master_fd_
+           << endl;
       return rFailure;
     } else if (real_read_num < LoadPacket::kHeadLength) {
+      cout << "3 received_data_size:" << real_read_num << endl;
       LOG(ERROR) << "received message error! only read " << real_read_num
                  << " bytes";
       continue;
     }
+    cout << "4 received_data_size:" << real_read_num << endl;
     GET_TIME_SL(start_handle);
     PERFLOG("received packet head");
     uint64_t data_length =
@@ -347,10 +353,10 @@ RetCode SlaveLoader::StoreDataInMemory(const LoadPacket& packet) {
              << " CHUNK SIZE is:" << CHUNK_SIZE
              << " last chunk id is:" << last_chunk_id;
   EXEC_AND_DLOG_RETURN(
-      ret, part_storage->AddChunkWithMemoryToNum(last_chunk_id + 1, HDFS),
+      ret, part_storage->AddRtChunkWithMemoryToNum(last_chunk_id + 1, HDFS),
       "added chunk to " << last_chunk_id + 1, "failed to add chunk");
-
-  /// copy data into applied memory
+  // cout << "******1*****" << endl;
+  // copy data into applied memory
   const uint64_t tuple_size = Catalog::getInstance()
                                   ->getTable(table_id)
                                   ->getProjectoin(prj_id)
@@ -381,6 +387,7 @@ RetCode SlaveLoader::StoreDataInMemory(const LoadPacket& packet) {
       InMemoryChunkWriterIterator writer(chunk_info.hook, CHUNK_SIZE,
                                          cur_block_id, BLOCK_SIZE, pos_in_block,
                                          tuple_size);
+      // cout << "store data length:" << data_length << endl;
       do {  // write to every block
         uint64_t written_length =
             writer.Write(packet.data_buffer_ + total_written_length,
@@ -388,8 +395,8 @@ RetCode SlaveLoader::StoreDataInMemory(const LoadPacket& packet) {
         total_written_length += written_length;
         DLOG(INFO) << "written " << written_length
                    << " bytes into chunk:" << cur_chunk_id
-                   << ". Now total written " << total_written_length
-                   << " bytes";
+                   << ". Now total written " << total_written_length << " bytes"
+                   << endl;
         if (total_written_length == data_length) {
           // all tuple is written into memory
           return rSuccess;
@@ -397,7 +404,6 @@ RetCode SlaveLoader::StoreDataInMemory(const LoadPacket& packet) {
           assert(false);
         }
       } while (writer.NextBlock());
-
       ++cur_chunk_id;  // get next chunk to write
       DLOG(INFO) << "Now chunk id is " << cur_chunk_id
                  << ", total number of chunk is" << part_storage->GetChunkNum();
@@ -453,7 +459,7 @@ behavior SlaveLoader::WorkInCAF(event_based_actor* self) {
 }
 
 behavior SlaveLoader::PersistInCAF(event_based_actor* self) {
-  self->delayed_send(self, seconds(3), CheckpointAtom::value);
+  // self->delayed_send(self, seconds(3), CheckpointAtom::value);
   return {[self](CheckpointAtom) {
     cout << "slave persist.." << endl;
     QueryReq query_req;

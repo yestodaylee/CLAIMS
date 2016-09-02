@@ -165,7 +165,7 @@ class PartitionStorage {
 
   void AddNewChunk();
 
-  RetCode AddChunkWithMemoryToNum(unsigned expected_number_of_chunks,
+  RetCode AddRtChunkWithMemoryToNum(unsigned expected_number_of_chunks,
                                   const StorageLevel& storage_level);
 
   const int GetChunkNum() const { return chunk_list_.size(); }
@@ -207,11 +207,13 @@ class PartitionStorage {
   bool Persist(UInt64 old_his_cp, UInt64 new_his_cp);
   bool PersistHDFS(UInt64 old_his_cp, UInt64 new_his_cp);
   bool PersistDisk(UInt64 old_his_cp, UInt64 new_his_cp);
+
  protected:
   PartitionID partition_id_;
   atomic<unsigned> number_of_chunks_;
   std::vector<ChunkStorage*> chunk_list_;
   // add it for txn scan
+  atomic<unsigned> number_of_rt_chunks_;
   std::vector<ChunkStorage*> rt_chunk_list_;
   StorageLevel desirable_storage_level_;
 

@@ -164,6 +164,12 @@ static behavior MasterLoader::ReceiveSlaveReg(event_based_actor* self,
         mloader->slave_addr_to_socket_[NodeAddress(ip, "")] = new_slave_fd;
         mloader->socket_fd_to_lock_[new_slave_fd] = Lock();
         DLOG(INFO) << "start to send test message to slave";
+
+        cout << "slave_node <=> socket_fd" << endl;
+        for (auto node = mloader->slave_addr_to_socket_.begin();
+             node != mloader->slave_addr_to_socket_.end(); node++)
+          cout << "ip:" << node->first.ip << ", socket fd:" << node->second
+               << endl;
         /*
                 /// test whether socket works well
                 ostringstream oss;
@@ -399,6 +405,12 @@ RetCode MasterLoader::Ingest(const string& message,
   /// reply ACK to MQ
   EXEC_AND_DLOG(ret, ack_function(), "replied to MQ", "failed to reply to MQ");
 
+  cout << ingest.ToString() << endl;
+/*  auto data_size = 0L;
+  for (auto& part : partition_buffers) {
+    for (auto& buffer : part) data_size += buffer.length_;
+  }
+  cout << "send_data_size:" << data_size << endl;*/
   /// distribute partition load task
   EXEC_AND_DLOG(ret,
                 SendPartitionTupleToSlave(table, partition_buffers, ingest),
@@ -753,6 +765,9 @@ RetCode MasterLoader::SelectSocket(const TableDescriptor* table,
   DLOG(INFO) << "node address is " << addr.ip << ":" << addr.port;
   addr.port = "";  // the port is used for OLAP, not for loading
   socket_fd = slave_addr_to_socket_[addr];
+
+  cout << "node id:" << node_id_in_rmm << ",node address:" << addr.ip << ":"
+       << addr.port << ",socket fd:" << socket_fd << endl;
   return ret;
 }
 
@@ -784,6 +799,7 @@ RetCode MasterLoader::SendPacket(const int socket_fd,
     }
     total_write_num += write_num;
   }
+  cout << "send data bytes:" << total_write_num << endl;
 #ifdef MASTER_LOADER_PREF
 //  if (__sync_add_and_fetch(&sent_packetcount, 1) == txn_count_for_debug * 4) {
 //    cout << "send " << sent_packetcount << " packets used " << send_total_time
@@ -847,7 +863,7 @@ void* MasterLoader::StartMasterLoader(void* arg) {
   //
   std::string brokerURI =
       "failover:(tcp://"
-      "10.11.1.192:61616?wireFormat=openwire&connection.useAsyncSend=true"
+      "58.198.176.92:61616?wireFormat=openwire&connection.useAsyncSend=true"
       //        "&transport.commandTracingEnabled=true"
       //        "&transport.tcpTracingEnabled=true"
       //        "&wireFormat.tightEncodingEnabled=true"

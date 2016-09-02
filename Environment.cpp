@@ -135,13 +135,24 @@ Environment::Environment(bool ismaster) : ismaster_(ismaster) {
   logging_->log("Initializing txn log server");
   if (!InitTxnLog()) LOG(ERROR) << "failed to initialize txn log";
 
-  /**
-   *  Binding all partition for each projection
-   *  Because
-   */
-  sleep(3);
-  logging_->log("Advanced Bind all partition for each projection");
-  if (!AdvancedBindAllPart()) LOG(ERROR) << "failed to bing partitions";
+  if (ismaster) {
+    /**
+     *  Binding all partition for each projection
+     */
+    sleep(3);
+    logging_->log("Advanced Bind all partition for each projection");
+    if (!AdvancedBindAllPart()) {
+      cout << "failed to bind partitions" << endl;
+      LOG(ERROR) << "failed to bing partitions";
+    }
+    cout << "bind partition...." << endl;
+    auto parts = BlockManager::getInstance()->GetAllPartition();
+    assert(parts.size() > 0);
+/*    for (auto& part : parts)
+      cout << "binding<" << part.projection_id.table_id << ","
+           << part.projection_id.projection_off << "," << part.partition_off
+           << ">" << endl;*/
+  }
 
 #ifndef DEBUG_MODE
   if (ismaster) {
@@ -317,8 +328,11 @@ bool Environment::AdvancedBindAllPart() {
     for (auto proj_id = 0; proj_id < proj_count; proj_id++) {
       auto proj = table->getProjectoin(proj_id);
       if (!proj->AllPartitionBound()) {
-        Catalog::getInstance()->getBindingModele()->BindingEntireProjection(
-            proj->getPartitioner(), DESIRIABLE_STORAGE_LEVEL);
+        bool ret =
+            Catalog::getInstance()->getBindingModele()->BindingEntireProjection(
+                proj->getPartitioner(), DESIRIABLE_STORAGE_LEVEL);
+        // cout << "binding<" << table_id << "," << proj_id << ">:" << ret <<
+        // endl;
       }
     }
   }

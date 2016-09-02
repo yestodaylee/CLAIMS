@@ -409,6 +409,7 @@ vector<PartitionID> BlockManager::GetAllPartition() {
   vector<PartitionID> part_list;
   for (auto itr = partition_id_to_storage_.begin();
        itr != partition_id_to_storage_.end(); itr++) {
+    part_list.push_back(itr->first);
   }
   return part_list;
 }

@@ -60,6 +60,7 @@ PartitionStorage::PartitionStorage(const PartitionID& partition_id,
                                    const StorageLevel& storage_level)
     : partition_id_(partition_id),
       number_of_chunks_(number_of_chunks),
+      number_of_rt_chunks_(0),
       desirable_storage_level_(storage_level) {
   if (number_of_chunks_ * CHUNK_SIZE / 1024 / 1024 >
       BufferManager::getInstance()->getStorageMemoryBudegeInMilibyte() *
@@ -74,8 +75,8 @@ PartitionStorage::PartitionStorage(const PartitionID& partition_id,
          ChunkID(partition_id_, i, true), BLOCK_SIZE,
    desirable_storage_level_));
    }*/
-  CheckAndAppendChunkList(number_of_chunks_, false);
-  CheckAndAppendChunkList(number_of_chunks_, true);
+  // CheckAndAppendChunkList(number_of_chunks_, false);
+  // CheckAndAppendChunkList(number_of_chunks_, true);
   // cout << "*******chunk_list_" << chunk_list_.size() << endl;
 }
 
@@ -88,28 +89,29 @@ PartitionStorage::~PartitionStorage() {
 
 void PartitionStorage::AddNewChunk() { number_of_chunks_++; }
 
-RetCode PartitionStorage::AddChunkWithMemoryToNum(
+RetCode PartitionStorage::AddRtChunkWithMemoryToNum(
     unsigned expected_number_of_chunks, const StorageLevel& storage_level) {
   RetCode ret = rSuccess;
-  if (number_of_chunks_ >= expected_number_of_chunks) return ret;
-  DLOG(INFO) << "now chunk number:" << number_of_chunks_
-             << ". expected chunk num:" << expected_number_of_chunks;
-
+  // cout << "******-1*****" << endl;
+  if (number_of_rt_chunks_ >= expected_number_of_chunks) return ret;
+  DLOG(INFO) << "now rt chunk number:" << number_of_rt_chunks_
+             << ". expected rt chunk num:" << expected_number_of_chunks;
+  // cout << "******0*****" << endl;
   LockGuard<Lock> guard(write_lock_);
-  if (number_of_chunks_ >= expected_number_of_chunks) return ret;
+  if (number_of_rt_chunks_ >= expected_number_of_chunks) return ret;
 
-  for (unsigned i = number_of_chunks_; i < expected_number_of_chunks; i++) {
+  for (unsigned i = number_of_rt_chunks_; i < expected_number_of_chunks; i++) {
     ChunkStorage* chunk = new ChunkStorage(ChunkID(partition_id_, i, true),
                                            BLOCK_SIZE, storage_level);
-    EXEC_AND_DLOG(ret, chunk->ApplyMemory(), "applied memory for chunk("
+    EXEC_AND_DLOG(ret, chunk->ApplyMemory(), "applied memory for rt chunk("
                                                  << partition_id_.getName()
                                                  << "," << i << ")",
-                  "failed to apply memory for chunk(" << partition_id_.getName()
-                                                      << "," << i << ")");
-    chunk_list_.push_back(chunk);
+                  "failed to apply memory for rt chunk("
+                      << partition_id_.getName() << "," << i << ")");
+    rt_chunk_list_.push_back(chunk);
   }
-  number_of_chunks_ = expected_number_of_chunks;
-  assert(chunk_list_.size() == number_of_chunks_);
+  number_of_rt_chunks_ = expected_number_of_chunks;
+  assert(rt_chunk_list_.size() == number_of_rt_chunks_);
 
   return ret;
 }
@@ -128,9 +130,12 @@ void PartitionStorage::UpdateChunksWithInsertOrAppend(
         chunk_list_.back()->GetChunkID());
     chunk_list_.back()->SetCurrentStorageLevel(HDFS);
   }
-  for (unsigned i = number_of_chunks_; i < number_of_chunks; i++)
+  for (unsigned i = number_of_chunks_; i < number_of_chunks; i++) {
     chunk_list_.push_back(
         new ChunkStorage(ChunkID(partition_id, i), BLOCK_SIZE, storage_level));
+    /* rt_chunk_list_.push_back(new ChunkStorage(ChunkID(partition_id, i, true),
+                                               BLOCK_SIZE, storage_level));*/
+  }
   number_of_chunks_ = number_of_chunks;
 }
 
@@ -249,6 +254,11 @@ PartitionStorage::TxnPartitionReaderIterator::TxnPartitionReaderIterator(
       begin += len;
     }
   }
+  /*  string str = "rt:";
+    for (auto& strip : rt_strip_list_) {
+      str += "<" + to_string(strip.first) + "," + to_string(strip.second) + ">";
+    }
+    cout << str << endl;*/
 }
 
 PartitionStorage::TxnPartitionReaderIterator::~TxnPartitionReaderIterator() {
@@ -282,10 +292,13 @@ bool PartitionStorage::TxnPartitionReaderIterator::NextBlock(
   } else if (rt_block_index_ < rt_strip_list_.size()) {  // scan real-time data
     auto pos = rt_strip_list_[rt_block_index_].first;
     auto offset_in_block = pos - (pos / BLOCK_SIZE) * BLOCK_SIZE;
+    assert(offset_in_block >= 0);
     auto len = rt_strip_list_[rt_block_index_].second;
     auto rt_block_cur = pos / BLOCK_SIZE;
     auto rt_chunk_cur = pos / CHUNK_SIZE;
-    if (rt_chunk_cur > rt_chunk_cur_) {  // move to new rt chunk
+    // cout << "visit rt:<" << rt_chunk_cur << "," << rt_block_cur << ">" <<
+    // endl;
+    if (rt_chunk_cur != rt_chunk_cur_) {  // move to new rt chunk
       rt_chunk_cur_ = rt_chunk_cur;
       rt_block_cur_ = rt_chunk_cur_ * (CHUNK_SIZE / BLOCK_SIZE);
       ps_->CheckAndAppendChunkList(rt_chunk_cur_ + 1, true);
@@ -296,6 +309,7 @@ bool PartitionStorage::TxnPartitionReaderIterator::NextBlock(
     }
 
     do {  // move to rt_block_cur
+      if (ba != nullptr) delete ba;
       rt_chunk_it_->GetNextBlockAccessor(ba);
       rt_block_cur_++;
     } while (rt_block_cur_ <= rt_block_cur);
@@ -403,8 +417,7 @@ bool PartitionStorage::PersistHDFS(UInt64 old_his_cp, UInt64 new_his_cp) {
    */
   auto file_handle = FileHandleImpFactory::Instance().CreateFileHandleImp(
       kHdfs, partition_id_.getPathAndName());
-  if (file_handle == nullptr)
-    return false;
+  if (file_handle == nullptr) return false;
   HdfsInMemoryChunk chunk_his;
   auto begin = old_his_cp;
   auto end = new_his_cp;
