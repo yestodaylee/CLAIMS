@@ -110,7 +110,8 @@ caf::behavior TxnCore::make_behavior() {
         if (next_core_id != TxnServer::GetCoreID(query->ts_)) {
           // scan next core
           this->forward_to(TxnServer::cores_[next_core_id]);
-        } else if (include_abort) {  // process the final query
+        } else if (include_abort && false) {  // process the final query
+          cout << "size of abort list: " << endl;
           for (auto& part_cp : query->rt_cp_list_) {
             auto part = part_cp.first;
             auto checkpoint = part_cp.second;
@@ -131,9 +132,9 @@ caf::behavior TxnCore::make_behavior() {
                 return true;
               }
             });
-            auto abort_pos = query->abort_list_[part][0].first +
-                             query->abort_list_[part][0].second;
             if (query->abort_list_[part].size() > 0) {
+              auto abort_pos = query->abort_list_[part][0].first +
+                               query->abort_list_[part][0].second;
               Strip::Filter(query->snapshot_[part],
                             [abort_pos](PStrip& pstrip) -> bool {
                 if (pstrip.first + pstrip.second <= abort_pos)
@@ -276,7 +277,8 @@ caf::behavior TxnServer::make_behavior() {
           -> caf::message {
             cp_list_[part].SetHisCP(ts, his_cp);
             cp_list_[part].SetRtCP(ts, rt_cp);
-            return caf::make_message(OkAtom::value);
+            cout << "commit " << part << ":" << his_cp << "," << rt_cp << endl;
+            return caf::make_message(rSuccess);
           },
       [this](GCAtom) {
         UInt64 ts;

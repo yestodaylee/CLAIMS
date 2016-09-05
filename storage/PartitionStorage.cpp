@@ -89,7 +89,34 @@ PartitionStorage::~PartitionStorage() {
 
 void PartitionStorage::AddNewChunk() { number_of_chunks_++; }
 
-RetCode PartitionStorage::AddRtChunkWithMemoryToNum(
+RetCode PartitionStorage::AddHisChunkWithMemoryApply(
+    unsigned expected_number_of_chunks, const StorageLevel& storage_level) {
+  RetCode ret = rSuccess;
+  if (chunk_list_.size() >= expected_number_of_chunks) return ret;
+  DLOG(INFO) << "now chunk number:" << number_of_chunks_
+             << ". expected chunk num:" << expected_number_of_chunks;
+  LockGuard<Lock> guard(write_lock_);
+  if (chunk_list_.size() >= expected_number_of_chunks) return ret;
+  for (unsigned i = chunk_list_.size(); i < expected_number_of_chunks; i++) {
+    ChunkStorage* chunk =
+        new ChunkStorage(ChunkID(partition_id_, i), BLOCK_SIZE, storage_level);
+    chunk_list_.push_back(chunk);
+    /*    EXEC_AND_DLOG(ret, chunk_list_[i]->ApplyMemory(),
+                      "applied memory for chunk(" << partition_id_.getName() <<
+       ","
+                                                  << i << ")",
+                      "failed to apply memory for chunk(" <<
+       partition_id_.getName()
+                                                          << "," << i << ")");*/
+  }
+
+  number_of_chunks_ = expected_number_of_chunks;
+  assert(chunk_list_.size() == number_of_chunks_);
+
+  return ret;
+}
+
+RetCode PartitionStorage::AddRtChunkWithMemoryApply(
     unsigned expected_number_of_chunks, const StorageLevel& storage_level) {
   RetCode ret = rSuccess;
   // cout << "******-1*****" << endl;
@@ -103,13 +130,14 @@ RetCode PartitionStorage::AddRtChunkWithMemoryToNum(
   for (unsigned i = number_of_rt_chunks_; i < expected_number_of_chunks; i++) {
     ChunkStorage* chunk = new ChunkStorage(ChunkID(partition_id_, i, true),
                                            BLOCK_SIZE, storage_level);
+    rt_chunk_list_.push_back(chunk);
     EXEC_AND_DLOG(ret, chunk->ApplyMemory(), "applied memory for rt chunk("
                                                  << partition_id_.getName()
                                                  << "," << i << ")",
                   "failed to apply memory for rt chunk("
                       << partition_id_.getName() << "," << i << ")");
-    rt_chunk_list_.push_back(chunk);
   }
+
   number_of_rt_chunks_ = expected_number_of_chunks;
   assert(rt_chunk_list_.size() == number_of_rt_chunks_);
 
@@ -271,7 +299,7 @@ bool PartitionStorage::TxnPartitionReaderIterator::NextBlock(
   ChunkReaderIterator::block_accessor* ba = nullptr;
   if (block_cur_ < last_his_block_) {  // scan historical data
     int64_t chunk_cur = block_cur_ / (CHUNK_SIZE / BLOCK_SIZE);
-    if (chunk_cur > chunk_cur_) {  // update chunk_it_
+    if (chunk_cur != chunk_cur_) {  // update chunk_it_
       chunk_cur_ = chunk_cur;
       ps_->CheckAndAppendChunkList(chunk_cur_ + 1, false);
       if (chunk_it_ != nullptr) delete chunk_it_;
@@ -280,6 +308,7 @@ bool PartitionStorage::TxnPartitionReaderIterator::NextBlock(
     chunk_it_->GetNextBlockAccessor(ba);
     if (ba == nullptr) {
       if (chunk_it_ != nullptr) delete chunk_it_;
+      assert(false);
       return false;
     } else {
       assert(ba != nullptr);
@@ -369,32 +398,40 @@ UInt64 PartitionStorage::MergeToHis(UInt64 old_his_cp,
     auto begin = strip.first;
     auto end = strip.first + strip.second;
     while (begin < end) {
+      auto move = BLOCK_SIZE - (begin + BLOCK_SIZE) % BLOCK_SIZE;
+      if (move > end - begin) move = end - begin;
       // update historical chunk cur
+      AddHisChunkWithMemoryApply(begin / CHUNK_SIZE + 1, MEMORY);
+      auto chunkit =
+          chunk_list_[begin / CHUNK_SIZE]->CreateChunkReaderIterator();
+      assert(chunkit != nullptr);
       if (!BlockManager::getInstance()->getMemoryChunkStore()->GetChunk(
-              ChunkID(partition_id_, begin / CHUNK_SIZE), chunk_his))
-        return old_his_cp;
+              chunk_list_[begin / CHUNK_SIZE]->GetChunkID(), chunk_his)) {
+        assert(false);
+      }
       // update real time chunk cur
       if (!BlockManager::getInstance()->getMemoryChunkStore()->GetChunk(
-              ChunkID(partition_id_, new_his_cp / CHUNK_SIZE), chunk_rt))
+              ChunkID(partition_id_, new_his_cp / CHUNK_SIZE, true),
+              chunk_rt)) {
+        assert(false);
         return old_his_cp;
+      }
       // each step move just one full block or even partly block
-      auto move = BLOCK_SIZE - (begin + BLOCK_SIZE) % BLOCK_SIZE;
       if (move == BLOCK_SIZE) {  // full block
         memcpy(chunk_his.hook + new_his_cp % CHUNK_SIZE,
                chunk_rt.hook + begin % CHUNK_SIZE, move);
       } else {
-        auto tuple_count = (move - sizeof(unsigned)) / tuple_size;
-        if ((begin + move) % BLOCK_SIZE == 0) {
-          auto real_move = tuple_count * tuple_size;
-          memcpy(chunk_his.hook + new_his_cp % CHUNK_SIZE,
-                 chunk_rt.hook + begin % CHUNK_SIZE, real_move);
-        } else {
-          memcpy(chunk_his.hook + new_his_cp % CHUNK_SIZE,
-                 chunk_rt.hook + begin % CHUNK_SIZE, move);
-        }
+        auto real_move =
+            (begin + move) % BLOCK_SIZE != 0 ? move : move - sizeof(unsigned);
+        auto tuple_count = real_move / tuple_size;
+        // cout << "tuple count,size : " << tuple_count << "," << tuple_size
+        //     << endl;
+        memcpy(chunk_his.hook + new_his_cp % CHUNK_SIZE,
+               chunk_rt.hook + begin % CHUNK_SIZE, move);
         auto tail_offset =
-            (begin / BLOCK_SIZE + 1) * BLOCK_SIZE - sizeof(unsigned);
-        *reinterpret_cast<unsigned*>(chunk_his.hook + tail_offset) +=
+            (new_his_cp + BLOCK_SIZE) % CHUNK_SIZE - sizeof(unsigned);
+        // cout << "tail_offset:" << tail_offset << endl;
+        *reinterpret_cast<unsigned*>(chunk_his.hook + tail_offset) =
             tuple_count;
       }
       begin += move;

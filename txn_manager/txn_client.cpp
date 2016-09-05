@@ -198,7 +198,7 @@ RetCode TxnClient::CommitCheckpoint(UInt64 ts, UInt64 part, UInt64 his_cp,
   try {
     caf::scoped_actor self;
     self->sync_send(TxnServer::active_ ? TxnServer::proxy_ : proxy_,
-                    CommitCPAtom::value, his_cp, rt_cp)
+                    CommitCPAtom::value, ts, part, his_cp, rt_cp)
         .await([&ret](RetCode r) { ret = r; },
                caf::after(seconds(kTimeout)) >> [&ret] {
                                                   //   ret =
@@ -207,7 +207,7 @@ RetCode TxnClient::CommitCheckpoint(UInt64 ts, UInt64 part, UInt64 his_cp,
                                                   cout << "time out" << endl;
                                                 });
   } catch (...) {
-    cout << "link fail" << endl;
+    cout << "link fail @ CommitCheckpoint" << endl;
     //    return rLinkTmFail;
     return -1;
   }

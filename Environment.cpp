@@ -144,14 +144,15 @@ Environment::Environment(bool ismaster) : ismaster_(ismaster) {
     if (!AdvancedBindAllPart()) {
       cout << "failed to bind partitions" << endl;
       LOG(ERROR) << "failed to bing partitions";
+    } else {
+      cout << "success to bind partitions" << endl;
     }
     cout << "bind partition...." << endl;
     auto parts = BlockManager::getInstance()->GetAllPartition();
-    assert(parts.size() > 0);
-/*    for (auto& part : parts)
-      cout << "binding<" << part.projection_id.table_id << ","
-           << part.projection_id.projection_off << "," << part.partition_off
-           << ">" << endl;*/
+    /*    for (auto& part : parts)
+          cout << "binding<" << part.projection_id.table_id << ","
+               << part.projection_id.projection_off << "," << part.partition_off
+               << ">" << endl;*/
   }
 
 #ifndef DEBUG_MODE

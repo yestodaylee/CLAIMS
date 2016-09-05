@@ -327,6 +327,7 @@ class ChunkStorage {
   }
 
   RetCode ApplyMemory();
+  StorageLevel GetStorgeLevel() const { current_storage_level_; }
 
  private:
   unsigned block_size_;

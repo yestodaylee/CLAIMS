@@ -220,7 +220,7 @@ void TxnBin::MergeSnapshot(Query &query) const {
                                  snapshot_[part].end());
     Strip::Sort(query.snapshot_[part]);
     Strip::Merge(query.snapshot_[part]);
-     Strip::Filter(query.snapshot_[part], [checkpoint](PStrip &pstrip) -> bool {
+    Strip::Filter(query.snapshot_[part], [checkpoint](PStrip &pstrip) -> bool {
       if (pstrip.first + pstrip.second <= checkpoint) {
         return false;
       } else {
@@ -243,7 +243,7 @@ void TxnBin::MergeTxn(Query &query, int len) const {
       for (auto &strip : txn_list_[i].strip_list_)
         query.snapshot_[strip.first].push_back(strip.second);
     } else if (txn_list_[i].IsAbort()) {
-      for (auto &strip: txn_list_[i].strip_list_)
+      for (auto &strip : txn_list_[i].strip_list_)
         query.abort_list_[strip.first].push_back(strip.second);
     }
 
@@ -252,10 +252,8 @@ void TxnBin::MergeTxn(Query &query, int len) const {
     auto checkpoint = part_cp.second;
     Strip::Sort(query.snapshot_[part]);
     Strip::Merge(query.snapshot_[part]);
-     Strip::Filter(query.snapshot_[part], [checkpoint](PStrip &pstrip) -> bool {
+    Strip::Filter(query.snapshot_[part], [checkpoint](PStrip &pstrip) -> bool {
       if (pstrip.first + pstrip.second <= checkpoint) {
-        cout << "fail:<" << pstrip.first << "," << pstrip.second << ">"
-             << pstrip.second << endl;
         return false;
       } else {
         if (pstrip.first < checkpoint &&

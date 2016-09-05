@@ -353,7 +353,7 @@ RetCode SlaveLoader::StoreDataInMemory(const LoadPacket& packet) {
              << " CHUNK SIZE is:" << CHUNK_SIZE
              << " last chunk id is:" << last_chunk_id;
   EXEC_AND_DLOG_RETURN(
-      ret, part_storage->AddRtChunkWithMemoryToNum(last_chunk_id + 1, HDFS),
+      ret, part_storage->AddRtChunkWithMemoryApply(last_chunk_id + 1, HDFS),
       "added chunk to " << last_chunk_id + 1, "failed to add chunk");
   // cout << "******1*****" << endl;
   // copy data into applied memory
@@ -459,9 +459,8 @@ behavior SlaveLoader::WorkInCAF(event_based_actor* self) {
 }
 
 behavior SlaveLoader::PersistInCAF(event_based_actor* self) {
-  // self->delayed_send(self, seconds(3), CheckpointAtom::value);
+  self->delayed_send(self, seconds(5), CheckpointAtom::value);
   return {[self](CheckpointAtom) {
-    cout << "slave persist.." << endl;
     QueryReq query_req;
     query_req.include_abort_ = true;
     Query query;
@@ -482,13 +481,17 @@ behavior SlaveLoader::PersistInCAF(event_based_actor* self) {
         auto old_his_cp = query.his_cp_list_[g_part_id];
         auto new_his_cp =
             part_handler->MergeToHis(old_his_cp, query.snapshot_[g_part_id]);
-        if (new_his_cp == old_his_cp) continue;
-        if (!part_handler->Persist(old_his_cp, new_his_cp)) continue;
+        // cout << "new_his_cp:" << new_his_cp << endl;
+        /*  if (new_his_cp == old_his_cp) continue;
+          if (!part_handler->Persist(old_his_cp, new_his_cp)) continue;
+           */
         TxnClient::CommitCheckpoint(query.ts_, g_part_id, new_his_cp,
                                     new_rt_cp);
+        /*cout << "persist:" << g_part_id << ":" << new_his_cp << "，"
+             << new_rt_cp << endl;*/
       }
     }
-    self->delayed_send(self, seconds(3), CheckpointAtom::value);
+    self->delayed_send(self, seconds(7), CheckpointAtom::value);
   }};
 }
 

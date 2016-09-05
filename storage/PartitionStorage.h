@@ -165,8 +165,11 @@ class PartitionStorage {
 
   void AddNewChunk();
 
-  RetCode AddRtChunkWithMemoryToNum(unsigned expected_number_of_chunks,
-                                  const StorageLevel& storage_level);
+  RetCode AddHisChunkWithMemoryApply(unsigned expected_number_of_chunks,
+                                     const StorageLevel& storage_level);
+
+  RetCode AddRtChunkWithMemoryApply(unsigned expected_number_of_chunks,
+                                    const StorageLevel& storage_level);
 
   const int GetChunkNum() const { return chunk_list_.size(); }
 

@@ -129,7 +129,7 @@ ChunkReaderIterator* ChunkStorage::CreateChunkReaderIterator() {
       if (BlockManager::getInstance()->getMemoryChunkStore()->GetChunk(
               chunk_id_, chunk_info))
         ret = new InMemoryChunkReaderItetaor(chunk_info.hook, chunk_info.length,
-                                             chunk_info.length / block_size_,
+                                             CHUNK_SIZE / BLOCK_SIZE,
                                              block_size_, chunk_id_);
       else
         ret = NULL;
