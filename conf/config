@@ -73,7 +73,7 @@ master_loader_port=9002
 
 master_loader_thread_num=1
 
-slave_loader_thread_num=1
+slave_loader_thread_num=4
 
 
 #事务服务器
@@ -86,7 +86,7 @@ txn_server_ip="127.0.0.1"
 txn_server_port=9100
 
 #事务日志
-txn_log=1
+txn_log=0
 
 txn_log_path="txn-log"
 

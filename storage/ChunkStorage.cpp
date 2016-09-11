@@ -65,7 +65,7 @@ ChunkStorage::ChunkStorage(const ChunkID& chunk_id, const unsigned& block_size,
       chunk_size_(CHUNK_SIZE) {}
 
 ChunkStorage::~ChunkStorage() {
-  // TODO(wangli): Auto-generated destructor stub
+  // TODO(wangli): Auto-generated destructor  stub
 }
 
 // apply memory for chunk size for writing later by slave loader

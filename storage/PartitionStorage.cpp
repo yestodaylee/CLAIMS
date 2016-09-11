@@ -92,22 +92,21 @@ void PartitionStorage::AddNewChunk() { number_of_chunks_++; }
 RetCode PartitionStorage::AddHisChunkWithMemoryApply(
     unsigned expected_number_of_chunks, const StorageLevel& storage_level) {
   RetCode ret = rSuccess;
+  LockGuard<Lock> guard(write_lock_);
   if (chunk_list_.size() >= expected_number_of_chunks) return ret;
   DLOG(INFO) << "now chunk number:" << number_of_chunks_
              << ". expected chunk num:" << expected_number_of_chunks;
-  LockGuard<Lock> guard(write_lock_);
   if (chunk_list_.size() >= expected_number_of_chunks) return ret;
   for (unsigned i = chunk_list_.size(); i < expected_number_of_chunks; i++) {
     ChunkStorage* chunk =
         new ChunkStorage(ChunkID(partition_id_, i), BLOCK_SIZE, storage_level);
     chunk_list_.push_back(chunk);
-    /*    EXEC_AND_DLOG(ret, chunk_list_[i]->ApplyMemory(),
-                      "applied memory for chunk(" << partition_id_.getName() <<
-       ","
-                                                  << i << ")",
-                      "failed to apply memory for chunk(" <<
-       partition_id_.getName()
-                                                          << "," << i << ")");*/
+    EXEC_AND_DLOG(ret, chunk_list_[i]->ApplyMemory(),
+                  "applied memory for chunk(" << partition_id_.getName() << ","
+                                              << i << ")",
+                  "failed to apply memory for chunk(" << partition_id_.getName()
+                                                      << "," << i << ")");
+    assert(ret == rSuccess);
   }
 
   number_of_chunks_ = expected_number_of_chunks;
@@ -119,12 +118,13 @@ RetCode PartitionStorage::AddHisChunkWithMemoryApply(
 RetCode PartitionStorage::AddRtChunkWithMemoryApply(
     unsigned expected_number_of_chunks, const StorageLevel& storage_level) {
   RetCode ret = rSuccess;
+  LockGuard<Lock> guard(write_lock_);
   // cout << "******-1*****" << endl;
   if (number_of_rt_chunks_ >= expected_number_of_chunks) return ret;
   DLOG(INFO) << "now rt chunk number:" << number_of_rt_chunks_
              << ". expected rt chunk num:" << expected_number_of_chunks;
   // cout << "******0*****" << endl;
-  LockGuard<Lock> guard(write_lock_);
+
   if (number_of_rt_chunks_ >= expected_number_of_chunks) return ret;
 
   for (unsigned i = number_of_rt_chunks_; i < expected_number_of_chunks; i++) {
@@ -282,6 +282,7 @@ PartitionStorage::TxnPartitionReaderIterator::TxnPartitionReaderIterator(
       begin += len;
     }
   }
+  cout << "snapshot size:" << rt_strip_list_.size() << endl;
   /*  string str = "rt:";
     for (auto& strip : rt_strip_list_) {
       str += "<" + to_string(strip.first) + "," + to_string(strip.second) + ">";
@@ -305,6 +306,7 @@ bool PartitionStorage::TxnPartitionReaderIterator::NextBlock(
       if (chunk_it_ != nullptr) delete chunk_it_;
       chunk_it_ = ps_->chunk_list_[chunk_cur_]->CreateChunkReaderIterator();
     }
+    assert(chunk_it_!=nullptr);
     chunk_it_->GetNextBlockAccessor(ba);
     if (ba == nullptr) {
       if (chunk_it_ != nullptr) delete chunk_it_;
@@ -401,18 +403,18 @@ UInt64 PartitionStorage::MergeToHis(UInt64 old_his_cp,
       auto move = BLOCK_SIZE - (begin + BLOCK_SIZE) % BLOCK_SIZE;
       if (move > end - begin) move = end - begin;
       // update historical chunk cur
-      AddHisChunkWithMemoryApply(begin / CHUNK_SIZE + 1, MEMORY);
-      auto chunkit =
-          chunk_list_[begin / CHUNK_SIZE]->CreateChunkReaderIterator();
-      assert(chunkit != nullptr);
+      AddHisChunkWithMemoryApply(begin / CHUNK_SIZE + 1, HDFS);
+      /* auto chunkit =
+           chunk_list_[begin / CHUNK_SIZE]->CreateChunkReaderIterator();
+       assert(chunkit != nullptr);*/
       if (!BlockManager::getInstance()->getMemoryChunkStore()->GetChunk(
               chunk_list_[begin / CHUNK_SIZE]->GetChunkID(), chunk_his)) {
-        assert(false);
+        // cout << "@@@@@@chunk id:" << begin / CHUNK_SIZE << "@@@@@@" << endl;
+        assert(false && begin && begin / CHUNK_SIZE);
       }
       // update real time chunk cur
       if (!BlockManager::getInstance()->getMemoryChunkStore()->GetChunk(
-              ChunkID(partition_id_, new_his_cp / CHUNK_SIZE, true),
-              chunk_rt)) {
+              rt_chunk_list_[begin / CHUNK_SIZE]->GetChunkID(), chunk_rt)) {
         assert(false);
         return old_his_cp;
       }

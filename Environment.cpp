@@ -135,11 +135,17 @@ Environment::Environment(bool ismaster) : ismaster_(ismaster) {
   logging_->log("Initializing txn log server");
   if (!InitTxnLog()) LOG(ERROR) << "failed to initialize txn log";
 
+#ifndef DEBUG_MODE
+  if (ismaster) {
+    initializeClientListener();
+  }
+#endif
+
   if (ismaster) {
     /**
      *  Binding all partition for each projection
      */
-    sleep(3);
+    sleep(15);
     logging_->log("Advanced Bind all partition for each projection");
     if (!AdvancedBindAllPart()) {
       cout << "failed to bind partitions" << endl;
@@ -154,12 +160,6 @@ Environment::Environment(bool ismaster) : ismaster_(ismaster) {
                << part.projection_id.projection_off << "," << part.partition_off
                << ">" << endl;*/
   }
-
-#ifndef DEBUG_MODE
-  if (ismaster) {
-    initializeClientListener();
-  }
-#endif
 }
 
 Environment::~Environment() {

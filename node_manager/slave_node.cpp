@@ -239,8 +239,13 @@ RetCode SlaveNode::RegisterToMaster() {
   {
     int retry_max_time = 10;
     int time = 0;
-    caf::actor master_actor =
-        remote_actor(Config::master_loader_ip, Config::master_loader_port);
+    caf::actor master_actor;
+    try {
+      master_actor =
+          remote_actor(Config::master_loader_ip, Config::master_loader_port);
+    } catch (exception& e) {
+      LOG(ERROR) << "register to master loader fail";
+    }
     while (1) {
       try {
         caf::scoped_actor self;

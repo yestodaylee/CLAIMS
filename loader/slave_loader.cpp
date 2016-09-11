@@ -241,21 +241,15 @@ RetCode SlaveLoader::ReceiveAndWorkLoop() {
     if (-1 == (real_read_num = recv(master_fd_, head_buffer,
                                     LoadPacket::kHeadLength, MSG_WAITALL))) {
       PLOG(ERROR) << "failed to receive message length from master";
-      cout << "1 received_data_size:" << real_read_num << endl;
       return rFailure;
     } else if (0 == real_read_num) {
       PLOG(ERROR) << "master loader socket has been closed";
-      cout << "2 received_data_size:" << real_read_num << endl;
-      cout << "listen fd:" << listening_fd_ << ",master fd:" << master_fd_
-           << endl;
       return rFailure;
     } else if (real_read_num < LoadPacket::kHeadLength) {
-      cout << "3 received_data_size:" << real_read_num << endl;
       LOG(ERROR) << "received message error! only read " << real_read_num
                  << " bytes";
       continue;
     }
-    cout << "4 received_data_size:" << real_read_num << endl;
     GET_TIME_SL(start_handle);
     PERFLOG("received packet head");
     uint64_t data_length =
@@ -265,7 +259,6 @@ RetCode SlaveLoader::ReceiveAndWorkLoop() {
     DLOG(INFO) << "real packet length is :" << real_packet_length
                << ". date length is " << data_length;
     assert(data_length >= 4 && data_length <= 10000000);
-
     char* data_buffer = Malloc(data_length);
     MemoryGuard<char> guard(data_buffer);  // auto-release
     if (NULL == data_buffer) {
@@ -407,7 +400,11 @@ RetCode SlaveLoader::StoreDataInMemory(const LoadPacket& packet) {
       ++cur_chunk_id;  // get next chunk to write
       DLOG(INFO) << "Now chunk id is " << cur_chunk_id
                  << ", total number of chunk is" << part_storage->GetChunkNum();
-      assert(cur_chunk_id < part_storage->GetChunkNum());
+      if (cur_chunk_id < part_storage->GetChunkNum()) {
+        cout << "cur_chunk_id:" << cur_chunk_id
+             << " chunk num:" << part_storage->GetChunkNum() << endl;
+        assert(cur_chunk_id < part_storage->GetChunkNum() && cur_chunk_id);
+      }
       cur_block_id = 0;  // the block id of next chunk is 0
       pos_in_block = 0;
     } else {
@@ -459,7 +456,7 @@ behavior SlaveLoader::WorkInCAF(event_based_actor* self) {
 }
 
 behavior SlaveLoader::PersistInCAF(event_based_actor* self) {
-  self->delayed_send(self, seconds(5), CheckpointAtom::value);
+  self->delayed_send(self, seconds(30), CheckpointAtom::value);
   return {[self](CheckpointAtom) {
     QueryReq query_req;
     query_req.include_abort_ = true;
@@ -487,11 +484,11 @@ behavior SlaveLoader::PersistInCAF(event_based_actor* self) {
            */
         TxnClient::CommitCheckpoint(query.ts_, g_part_id, new_his_cp,
                                     new_rt_cp);
-        /*cout << "persist:" << g_part_id << ":" << new_his_cp << "，"
-             << new_rt_cp << endl;*/
+        cout << "persist:" << g_part_id << ":" << new_his_cp << "，"
+             << new_rt_cp << endl;
       }
     }
-    self->delayed_send(self, seconds(7), CheckpointAtom::value);
+    self->delayed_send(self, seconds(30), CheckpointAtom::value);
   }};
 }
 
