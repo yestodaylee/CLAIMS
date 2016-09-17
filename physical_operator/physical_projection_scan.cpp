@@ -111,11 +111,11 @@ bool PhysicalProjectionScan::Open(SegmentExecStatus* const exec_status,
       //           << ",part_id:" << part_id << ",cp:" << cp << endl;
       partition_reader_iterator_ = partition_handle_->CreateTxnReaderIterator(
           cp, state_.query_.scan_snapshot_[global_part_id]);
-            cout << "scan part:" << global_part_id << endl;
-            cout << "checkpoint:" << cp << endl;
-            for (auto& part : state_.query_.scan_snapshot_[global_part_id]) {
-              cout << "<" << part.first << "," << part.second << ">" << endl;
-            }
+      cout << "version:" << state_.query_.ts_ << ",part:" << global_part_id
+           << ",checkpoint:" << cp;
+      for (auto& part : state_.query_.scan_snapshot_[global_part_id])
+        cout << "<" << part.first << "," << part.second << ">";
+      cout << endl;
       //  partition_reader_iterator_ =
       //     partition_handle_->CreateAtomicReaderIterator();
       SetReturnStatus(true);

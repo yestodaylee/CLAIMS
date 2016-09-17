@@ -38,10 +38,11 @@
 #include "../storage/StorageLevel.h"
 #include "../storage/PartitionReaderIterator.h"
 #include "../utility/lock.h"
+#include "../utility/lock_guard.h"
 #include "../Debug.h"
 using claims::txn::PStrip;
 using claims::txn::UInt64;
-
+using claims::utility::LockGuard;
 // namespace claims {
 // namespace storage {
 /**
@@ -147,6 +148,9 @@ class PartitionStorage {
     vector<void*> rt_block_buffer_;
 
     Lock lock_;
+
+   public:
+    static ofstream logfile;
   };
 
   /**
@@ -163,7 +167,8 @@ class PartitionStorage {
    */
   virtual ~PartitionStorage();
 
-  void AddNewChunk();
+  void AddNewRTChunk();
+  void AddNewHisChunk();
 
   RetCode AddHisChunkWithMemoryApply(unsigned expected_number_of_chunks,
                                      const StorageLevel& storage_level);
@@ -171,7 +176,15 @@ class PartitionStorage {
   RetCode AddRtChunkWithMemoryApply(unsigned expected_number_of_chunks,
                                     const StorageLevel& storage_level);
 
-  const int GetChunkNum() const { return chunk_list_.size(); }
+  int GetRTChunkNum() {
+    LockGuard<Lock> guard(write_lock_);
+    return rt_chunk_list_.size();
+  }
+
+  int GetHisChunkNum() {
+    LockGuard<Lock> guard(write_lock_);
+    return chunk_list_.size();
+  }
 
   /**
    * @brief Method description: Expand the container of partition

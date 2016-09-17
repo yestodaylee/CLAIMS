@@ -112,6 +112,9 @@ static const int txn_count_for_debug = 10000;
 
 namespace claims {
 namespace loader {
+
+ofstream MasterLoader::logfile;
+
 void MasterLoader::IngestionRequest::Show() {
   DLOG(INFO) << "table name:" << table_name_
              << ", column separator:" << col_sep_
@@ -171,44 +174,47 @@ static behavior MasterLoader::ReceiveSlaveReg(event_based_actor* self,
           cout << "ip:" << node->first.ip << ", socket fd:" << node->second
                << endl;
         /*
-                /// test whether socket works well
-                ostringstream oss;
-                oss << "hello, i'm master, whose address is "
-                    << mloader->master_loader_ip << ":"
-                    << to_string(mloader->master_loader_port) << ". \0";
+                    /// test whether socket works well
+                    ostringstream oss;
+                    oss << "hello, i'm master, whose address is "
+                        << mloader->master_loader_ip << ":"
+                        << to_string(mloader->master_loader_port) << ". \0";
 
-                int message_length = oss.str().length();
-                DLOG(INFO) << "message length is " << message_length;
+                    int message_length = oss.str().length();
+                    DLOG(INFO) << "message length is " << message_length;
 
-                if (-1 ==
-                    write(new_slave_fd,
-           reinterpret_cast<char*>(&message_length), 4)) {
-                  PLOG(ERROR) << "failed to send message length to slave(" << ip
-           << ":"
-                              << port << ")";
-                } else {
-                  DLOG(INFO) << "message length is sent";
-                }
-                if (-1 == write(new_slave_fd, oss.str().c_str(),
-           message_length)) {
-                  PLOG(ERROR) << "failed to send message to slave(" << ip << ":"
-           << port
-                              << ")";
-                } else {
-                  DLOG(INFO) << "message buffer is sent";
-                }
-        */
+                    if (-1 ==
+                        write(new_slave_fd,
+               reinterpret_cast<char*>(&message_length), 4)) {
+                      PLOG(ERROR) << "failed to send message length to slave("
+           <<
+             ip
+               << ":"
+                                  << port << ")";
+                    } else {
+                      DLOG(INFO) << "message length is sent";
+                    }
+                    if (-1 == write(new_slave_fd, oss.str().c_str(),
+               message_length)) {
+                      PLOG(ERROR) << "failed to send message to slave(" << ip <<
+             ":"
+               << port
+                                  << ")";
+                    } else {
+                      DLOG(INFO) << "message buffer is sent";
+                    }
+         */
         return 1;
       },
       [=](LoadAckAtom, uint64_t txn_id, bool is_commited) {  // NOLINT
 
         /*
-          TODO(ANYONE): there should be a thread checking whether
-         transaction overtime periodically and abort these transaction
-         and delete from map.
-         Consider that: if this function access the item in map just deleted
-         by above thread, unexpected thing happens.
-        */
+              TODO(ANYONE): there should be a thread checking whether
+             transaction overtime periodically and abort these transaction
+             and delete from map.
+             Consider that: if this function access the item in map just deleted
+             by above thread, unexpected thing happens.
+         */
 
         DLOG(INFO) << "received a commit result " << is_commited
                    << " of txn with id:" << txn_id;
@@ -244,7 +250,7 @@ static behavior MasterLoader::ReceiveSlaveReg(event_based_actor* self,
             mloader->txn_commint_info_.erase(txn_id);
             mloader->commit_info_spin_lock_.release();
 
-            // FOR DEBUG
+          // FOR DEBUG
 #ifdef MASTER_LOADER_PREF
             if (++debug_finished_txn_count == txn_count_for_debug) {
               cout << "\n" << txn_count_for_debug << " txn used "
@@ -462,6 +468,10 @@ RetCode MasterLoader::GetRequestFromMessage(const string& message,
   pos = next_pos + 1;
   next_pos = message.find(',', pos);
   req->row_sep_ = message.substr(pos, next_pos - pos);
+  /*
+    logfile << "table:" << req->table_name_ << ",col sep:" << req->col_sep_
+            << ",row sep" << req->row_sep_ << endl;
+   */
 
   pos = next_pos + 1;
 
@@ -549,7 +559,13 @@ RetCode MasterLoader::GetPartitionTuples(
         "tuple is invalid." << tuple_string);
 #endif
     correct_tuple_buffer.push_back(tuple_buffer);
+
+    /*    for (auto i = 1; i < table_schema->getncolumns(); i++) {
+          logfile << table_schema->getColumnValue(tuple_buffer, i) << "|";
+        }
+        logfile << endl;*/
   }
+  // logfile.flush();
   PERFLOG("all tuples are tovalued");
 
   // map every tuple in different partition
@@ -767,7 +783,7 @@ RetCode MasterLoader::SelectSocket(const TableDescriptor* table,
   socket_fd = slave_addr_to_socket_[addr];
 
   /*  cout << "node id:" << node_id_in_rmm << ",node address:" << addr.ip << ":"
-         << addr.port << ",socket fd:" << socket_fd << endl;*/
+     << addr.port << ",socket fd:" << socket_fd << endl;*/
   return ret;
 }
 
@@ -845,6 +861,8 @@ void* MasterLoader::Work(void* arg) {
 }
 
 void* MasterLoader::StartMasterLoader(void* arg) {
+  remove("master_loader_log.txt");
+  logfile.open("master_loader_log.txt");
   Config::getInstance();
   LOG(INFO) << "start master loader...";
 
@@ -875,7 +893,7 @@ void* MasterLoader::StartMasterLoader(void* arg) {
   // use a topic or queue set the 'useTopics' flag.
   //============================================================
   std::string destURI =
-      "t123?consumer.prefetchSize = 1 ";  // ?consumer.prefetchSize=1";
+      "t1234?consumer.prefetchSize = 1 ";  // ?consumer.prefetchSize=1";
 
   //============================================================
   // set to true to use topics instead of queues

@@ -276,13 +276,15 @@ class InMemoryChunkWriterIterator {
  public:
   InMemoryChunkWriterIterator(void* chunk_offset, uint64_t chunk_size,
                               uint64_t block_id, uint64_t block_size,
-                              uint64_t pos_in_block, uint64_t tuple_size)
+                              uint64_t pos_in_block, uint64_t tuple_size,
+                              Schema* schema)
       : chunk_offset_(chunk_offset),
         chunk_size_(chunk_size),
         block_id_(block_id),
         block_size_(block_size),
         pos_in_block_(pos_in_block),
-        tuple_size_(tuple_size) {}
+        tuple_size_(tuple_size),
+        schema_(schema) {}
 
  public:
   uint64_t Write(const void* const buffer_to_write, uint64_t length_to_write);
@@ -292,6 +294,8 @@ class InMemoryChunkWriterIterator {
     pos_in_block_ = 0;
     return true;
   }
+  uint64_t GetBlockId() const { return block_id_; }
+  uint64_t GetBlockPos() const { return pos_in_block_; }
 
  private:
   void* chunk_offset_;
@@ -300,6 +304,7 @@ class InMemoryChunkWriterIterator {
   uint64_t block_size_;
   uint64_t pos_in_block_;
   uint64_t tuple_size_;
+  Schema* schema_;
 };
 class ChunkStorage {
  public:

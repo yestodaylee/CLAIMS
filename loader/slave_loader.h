@@ -29,11 +29,13 @@
 #ifndef LOADER_SLAVE_LOADER_H_
 #define LOADER_SLAVE_LOADER_H_
 #include <assert.h>
+#include <stdio.h>
 #include <iostream>
 #include <queue>
 #include <string>
 #include <atomic>
 #include <unordered_map>
+#include <fstream>
 #include "../catalog/catalog.h"
 #include "../storage/BlockManager.h"
 #include "../txn_manager/txn.hpp"
@@ -48,6 +50,7 @@ using std::unordered_map;
 using caf::behavior;
 using caf::event_based_actor;
 using std::string;
+using std::fstream;
 using claims::catalog::Catalog;
 using claims::txn::CheckpointAtom;
 using claims::txn::UInt64;
@@ -110,6 +113,9 @@ class SlaveLoader {
   SpineLock queue_lock_;
   semaphore packet_count_;
   Lock partition_storage_lock_;
+
+ public:
+  static ofstream logfile;
 };
 
 } /* namespace loader */

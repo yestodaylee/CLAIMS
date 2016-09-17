@@ -38,7 +38,6 @@
 #include "../common/memory_handle.h"
 #include "../Config.h"
 #include "../Resource/BufferManager.h"
-#include "../utility/lock_guard.h"
 #include "../storage/BlockManager.h"
 #include "../common/file_handle/file_handle_imp.h"
 #include "../common/file_handle/hdfs_file_handle_imp.h"
@@ -47,6 +46,8 @@ using claims::common::rSuccess;
 using claims::common::FileHandleImpFactory;
 using claims::common::kHdfs;
 using claims::utility::LockGuard;
+
+ofstream PartitionStorage::TxnPartitionReaderIterator::logfile;
 
 /**
  * According to number_of_chunks, construct chunk from partition and add into
@@ -87,12 +88,21 @@ PartitionStorage::~PartitionStorage() {
   chunk_list_.clear();
 }
 
-void PartitionStorage::AddNewChunk() { number_of_chunks_++; }
+void PartitionStorage::AddNewRTChunk() {
+  LockGuard<Lock> guard(write_lock_);
+  number_of_rt_chunks_++;
+}
+
+void PartitionStorage::AddNewHisChunk() {
+  LockGuard<Lock> guard(write_lock_);
+  number_of_chunks_++;
+}
 
 RetCode PartitionStorage::AddHisChunkWithMemoryApply(
     unsigned expected_number_of_chunks, const StorageLevel& storage_level) {
   RetCode ret = rSuccess;
   LockGuard<Lock> guard(write_lock_);
+  // cout << "1..." << endl;
   if (chunk_list_.size() >= expected_number_of_chunks) return ret;
   DLOG(INFO) << "now chunk number:" << number_of_chunks_
              << ". expected chunk num:" << expected_number_of_chunks;
@@ -107,6 +117,7 @@ RetCode PartitionStorage::AddHisChunkWithMemoryApply(
                   "failed to apply memory for chunk(" << partition_id_.getName()
                                                       << "," << i << ")");
     assert(ret == rSuccess);
+    // cout << "2...." << ret << endl;
   }
 
   number_of_chunks_ = expected_number_of_chunks;
@@ -173,6 +184,7 @@ void PartitionStorage::UpdateChunksWithInsertOrAppend(
  * call back actual method.
  */
 void PartitionStorage::RemoveAllChunks(const PartitionID& partition_id) {
+  LockGuard<Lock> guard(write_lock_);
   if (!chunk_list_.empty()) {
     vector<ChunkStorage*>::iterator iter = chunk_list_.begin();
     MemoryChunkStore* mcs = MemoryChunkStore::GetInstance();
@@ -288,15 +300,18 @@ PartitionStorage::TxnPartitionReaderIterator::TxnPartitionReaderIterator(
       str += "<" + to_string(strip.first) + "," + to_string(strip.second) + ">";
     }
     cout << str << endl;*/
+  logfile.open("ps_log.txt");
 }
 
 PartitionStorage::TxnPartitionReaderIterator::~TxnPartitionReaderIterator() {
   for (auto block : rt_block_buffer_) free(block);
+  logfile.close();
 }
 
 bool PartitionStorage::TxnPartitionReaderIterator::NextBlock(
     BlockStreamBase*& block) {
   LockGuard<Lock> guard(lock_);
+  HdfsInMemoryChunk chunk;
   ChunkReaderIterator::block_accessor* ba = nullptr;
   if (block_cur_ < last_his_block_) {  // scan historical data
     int64_t chunk_cur = block_cur_ / (CHUNK_SIZE / BLOCK_SIZE);
@@ -306,7 +321,7 @@ bool PartitionStorage::TxnPartitionReaderIterator::NextBlock(
       if (chunk_it_ != nullptr) delete chunk_it_;
       chunk_it_ = ps_->chunk_list_[chunk_cur_]->CreateChunkReaderIterator();
     }
-    assert(chunk_it_!=nullptr);
+    assert(chunk_it_ != nullptr);
     chunk_it_->GetNextBlockAccessor(ba);
     if (ba == nullptr) {
       if (chunk_it_ != nullptr) delete chunk_it_;
@@ -318,6 +333,8 @@ bool PartitionStorage::TxnPartitionReaderIterator::NextBlock(
       delete ba;
       ba = nullptr;
       block_cur_++;
+      /*      logfile << chunk_cur_ << "->" << (block_cur_ - 1) % 1024 << "->"
+                    << "full1" << endl;*/
       return true;
     }
   } else if (rt_block_index_ < rt_strip_list_.size()) {  // scan real-time data
@@ -338,7 +355,6 @@ bool PartitionStorage::TxnPartitionReaderIterator::NextBlock(
           ps_->rt_chunk_list_[rt_chunk_cur_]->CreateChunkReaderIterator();
       assert(rt_chunk_it_ != nullptr);
     }
-
     do {  // move to rt_block_cur
       if (ba != nullptr) delete ba;
       rt_chunk_it_->GetNextBlockAccessor(ba);
@@ -347,6 +363,9 @@ bool PartitionStorage::TxnPartitionReaderIterator::NextBlock(
 
     if (len == BLOCK_SIZE) {  // directly return pointer
       ba->GetBlock(block);
+      /*      logfile << rt_chunk_cur_ << "->" << (rt_block_cur_ - 1) % 1024 <<
+         "->"
+                    << "full2" << endl;*/
     } else {
       auto tuple_size =
           reinterpret_cast<BlockStreamFix*>(block)->getTupleSize();
@@ -359,10 +378,21 @@ bool PartitionStorage::TxnPartitionReaderIterator::NextBlock(
       auto des_addr = reinterpret_cast<void*>(malloc(BLOCK_SIZE));
       auto scr_addr = block->getBlockDataAddress() + offset_in_block;
       memcpy(des_addr, scr_addr, len);
+      *reinterpret_cast<unsigned*>(des_addr + BLOCK_SIZE - sizeof(unsigned)) =
+          tuple_count;
       reinterpret_cast<BlockStreamFix*>(block)->setBlockDataAddress(des_addr);
       reinterpret_cast<BlockStreamFix*>(block)->setTuplesInBlock(tuple_count);
       rt_block_buffer_.push_back(des_addr);
+      /*      logfile << rt_chunk_cur_ << "->" << (rt_block_cur_ - 1) % 1024 <<
+         "->"
+                    << offset_in_block << "," << offset_in_block + len << ","
+                    << tuple_count << endl;*/
     }
+    auto cout =
+        *reinterpret_cast<unsigned int*>(block->getBlockDataAddress() +
+                                         BLOCK_SIZE - sizeof(unsigned int));
+    /*    logfile << rt_chunk_cur_ << "->" << (rt_block_cur_ - 1) % 1024 << "->"
+                << cout << endl;*/
     delete ba;
     ba = nullptr;
     rt_block_index_++;
@@ -404,12 +434,8 @@ UInt64 PartitionStorage::MergeToHis(UInt64 old_his_cp,
       if (move > end - begin) move = end - begin;
       // update historical chunk cur
       AddHisChunkWithMemoryApply(begin / CHUNK_SIZE + 1, HDFS);
-      /* auto chunkit =
-           chunk_list_[begin / CHUNK_SIZE]->CreateChunkReaderIterator();
-       assert(chunkit != nullptr);*/
       if (!BlockManager::getInstance()->getMemoryChunkStore()->GetChunk(
               chunk_list_[begin / CHUNK_SIZE]->GetChunkID(), chunk_his)) {
-        // cout << "@@@@@@chunk id:" << begin / CHUNK_SIZE << "@@@@@@" << endl;
         assert(false && begin && begin / CHUNK_SIZE);
       }
       // update real time chunk cur
@@ -426,13 +452,10 @@ UInt64 PartitionStorage::MergeToHis(UInt64 old_his_cp,
         auto real_move =
             (begin + move) % BLOCK_SIZE != 0 ? move : move - sizeof(unsigned);
         auto tuple_count = real_move / tuple_size;
-        // cout << "tuple count,size : " << tuple_count << "," << tuple_size
-        //     << endl;
         memcpy(chunk_his.hook + new_his_cp % CHUNK_SIZE,
                chunk_rt.hook + begin % CHUNK_SIZE, move);
         auto tail_offset =
             (new_his_cp + BLOCK_SIZE) % CHUNK_SIZE - sizeof(unsigned);
-        // cout << "tail_offset:" << tail_offset << endl;
         *reinterpret_cast<unsigned*>(chunk_his.hook + tail_offset) =
             tuple_count;
       }

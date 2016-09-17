@@ -37,7 +37,7 @@
 #include "../Debug.h"
 #include "../utility/rdtsc.h"
 #include "../utility/warmup.h"
-
+#include "../loader/slave_loader.cpp"
 using claims::common::CStrError;
 using claims::common::rUnkownStroageLevel;
 using claims::common::rFailOpenFileInDiskChunkReaderIterator;
@@ -45,6 +45,7 @@ using claims::common::rFailReadOneBlockInDiskChunkReaderIterator;
 using claims::common::rFailOpenHDFSFileInStorage;
 using claims::common::rFailSetStartOffsetInStorage;
 using claims::common::HdfsConnector;
+using claims::loader::SlaveLoader;
 bool ChunkReaderIterator::NextBlock() {
   lock_.acquire();
   if (this->cur_block_ >= this->number_of_blocks_) {
@@ -86,9 +87,11 @@ RetCode ChunkStorage::ApplyMemory() {
     /*
      * set each block tail to "zero" in new chunk
      */
-    for (auto offset = 0; offset < CHUNK_SIZE; offset += BLOCK_SIZE)
+    for (auto offset = BLOCK_SIZE; offset <= CHUNK_SIZE; offset += BLOCK_SIZE) {
       *reinterpret_cast<unsigned*>(chunk_info.hook + offset -
                                    sizeof(unsigned)) = 0;
+      // cout << "block:" << offset / BLOCK_SIZE << "->" << 0 << endl;
+    }
 
     /* update the chunk info in the Chunk store in case that the
      * chunk_info is updated.*/
@@ -489,6 +492,20 @@ uint64_t InMemoryChunkWriterIterator::Write(const void* const buffer_to_write,
                << ". buffer to write: " << buffer_to_write;
     memcpy(block_offset + pos_in_block_, buffer_to_write,
            actual_written_tuple_count * tuple_size_);
+    /*    for (auto p = 0; p < actual_written_tuple_count; p++) {
+          for (auto c = 1; c < schema_->getncolumns(); c++)
+            SlaveLoader::logfile
+                << schema_->getColumnValue(buffer_to_write + p * tuple_size_, c)
+                << "|";
+          SlaveLoader::logfile << schema_->getTupleMaxSize() << endl;
+        }*/
+    /*
+        SlaveLoader::logfile << block_id_ << "," << pos_in_block_ << ","
+                             << pos_in_block_ +
+                                    actual_written_tuple_count* tuple_size_ <<
+       endl;
+    */
+
     DLOG(INFO) << "copy " << actual_written_tuple_count * tuple_size_
                << " bytes into block:" << block_id_;
 

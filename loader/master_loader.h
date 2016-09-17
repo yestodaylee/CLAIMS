@@ -31,6 +31,7 @@
 
 #include <boost/unordered/unordered_map.hpp>
 #include <sys/select.h>
+#include <fstream>
 #include <time.h>
 #include <functional>
 #include <string>
@@ -51,7 +52,7 @@ using std::function;
 using std::set;
 using std::unordered_map;
 using std::unordered_set;
-
+using std::ofstream;
 namespace claims {
 namespace catalog {
 class TableDescriptor;
@@ -224,6 +225,8 @@ class MasterLoader {
 
   unordered_map<uint64_t, uint64_t> txn_start_time_;
   static uint64_t txn_average_delay_;
+
+  static ofstream logfile;
 };
 
 } /* namespace loader */

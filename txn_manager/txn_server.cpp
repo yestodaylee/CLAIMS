@@ -238,7 +238,7 @@ caf::behavior TxnServer::make_behavior() {
   } catch (...) {
     cout << "txn server bind to port:" << port_ << " fail" << endl;
   }
-  this->delayed_send(this, seconds(3), GCAtom::value);
+  // this->delayed_send(this, seconds(3), GCAtom::value);
   return {
       [this](DebugAtom, string flag) -> caf::message {
         cout << "debug begin" << endl;

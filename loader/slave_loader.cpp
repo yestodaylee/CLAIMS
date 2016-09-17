@@ -96,6 +96,8 @@ static const char* txn_count_string = "5000";
 namespace claims {
 namespace loader {
 
+ofstream SlaveLoader::logfile;
+
 SlaveLoader::SlaveLoader() {}
 SlaveLoader::~SlaveLoader() {}
 
@@ -362,6 +364,19 @@ RetCode SlaveLoader::StoreDataInMemory(const LoadPacket& packet) {
   uint64_t total_written_length = 0;
   uint64_t data_length = packet.data_length_;
   HdfsInMemoryChunk chunk_info;
+
+  Schema* schema = Catalog::getInstance()
+                       ->getTable(table_id)
+                       ->getProjectoin(prj_id)
+                       ->getSchema();
+
+  /*  for (auto p = 0; p < data_length; p += tuple_size) {
+      for (auto col = 1; col < schema->getncolumns(); col++) {
+        logfile << schema->getColumnValue(packet.data_buffer_ + p, col) + "|";
+      }
+      logfile << endl;
+    }*/
+
   while (total_written_length < data_length) {
     /// get start position of current chunk
     if (BlockManager::getInstance()->getMemoryChunkStore()->GetChunk(
@@ -379,12 +394,16 @@ RetCode SlaveLoader::StoreDataInMemory(const LoadPacket& packet) {
                  << chunk_info.hook + CHUNK_SIZE;
       InMemoryChunkWriterIterator writer(chunk_info.hook, CHUNK_SIZE,
                                          cur_block_id, BLOCK_SIZE, pos_in_block,
-                                         tuple_size);
+                                         tuple_size, schema);
       // cout << "store data length:" << data_length << endl;
       do {  // write to every block
+/*        logfile << cur_chunk_id << "->" << writer.GetBlockId() << "->"
+                << writer.GetBlockPos() << ",";*/
         uint64_t written_length =
             writer.Write(packet.data_buffer_ + total_written_length,
                          data_length - total_written_length);
+/*        logfile << writer.GetBlockPos() + written_length << ","
+                << written_length / schema->getTupleMaxSize() << endl;*/
         total_written_length += written_length;
         DLOG(INFO) << "written " << written_length
                    << " bytes into chunk:" << cur_chunk_id
@@ -399,11 +418,12 @@ RetCode SlaveLoader::StoreDataInMemory(const LoadPacket& packet) {
       } while (writer.NextBlock());
       ++cur_chunk_id;  // get next chunk to write
       DLOG(INFO) << "Now chunk id is " << cur_chunk_id
-                 << ", total number of chunk is" << part_storage->GetChunkNum();
-      if (cur_chunk_id < part_storage->GetChunkNum()) {
+                 << ", total number of chunk is"
+                 << part_storage->GetRTChunkNum();
+      if (cur_chunk_id < part_storage->GetRTChunkNum()) {
         cout << "cur_chunk_id:" << cur_chunk_id
-             << " chunk num:" << part_storage->GetChunkNum() << endl;
-        assert(cur_chunk_id < part_storage->GetChunkNum() && cur_chunk_id);
+             << " chunk num:" << part_storage->GetRTChunkNum() << endl;
+        assert(cur_chunk_id < part_storage->GetRTChunkNum() && cur_chunk_id);
       }
       cur_block_id = 0;  // the block id of next chunk is 0
       pos_in_block = 0;
@@ -412,6 +432,7 @@ RetCode SlaveLoader::StoreDataInMemory(const LoadPacket& packet) {
       assert(false && "no chunk with this chunk id");
     }
   }
+
   return ret;
 }
 
@@ -442,8 +463,11 @@ RetCode SlaveLoader::SendAckToMasterLoader(const uint64_t& txn_id,
 
 // this method has the best performance
 behavior SlaveLoader::WorkInCAF(event_based_actor* self) {
+  remove("slave_loader_log.txt");
+  logfile.open("slave_loader_log.txt");
   return {[=](LoadPacketAtom, LoadPacket* packet) {  // NOLINT
     RetCode ret = rSuccess;
+
     EXEC_AND_DLOG(ret, StoreDataInMemory(*packet), "stored data",
                   "failed to store");
     /// return result to master loader
@@ -456,7 +480,7 @@ behavior SlaveLoader::WorkInCAF(event_based_actor* self) {
 }
 
 behavior SlaveLoader::PersistInCAF(event_based_actor* self) {
-  self->delayed_send(self, seconds(30), CheckpointAtom::value);
+  // self->delayed_send(self, seconds(10), CheckpointAtom::value);
   return {[self](CheckpointAtom) {
     QueryReq query_req;
     query_req.include_abort_ = true;
@@ -488,7 +512,7 @@ behavior SlaveLoader::PersistInCAF(event_based_actor* self) {
              << new_rt_cp << endl;
       }
     }
-    self->delayed_send(self, seconds(30), CheckpointAtom::value);
+    self->delayed_send(self, seconds(10), CheckpointAtom::value);
   }};
 }
 
