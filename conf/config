@@ -75,6 +75,9 @@ master_loader_thread_num=1
 
 slave_loader_thread_num=1
 
+amq_url="58.198.176.92:61616"
+
+amq_topic="t1234"
 
 #事务服务器
 txn_server=1

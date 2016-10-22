@@ -17,11 +17,12 @@
 #include "../Config.h"
 #include "../common/error_define.h"
 #include "../common/error_no.h"
+// #include "../utility/lock_guard.h"
 using claims::common::rLoadFromHdfsOpenFailed;
 using claims::common::rLoadFromDiskOpenFailed;
 using claims::common::rUnbindPartitionFailed;
 using claims::common::HdfsConnector;
-
+// using claims::utility::LockGuard;
 BlockManager* BlockManager::blockmanager_ = NULL;
 
 BlockManager* BlockManager::getInstance() {
@@ -342,7 +343,8 @@ string BlockManager::askForMatch(string filename, BlockManagerId bmi) {
   //  return file_proj_[filename.c_str()];
 }
 
-bool BlockManager::ContainsPartition(const PartitionID& part) const {
+bool BlockManager::ContainsPartition(const PartitionID& part) {
+  LockGuard<Lock> guard(lock);
   boost::unordered_map<PartitionID, PartitionStorage*>::const_iterator it =
       partition_id_to_storage_.find(part);
   return !(it == partition_id_to_storage_.cend());
@@ -351,6 +353,7 @@ bool BlockManager::ContainsPartition(const PartitionID& part) const {
 bool BlockManager::AddPartition(const PartitionID& partition_id,
                                 const unsigned& number_of_chunks,
                                 const StorageLevel& desirable_storage_level) {
+  LockGuard<Lock> lock_guard(lock);
   boost::unordered_map<PartitionID, PartitionStorage*>::const_iterator it =
       partition_id_to_storage_.find(partition_id);
   if (it != partition_id_to_storage_.cend()) {
@@ -379,6 +382,7 @@ bool BlockManager::AddPartition(const PartitionID& partition_id,
 }
 
 bool BlockManager::RemovePartition(const PartitionID& partition_id) {
+  LockGuard<Lock> guard(lock);
   boost::unordered_map<PartitionID, PartitionStorage*>::iterator it =
       partition_id_to_storage_.find(partition_id);
   if (it == partition_id_to_storage_.cend()) {
@@ -393,7 +397,8 @@ bool BlockManager::RemovePartition(const PartitionID& partition_id) {
 }
 
 PartitionStorage* BlockManager::GetPartitionHandle(
-    const PartitionID& partition_id) const {
+    const PartitionID& partition_id) {
+  LockGuard<Lock>  guard(lock);
   DLOG(INFO) << "partid2storage size is:" << partition_id_to_storage_.size();
   DLOG(INFO) << "going to find storage [" << partition_id.getName() << "]";
   boost::unordered_map<PartitionID, PartitionStorage*>::const_iterator it =

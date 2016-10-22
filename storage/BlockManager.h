@@ -90,11 +90,11 @@ class BlockManager {
   /* poc测试 */
   BlockManagerId *getId();
   string askForMatch(string filename, BlockManagerId bmi);
-  bool ContainsPartition(const PartitionID &part) const;
+  bool ContainsPartition(const PartitionID &part);
   bool AddPartition(const PartitionID &, const unsigned &number_of_chunks,
                     const StorageLevel &desirable_storage_level);
   bool RemovePartition(const PartitionID &);
-  PartitionStorage *GetPartitionHandle(const PartitionID &partition_id) const;
+  PartitionStorage *GetPartitionHandle(const PartitionID &partition_id);
 
   vector<PartitionID> GetAllPartition();
   UInt64 MergeHisToRt(PartitionID, const vector<PStrip> &strip_list, UInt64 rt);

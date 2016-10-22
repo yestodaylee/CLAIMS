@@ -57,12 +57,21 @@ bool ChunkReaderIterator::NextBlock() {
   return true;
 }
 
-ChunkStorage::ChunkStorage(const ChunkID& chunk_id, const unsigned& block_size,
-                           const StorageLevel& desirable_storage_level)
+ChunkStorage::ChunkStorage(const ChunkID& chunk_id, const unsigned block_size,
+                           const StorageLevel desirable_storage_level)
     : chunk_id_(chunk_id),
       block_size_(block_size),
       desirable_storage_level_(desirable_storage_level),
       current_storage_level_(HDFS),
+      chunk_size_(CHUNK_SIZE) {}
+
+ChunkStorage::ChunkStorage(const ChunkID& chunk_id, const unsigned block_size,
+                           const StorageLevel desirable_storage_level,
+                           const StorageLevel current_storage_level)
+    : chunk_id_(chunk_id),
+      block_size_(block_size),
+      desirable_storage_level_(desirable_storage_level),
+      current_storage_level_(current_storage_level),
       chunk_size_(CHUNK_SIZE) {}
 
 ChunkStorage::~ChunkStorage() {
@@ -74,10 +83,6 @@ RetCode ChunkStorage::ApplyMemory() {
   RetCode ret = claims::common::rSuccess;
   HdfsInMemoryChunk chunk_info;
   chunk_info.length = CHUNK_SIZE;
-  cout << "apply memory:<" << chunk_id_.partition_id.projection_id.table_id
-       << "," << chunk_id_.partition_id.projection_id.projection_off << ","
-       << chunk_id_.partition_id.partition_off << "," << chunk_id_.chunk_off
-       << ">" << endl;
   if (BlockManager::getInstance()->getMemoryChunkStore()->ApplyChunk(
           chunk_id_, chunk_info.hook)) {
     /* there is enough memory storage space, so the storage level can be
@@ -90,9 +95,11 @@ RetCode ChunkStorage::ApplyMemory() {
     for (auto offset = BLOCK_SIZE; offset <= CHUNK_SIZE; offset += BLOCK_SIZE) {
       *reinterpret_cast<unsigned*>(chunk_info.hook + offset -
                                    sizeof(unsigned)) = 0;
-      // cout << "block:" << offset / BLOCK_SIZE << "->" << 0 << endl;
     }
 
+/*    cout << "Success to apply mem chunk:"
+         << chunk_id_.partition_id.partition_off << "," << chunk_id_.chunk_off
+         << endl;*/
     /* update the chunk info in the Chunk store in case that the
      * chunk_info is updated.*/
     BlockManager::getInstance()->getMemoryChunkStore()->UpdateChunkInfo(
@@ -102,7 +109,8 @@ RetCode ChunkStorage::ApplyMemory() {
      * The storage memory is full, some swap algorithm is needed here.
      * TODO: swap algorithm.
      */
-    printf("Failed to get memory chunk budget!\n");
+/*    cout << "Failed to apply mem chunk:" << chunk_id_.partition_id.partition_off
+         << "," << chunk_id_.chunk_off << endl;*/
     ret = claims::common::rNoMemory;
     assert(false);
   }

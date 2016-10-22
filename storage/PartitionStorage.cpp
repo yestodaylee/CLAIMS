@@ -31,7 +31,7 @@
 
 #include <assert.h>
 #include <vector>
-
+#include <string>
 #include "../common/error_define.h"
 // #include "../Debug.h"
 #include "./MemoryManager.h"
@@ -42,6 +42,7 @@
 #include "../common/file_handle/file_handle_imp.h"
 #include "../common/file_handle/hdfs_file_handle_imp.h"
 #include "../common/file_handle/file_handle_imp_factory.h"
+#include "../utility/resource_guard.h"
 using claims::common::rSuccess;
 using claims::common::FileHandleImpFactory;
 using claims::common::kHdfs;
@@ -388,7 +389,7 @@ bool PartitionStorage::TxnPartitionReaderIterator::NextBlock(
                     << offset_in_block << "," << offset_in_block + len << ","
                     << tuple_count << endl;*/
     }
-    auto cout =
+    auto count =
         *reinterpret_cast<unsigned int*>(block->getBlockDataAddress() +
                                          BLOCK_SIZE - sizeof(unsigned int));
     /*    logfile << rt_chunk_cur_ << "->" << (rt_block_cur_ - 1) % 1024 << "->"
@@ -413,6 +414,7 @@ void PartitionStorage::CheckAndAppendChunkList(unsigned number_of_chunk,
           new ChunkStorage(ChunkID(partition_id_, size, true), BLOCK_SIZE,
                            desirable_storage_level_));
   }
+  assert(desirable_storage_level_ == MEMORY);
 }
 
 UInt64 PartitionStorage::MergeToHis(UInt64 old_his_cp,
@@ -420,12 +422,14 @@ UInt64 PartitionStorage::MergeToHis(UInt64 old_his_cp,
   auto new_his_cp = old_his_cp;
   auto table_id = partition_id_.projection_id.table_id;
   auto proj_id = partition_id_.projection_id.projection_off;
-  auto tuple_size = Catalog::getInstance()
-                        ->getTable(table_id)
-                        ->getProjectoin(proj_id)
-                        ->getSchema()
-                        ->getTupleMaxSize();
+  Schema* schema = Catalog::getInstance()
+                       ->getTable(table_id)
+                       ->getProjectoin(proj_id)
+                       ->getSchema();
+  MemoryGuard<Schema> schema_guard(schema);
+  auto tuple_size = schema->getTupleMaxSize();
   HdfsInMemoryChunk chunk_rt, chunk_his;
+  if (strip_list.size() > 0) cout << "{before merge" << endl;
   for (auto& strip : strip_list) {
     auto begin = strip.first;
     auto end = strip.first + strip.second;
@@ -433,12 +437,13 @@ UInt64 PartitionStorage::MergeToHis(UInt64 old_his_cp,
       auto move = BLOCK_SIZE - (begin + BLOCK_SIZE) % BLOCK_SIZE;
       if (move > end - begin) move = end - begin;
       // update historical chunk cur
-      AddHisChunkWithMemoryApply(begin / CHUNK_SIZE + 1, HDFS);
+      AddHisChunkWithMemoryApply(begin / CHUNK_SIZE + 1, MEMORY);
       if (!BlockManager::getInstance()->getMemoryChunkStore()->GetChunk(
               chunk_list_[begin / CHUNK_SIZE]->GetChunkID(), chunk_his)) {
         assert(false && begin && begin / CHUNK_SIZE);
       }
       // update real time chunk cur
+      // real-time chunk need't check
       if (!BlockManager::getInstance()->getMemoryChunkStore()->GetChunk(
               rt_chunk_list_[begin / CHUNK_SIZE]->GetChunkID(), chunk_rt)) {
         assert(false);
@@ -448,7 +453,7 @@ UInt64 PartitionStorage::MergeToHis(UInt64 old_his_cp,
       if (move == BLOCK_SIZE) {  // full block
         memcpy(chunk_his.hook + new_his_cp % CHUNK_SIZE,
                chunk_rt.hook + begin % CHUNK_SIZE, move);
-      } else {
+      } else {  // partly block
         auto real_move =
             (begin + move) % BLOCK_SIZE != 0 ? move : move - sizeof(unsigned);
         auto tuple_count = real_move / tuple_size;
@@ -463,6 +468,7 @@ UInt64 PartitionStorage::MergeToHis(UInt64 old_his_cp,
       new_his_cp += BLOCK_SIZE;
     }
   }
+  if (strip_list.size() > 0) cout << "}after merge" << endl;
   return new_his_cp;
 }
 

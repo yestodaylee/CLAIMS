@@ -312,8 +312,12 @@ class ChunkStorage {
    * Considering that how block size effects the performance is to be tested,
    * here we leave a parameter block_size for the performance test concern.
    */
-  ChunkStorage(const ChunkID& chunk_id, const unsigned& block_size,
-               const StorageLevel& desirable_storage_level);
+  ChunkStorage(const ChunkID& chunk_id, const unsigned block_size,
+               const StorageLevel desirable_storage_level);
+
+  ChunkStorage(const ChunkID& chunk_id, const unsigned block_size,
+               const StorageLevel desirable_storage_level,
+               const StorageLevel current_storage_level);
 
   virtual ~ChunkStorage();
 
@@ -327,7 +331,7 @@ class ChunkStorage {
 
   ChunkID GetChunkID() { return chunk_id_; }
 
-  void SetCurrentStorageLevel(const StorageLevel& current_storage_level) {
+  void SetCurrentStorageLevel(const StorageLevel current_storage_level) {
     current_storage_level_ = current_storage_level;
   }
 

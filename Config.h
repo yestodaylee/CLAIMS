@@ -83,6 +83,8 @@ class Config {
   static bool is_master_loader;
   static std::string master_loader_ip;
   static int master_loader_port;
+  static std::string amq_url;
+  static std::string amq_topic;
 
   static bool enable_txn_server;
   static int txn_server_cores;

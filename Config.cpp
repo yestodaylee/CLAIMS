@@ -94,6 +94,8 @@ int Config::memory_utilization;
 bool Config::is_master_loader;
 std::string Config::master_loader_ip;
 int Config::master_loader_port;
+std::string Config::amq_url;
+std::string Config::amq_topic;
 
 bool Config::enable_txn_server;
 int Config::txn_server_cores;
@@ -173,6 +175,10 @@ void Config::initialize() {
 
   master_loader_port = getInt("master_loader_port", 9001);
 
+  amq_url = getString("amq_url", "58.198.176.92:61616");
+
+  amq_topic = getString("amq_topic", "claims");
+
   // txn manager
   enable_txn_server = getBoolean("txn_server", true);
 
@@ -250,6 +256,8 @@ void Config::print_configure() const {
   std::cout << "catalog_file:" << catalog_file << std::endl;
   std::cout << "codegen:" << enable_codegen << std::endl;
   std::cout << "load_thread_num:" << load_thread_num << std::endl;
+  std::cout << "amq_url:" << amq_url << std::endl;
+  std::cout << "amq_topic:" << amq_topic << std::endl;
 
   std::cout << "enable_txn_serverr:" << enable_txn_server << std::endl;
   std::cout << "txn_server_cores:" << txn_server_cores << std::endl;

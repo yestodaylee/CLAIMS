@@ -262,7 +262,6 @@ RetCode SlaveLoader::ReceiveAndWorkLoop() {
                << ". date length is " << data_length;
     assert(data_length >= 4 && data_length <= 10000000);
     char* data_buffer = Malloc(data_length);
-    MemoryGuard<char> guard(data_buffer);  // auto-release
     if (NULL == data_buffer) {
       ELOG((ret = claims::common::rNoMemory),
            "no memory to hold data of message from master");
@@ -348,15 +347,16 @@ RetCode SlaveLoader::StoreDataInMemory(const LoadPacket& packet) {
              << " CHUNK SIZE is:" << CHUNK_SIZE
              << " last chunk id is:" << last_chunk_id;
   EXEC_AND_DLOG_RETURN(
-      ret, part_storage->AddRtChunkWithMemoryApply(last_chunk_id + 1, HDFS),
+      ret, part_storage->AddRtChunkWithMemoryApply(last_chunk_id + 1, MEMORY),
       "added chunk to " << last_chunk_id + 1, "failed to add chunk");
   // cout << "******1*****" << endl;
   // copy data into applied memory
-  const uint64_t tuple_size = Catalog::getInstance()
-                                  ->getTable(table_id)
-                                  ->getProjectoin(prj_id)
-                                  ->getSchema()
-                                  ->getTupleMaxSize();
+  Schema* schema = Catalog::getInstance()
+                       ->getTable(table_id)
+                       ->getProjectoin(prj_id)
+                       ->getSchema();
+  MemoryGuard<Schema> schema_guard(schema);
+  const uint64_t tuple_size = schema->getTupleMaxSize();
 
   uint64_t cur_chunk_id = packet.pos_ / CHUNK_SIZE;
   uint64_t cur_block_id = (packet.pos_ % CHUNK_SIZE) / BLOCK_SIZE;
@@ -364,11 +364,6 @@ RetCode SlaveLoader::StoreDataInMemory(const LoadPacket& packet) {
   uint64_t total_written_length = 0;
   uint64_t data_length = packet.data_length_;
   HdfsInMemoryChunk chunk_info;
-
-  Schema* schema = Catalog::getInstance()
-                       ->getTable(table_id)
-                       ->getProjectoin(prj_id)
-                       ->getSchema();
 
   /*  for (auto p = 0; p < data_length; p += tuple_size) {
       for (auto col = 1; col < schema->getncolumns(); col++) {
@@ -397,13 +392,13 @@ RetCode SlaveLoader::StoreDataInMemory(const LoadPacket& packet) {
                                          tuple_size, schema);
       // cout << "store data length:" << data_length << endl;
       do {  // write to every block
-/*        logfile << cur_chunk_id << "->" << writer.GetBlockId() << "->"
-                << writer.GetBlockPos() << ",";*/
+        /*        logfile << cur_chunk_id << "->" << writer.GetBlockId() << "->"
+                        << writer.GetBlockPos() << ",";*/
         uint64_t written_length =
             writer.Write(packet.data_buffer_ + total_written_length,
                          data_length - total_written_length);
-/*        logfile << writer.GetBlockPos() + written_length << ","
-                << written_length / schema->getTupleMaxSize() << endl;*/
+        /*        logfile << writer.GetBlockPos() + written_length << ","
+                        << written_length / schema->getTupleMaxSize() << endl;*/
         total_written_length += written_length;
         DLOG(INFO) << "written " << written_length
                    << " bytes into chunk:" << cur_chunk_id
@@ -421,18 +416,17 @@ RetCode SlaveLoader::StoreDataInMemory(const LoadPacket& packet) {
                  << ", total number of chunk is"
                  << part_storage->GetRTChunkNum();
       if (cur_chunk_id < part_storage->GetRTChunkNum()) {
-        cout << "cur_chunk_id:" << cur_chunk_id
-             << " chunk num:" << part_storage->GetRTChunkNum() << endl;
         assert(cur_chunk_id < part_storage->GetRTChunkNum() && cur_chunk_id);
       }
       cur_block_id = 0;  // the block id of next chunk is 0
       pos_in_block = 0;
     } else {
       LOG(INFO) << "chunk id is " << cur_chunk_id << endl;
+      cout << "get chunk:" << cur_chunk_id << " failed" << endl;
       assert(false && "no chunk with this chunk id");
     }
   }
-
+  delete schema;
   return ret;
 }
 
@@ -475,12 +469,13 @@ behavior SlaveLoader::WorkInCAF(event_based_actor* self) {
                  "sent commit result of " << packet->txn_id_
                                           << " to master loader",
                  "failed to send commit res to master loader");
+    DELETE_PTR(packet->data_buffer_);
     DELETE_PTR(packet);
   }};
 }
 
 behavior SlaveLoader::PersistInCAF(event_based_actor* self) {
-  // self->delayed_send(self, seconds(10), CheckpointAtom::value);
+  // self->delayed_send(self, seconds(20), CheckpointAtom::value);
   return {[self](CheckpointAtom) {
     QueryReq query_req;
     query_req.include_abort_ = true;
@@ -500,19 +495,21 @@ behavior SlaveLoader::PersistInCAF(event_based_actor* self) {
                          query.snapshot_[g_part_id].rbegin()->second;
         // merge from historical to real time
         auto old_his_cp = query.his_cp_list_[g_part_id];
+        cout << "before merge " << endl;
         auto new_his_cp =
             part_handler->MergeToHis(old_his_cp, query.snapshot_[g_part_id]);
+        cout << "after merge" << endl;
         // cout << "new_his_cp:" << new_his_cp << endl;
         /*  if (new_his_cp == old_his_cp) continue;
           if (!part_handler->Persist(old_his_cp, new_his_cp)) continue;
            */
         TxnClient::CommitCheckpoint(query.ts_, g_part_id, new_his_cp,
                                     new_rt_cp);
-        cout << "persist:" << g_part_id << ":" << new_his_cp << "，"
-             << new_rt_cp << endl;
+        /*   cout << "persist:" << g_part_id << ":" << new_his_cp << "，"
+                << new_rt_cp << endl;*/
       }
     }
-    self->delayed_send(self, seconds(10), CheckpointAtom::value);
+    self->delayed_send(self, seconds(20), CheckpointAtom::value);
   }};
 }
 

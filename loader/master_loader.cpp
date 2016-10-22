@@ -423,6 +423,8 @@ RetCode MasterLoader::Ingest(const string& message,
                 "sent every partition data to send queue",
                 "failed to send every partition data to queue");
 
+  for (auto& part_list : partition_buffers)
+    for (auto& part : part_list) delete part.buffer_;
   assert(rSuccess == ret);
 
   return ret;
@@ -517,8 +519,7 @@ RetCode MasterLoader::GetPartitionTuples(
   Schema* table_schema = table->getSchema();
   MemoryGuard<Schema> table_schema_guard(table_schema);
   vector<void*> correct_tuple_buffer;
-  STLGuardWithRetCode<vector<void*>> guard(correct_tuple_buffer,
-                                           ret);  // attention!
+  // STLMemoryGuard<vector<void*>> guard(correct_tuple_buffer);  // attention!
   // must set RetCode 'ret' before returning error code!!!!
   ThreeLayerSTLGuardWithRetCode<vector<vector<vector<void*>>>>
       return_tuple_buffer_guard(tuple_buffer_per_part, ret);  // attention!
@@ -588,6 +589,7 @@ RetCode MasterLoader::GetPartitionTuples(
       // extract the sub tuple according to the projection schema
       void* target = Malloc(tuple_max_length);  // newmalloc
       if (target == NULL) {
+        assert(false);
         return (ret = claims::common::rNoMemory);
       }
       sub_tuple.getSubTuple(tuple_buffer, target);
@@ -603,6 +605,7 @@ RetCode MasterLoader::GetPartitionTuples(
       tuple_buffer_per_part[i][part].push_back(target);
     }
   }
+  for (auto& tuple : correct_tuple_buffer) delete tuple;
   return ret;
 }
 
@@ -619,6 +622,9 @@ RetCode MasterLoader::MergePartitionTupleIntoOneBuffer(
                    ->getPartitioner()
                    ->getNumberOfPartitions() &&
            "partition number is not match");
+    Schema* schema = table->getProjectoin(i)->getSchema();
+    MemoryGuard<Schema> schema_guard(schema);
+    int tuple_len = schema->getTupleMaxSize();
     for (int j = 0; j < tuple_buffer_per_part[i].size(); ++j) {
       int tuple_count = tuple_buffer_per_part[i][j].size();
       /*
@@ -626,7 +632,7 @@ RetCode MasterLoader::MergePartitionTupleIntoOneBuffer(
        * buffer indicates the index of partition
        */
       //  if (0 == tuple_count) continue;
-      int tuple_len = table->getProjectoin(i)->getSchema()->getTupleMaxSize();
+
       int buffer_len = tuple_count * tuple_len;
       DLOG(INFO) << "the tuple length of prj:" << i << ",part:" << j
                  << ",table:" << table->getTableName() << " is:" << tuple_len;
@@ -659,9 +665,12 @@ RetCode MasterLoader::ApplyTransaction(
   uint64_t table_id = table->get_table_id();
 
   FixTupleIngestReq req;
+
   for (int i = 0; i < table->getNumberOfProjection(); ++i) {
     ProjectionDescriptor* prj = table->getProjectoin(i);
-    uint64_t tuple_length = prj->getSchema()->getTupleMaxSize();
+    Schema* schema = prj->getSchema();
+    MemoryGuard<Schema> schema_guard(schema);
+    uint64_t tuple_length = schema->getTupleMaxSize();
     for (int j = 0; j < prj->getPartitioner()->getNumberOfPartitions(); ++j) {
       if (partition_buffers[i][j].length_ == 0) continue;
       req.InsertStrip(GetGlobalPartId(table_id, i, j), tuple_length,
@@ -879,21 +888,29 @@ void* MasterLoader::StartMasterLoader(void* arg) {
   //    tcp://127.0.0.1:61616?wireFormat=openwire  same as above
   //    tcp://127.0.0.1:61613?wireFormat=stomp     use stomp instead
   //
-  std::string brokerURI =
-      "failover:(tcp://"
-      "58.198.176.92:61616?wireFormat=openwire&connection.useAsyncSend=true"
-      //        "&transport.commandTracingEnabled=true"
-      //        "&transport.tcpTracingEnabled=true"
-      //        "&wireFormat.tightEncodingEnabled=true"
-      ")";
+  /*  std::string brokerURI =
+        "failover:(tcp://"
+        "58.198.176.92:61616?wireFormat=openwire&connection.useAsyncSend=true"
 
+        //        "&transport.commandTracingEnabled=true"
+        //        "&transport.tcpTracingEnabled=true"
+        //        "&wireFormat.tightEncodingEnabled=true"
+        ")";*/
+  std::string brokerURI = "failover:(tcp://" + Config::amq_url +
+                          "?wireFormat=openwire&connection.useAsyncSend=true"
+
+                          //        "&transport.commandTracingEnabled=true"
+                          //        "&transport.tcpTracingEnabled=true"
+                          //        "&wireFormat.tightEncodingEnabled=true"
+                          ")";
   //============================================================
   // This is the Destination Name and URI options.  Use this to
   // customize where the consumer listens, to have the consumer
   // use a topic or queue set the 'useTopics' flag.
   //============================================================
   std::string destURI =
-      "t1234?consumer.prefetchSize = 1 ";  // ?consumer.prefetchSize=1";
+      Config::amq_topic +
+      "?consumer.prefetchSize = 1 ";  // ?consumer.prefetchSize=1";
 
   //============================================================
   // set to true to use topics instead of queues
