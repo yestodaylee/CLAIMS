@@ -27,6 +27,7 @@
  */
 #include "txn.hpp"
 #include "txn_server.hpp"
+
 namespace claims {
 namespace txn {
 
@@ -238,11 +239,22 @@ void TxnBin::MergeSnapshot(Query &query) const {
 }
 
 void TxnBin::MergeTxn(Query &query, int len) const {
+  /*  if (ct_ < len) {
+      cout << "ct:" << ct_ << ",len:" << len << endl;
+      assert(false);
+    }*/
+  for (auto i = 0; i < len; i++) {
+    if (!(txn_list_[i].IsCommit() || txn_list_[i].IsAbort())) {
+      // cout << "error to scan txn!!!!!!!!!" << endl;
+    }
+  }
   for (auto i = 0; i < len; i++)
     if (txn_list_[i].IsCommit()) {
+      query.scan_count_++;
       for (auto &strip : txn_list_[i].strip_list_)
         query.snapshot_[strip.first].push_back(strip.second);
     } else if (txn_list_[i].IsAbort()) {
+      assert(false);
       for (auto &strip : txn_list_[i].strip_list_)
         query.abort_list_[strip.first].push_back(strip.second);
     }

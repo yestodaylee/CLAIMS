@@ -112,10 +112,11 @@ bool PhysicalProjectionScan::Open(SegmentExecStatus* const exec_status,
       partition_reader_iterator_ = partition_handle_->CreateTxnReaderIterator(
           cp, state_.query_.scan_snapshot_[global_part_id]);
       cout << "version:" << state_.query_.ts_ << ",part:" << global_part_id
-           << ",checkpoint chunk:" << cp / CHUNK_SIZE
-           << ",block:" << (cp % CHUNK_SIZE) / BLOCK_SIZE << cp;
+           << ",checkpoint :"
+           << "block:" << cp / BLOCK_SIZE << "," << cp % BLOCK_SIZE << endl;
       for (auto& part : state_.query_.scan_snapshot_[global_part_id])
-        cout << "<" << part.first << "," << part.second << ">";
+        cout << "[<" << part.first / BLOCK_SIZE << ","
+             << part.first % BLOCK_SIZE << ">," << part.second << "]";
       cout << endl;
       //  partition_reader_iterator_ =
       //     partition_handle_->CreateAtomicReaderIterator();

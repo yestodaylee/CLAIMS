@@ -107,13 +107,31 @@ uint64_t MasterLoader::debug_consumed_message_count = 0;
 timeval MasterLoader::start_time;
 uint64_t MasterLoader::txn_average_delay_ = 0;
 static int MasterLoader::buffer_full_time = 0;
-
+atomic<uint64_t> message_count;
 static const int txn_count_for_debug = 10000;
 
 namespace claims {
 namespace loader {
 
 ofstream MasterLoader::logfile;
+
+void MasterLoader::AddCount() {
+  message_count.fetch_add(1);
+  // cout << "new message" << endl;
+}
+
+behavior MasterLoader::Monitor(event_based_actor* self) {
+  static uint64_t last_count = 0;
+  self->delayed_send(self, seconds(5), "monitor");
+  return {[self](const string& str) {
+    auto tmp = message_count.load();
+    if (tmp != last_count) {
+      last_count = tmp;
+      cout << "master_loader receive count==>" << last_count << endl;
+    }
+    self->delayed_send(self, seconds(5), "monitor");
+  }};
+}
 
 void MasterLoader::IngestionRequest::Show() {
   DLOG(INFO) << "table name:" << table_name_
@@ -298,6 +316,7 @@ static behavior MasterLoader::ReceiveSlaveReg(event_based_actor* self,
 RetCode MasterLoader::ConnectWithSlaves() {
   int ret = rSuccess;
   try {
+    auto monitor_actor = spawn(MasterLoader::Monitor);
     auto listening_actor = spawn(&MasterLoader::ReceiveSlaveReg, this);
     publish(listening_actor, master_loader_port_, nullptr, true);
     DLOG(INFO) << "published in " << master_loader_ip_ << ":"
@@ -316,7 +335,7 @@ RetCode MasterLoader::Ingest(const string& message,
   static uint64_t get_tuple_time = 0;
   static uint64_t merge_tuple_time = 0;
   static uint64_t time_before_txn = 0;
-
+// assert(false);
 #ifdef MASTER_LOADER_PREF
   uint64_t temp_message_count =
       __sync_add_and_fetch(&debug_consumed_message_count, 1);

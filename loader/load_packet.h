@@ -40,6 +40,7 @@ using LoadAckAtom = caf::atom_constant<caf::atom("load_ack")>;
 using RegNodeAtom = caf::atom_constant<caf::atom("reg_node")>;
 using BindPartAtom = caf::atom_constant<caf::atom("bind_part")>;
 using OkAtom = caf::atom_constant<caf::atom("ok")>;
+using AddBlockAtom = caf::atom_constant<caf::atom("add_block")>;
 
 /**************  LoadPacket format  *****************/
 /** field             type          length **********/

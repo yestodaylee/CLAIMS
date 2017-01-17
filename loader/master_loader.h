@@ -128,6 +128,8 @@ class MasterLoader {
   MasterLoader();
   ~MasterLoader();
 
+  static behavior Monitor(event_based_actor* self);
+  void AddCount();
   RetCode ConnectWithSlaves();
 
   RetCode Ingest(const string& message, function<int()> ack_function);

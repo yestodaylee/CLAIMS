@@ -48,6 +48,7 @@ class SlaveNode : public BaseNode {
   void CreateActor();
   virtual ~SlaveNode();
   RetCode RegisterToMaster();
+  RetCode AddBlocks(int part, int block_num);
   static SlaveNode* GetInstance();
   RetCode AddOneNode(const unsigned int& node_id, const string& node_ip,
                      const uint16_t& node_port);

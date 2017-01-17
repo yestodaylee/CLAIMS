@@ -25,12 +25,20 @@
  * Description:
  *
  */
+#include <iostream>
+#include <fstream>
 #include "txn_server.hpp"
-
 #include "caf/all.hpp"
 #include "txn_log.hpp"
-
+//#include "../catalog/catalog.h"
+#include "../utility/resource_guard.h"
+// using claims::catalog::Catalog;
+//#include "../loader/slave_loader.h"
+//#include "../Environment.h"
+#include "../txn_manager/txn_server.hpp"
 using caf::aout;
+using std::ofstream;
+ofstream txn_log;
 namespace claims {
 namespace txn {
 // using claims::common::rSuccess;
@@ -81,7 +89,7 @@ caf::behavior TxnCore::make_behavior() {
         return caf::make_message(rSuccess);
       },
       [this](AbortIngestAtom, const UInt64 ts) -> caf::message {
-        // cout << "abort:" << ts << endl;
+        cout << "!!!!!!!abort:" << ts << endl;
         RetCode ret = rSuccess;
         auto id = TxnBin::GetTxnBinID(ts, TxnServer::concurrency_);
         auto pos = TxnBin::GetTxnBinPos(ts, TxnServer::concurrency_);
@@ -90,34 +98,59 @@ caf::behavior TxnCore::make_behavior() {
       },
       [this](QueryAtom, shared_ptr<Query> query,
              bool include_abort) -> caf::message {
-        auto id = TxnBin::GetTxnBinID(query->ts_, TxnServer::concurrency_);
-        auto pos = TxnBin::GetTxnBinPos(query->ts_, TxnServer::concurrency_);
-        auto ts = TxnBin::GetTxnBinMaxTs(id, TxnServer::concurrency_, core_id_);
-        auto remain = kTxnBinSize - (ts - query->ts_) / TxnServer::concurrency_;
-        if (remain > 0) {
-          txnbin_list_[id].MergeTxn(*query, remain);
+        int last_core = query->ts_ / TxnServer::concurrency_;
+        int bin_num = 0;
+        if (query->ts_ >= TxnServer::concurrency_)
+          bin_num = (query->ts_) / (TxnServer::concurrency_ * kTxnBinSize);
+        // cout << "bin_num:" << bin_num << endl;
+        int remain = 0;
+        if (query->ts_ > TxnServer::concurrency_) {
+          auto all_remain =
+              (query->ts_) % (TxnServer::concurrency_ * kTxnBinSize);
+          remain = (all_remain + TxnServer::concurrency_ - 1 - core_id_) /
+                   TxnServer::concurrency_;
         }
-        while (id > 0) {
-          --id;
+        if (core_id_ > last_core && remain > 0) remain--;
+        if (!include_abort) {
+          cout << "qy_ts:" << query->ts_ << ",core:" << core_id_
+               << ",bin num:" << bin_num << ",re:" << remain << endl;
+        }
+        if (remain > 0) {
+          txnbin_list_[bin_num].MergeTxn(*query, remain);
+          auto count = txnbin_list_[bin_num].Count();
+          if (count < remain)
+            cout << "!!!!!error:" << query->ts_ << "@" << core_id_ << ","
+                 << bin_num << "?count:" << count << ",remain:" << remain
+                 << endl;
+        }
+
+        for (int id = bin_num - 1; id >= 0; id--) {
           if (txnbin_list_[id].IsSnapshot()) {
             txnbin_list_[id].MergeSnapshot(*query);
             break;
           } else {
             txnbin_list_[id].MergeTxn(*query, kTxnBinSize);
+            auto count = txnbin_list_[id].Count();
+            if (count < kTxnBinSize)
+              cout << "$$$$$$error:" << query->ts_ << "@" << core_id_ << ","
+                   << bin_num << "?count:" << count << endl;
           }
         }
         auto next_core_id = (core_id_ + 1) % TxnServer::concurrency_;
         if (next_core_id != TxnServer::GetCoreID(query->ts_)) {
           // scan next core
           this->forward_to(TxnServer::cores_[next_core_id]);
-        } else if (include_abort && false) {  // process the final query
-          cout << "size of abort list: " << endl;
+        } else if (include_abort) {  //
+                                     // process the final subquery
+          // cout << "size of abort list: " << endl;
           for (auto& part_cp : query->rt_cp_list_) {
             auto part = part_cp.first;
             auto checkpoint = part_cp.second;
+            // mix snapshot_list into abort_list
             query->abort_list_[part].insert(query->abort_list_[part].end(),
                                             query->snapshot_[part].begin(),
                                             query->snapshot_[part].end());
+            // clear abort list
             Strip::Sort(query->abort_list_[part]);
             Strip::Merge(query->abort_list_[part]);
             Strip::Filter(query->abort_list_[part],
@@ -132,12 +165,13 @@ caf::behavior TxnCore::make_behavior() {
                 return true;
               }
             });
+            // remove not continuous commit/abort strip
             if (query->abort_list_[part].size() > 0) {
-              auto abort_pos = query->abort_list_[part][0].first +
-                               query->abort_list_[part][0].second;
+              auto continuous_pos = query->abort_list_[part][0].first +
+                                    query->abort_list_[part][0].second;
               Strip::Filter(query->snapshot_[part],
-                            [abort_pos](PStrip& pstrip) -> bool {
-                if (pstrip.first + pstrip.second <= abort_pos)
+                            [continuous_pos](PStrip& pstrip) -> bool {
+                if (pstrip.first + pstrip.second <= continuous_pos)
                   return true;
                 else
                   return false;
@@ -232,6 +266,7 @@ string TxnCore::ToString() {
 }
 
 caf::behavior TxnServer::make_behavior() {
+  if (!txn_log.is_open()) txn_log.open("txn_log.txt");
   try {
     caf::io::publish(proxy_, port_, nullptr, true);
     cout << "txn server bind to port:" << port_ << " success" << endl;
@@ -278,6 +313,7 @@ caf::behavior TxnServer::make_behavior() {
             cp_list_[part].SetHisCP(ts, his_cp);
             cp_list_[part].SetRtCP(ts, rt_cp);
             cout << "commit " << part << ":" << his_cp << "," << rt_cp << endl;
+
             return caf::make_message(rSuccess);
           },
       [this](GCAtom) {

@@ -112,7 +112,7 @@ static const int kGCTime = 5;
 static const int kTimeout = 3;
 static const int kBlockSize = 64 * 1024;
 static const int kTailSize = sizeof(unsigned);
-static const int kTxnBinSize = 3;  // 1024;
+static const int kTxnBinSize = 10;  // 1024;
 
 inline UInt64 GetGlobalPartId(UInt64 table_id, UInt64 projeciton_id,
                               UInt64 partition_id) {
@@ -301,7 +301,7 @@ class Query {
    */
   unordered_map<UInt64, UInt64> rt_cp_list_;
   unordered_map<UInt64, vector<PStrip>> abort_list_;
-
+  UInt64 scan_count_ = 0;
   Query() {}
   Query(UInt64 ts, const unordered_map<UInt64, UInt64> &his_cp_list,
         const unordered_map<UInt64, UInt64> &rt_cp_list)
@@ -336,7 +336,7 @@ class Query {
   map<UInt64, UInt64> scan_cp_list_;
   template <class Archive>
   void serialize(Archive &ar, const unsigned int version) {
-    ar &scan_snapshot_ &scan_cp_list_;
+    ar &ts_ &scan_snapshot_ &scan_cp_list_;
   }
 };
 inline bool operator==(const Query &lhs, const Query &rhs) {
@@ -434,7 +434,8 @@ class TxnBin {
   }
   static UInt64 GetTxnBinMaxTs(UInt64 txnbin_id, UInt64 core_num,
                                UInt64 core_id) {
-    return (txnbin_id + 1) * kTxnBinSize * core_num + core_id;
+    // return (txnbin_id + 1) * kTxnBinSize * core_num + core_id;
+    return txnbin_id * kTxnBinSize * core_num + kTxnBinSize + core_id;
   }
 
   Txn txn_list_[kTxnBinSize];

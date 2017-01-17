@@ -150,7 +150,6 @@ class PartitionStorage {
     Lock lock_;
 
    public:
-    static ofstream logfile;
   };
 
   /**
@@ -220,7 +219,7 @@ class PartitionStorage {
   }
   void CheckAndAppendChunkList(unsigned number_of_chunk, bool is_rt);
   UInt64 MergeToHis(UInt64 old_his_cp, const vector<PStrip>& strip_list);
-  bool Persist(UInt64 old_his_cp, UInt64 new_his_cp);
+  RetCode Persist(UInt64 old_his_cp, UInt64 new_his_cp);
   bool PersistHDFS(UInt64 old_his_cp, UInt64 new_his_cp);
   bool PersistDisk(UInt64 old_his_cp, UInt64 new_his_cp);
 
@@ -234,6 +233,8 @@ class PartitionStorage {
   StorageLevel desirable_storage_level_;
 
   Lock write_lock_;
+
+  // static ofstream logfile;
 };
 //}  // namespace storage
 //}  // namespace claims

@@ -283,6 +283,9 @@ const int rBeginQueryFail = -2504;
 const int rBeginCheckpointFail = -2505;
 const int rCommitCheckpointFail = -2506;
 
+const int rGetFileHandleFail = -2507;
+const int rGetMemoryHandleFail = -2508;
+
 /* errorno for codegen -3001 ~ -4000 */
 const int rTestError = -3001;
 

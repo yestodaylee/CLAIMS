@@ -280,6 +280,18 @@ class Partitioner {
 
   vector<PartitionID> getPartitionIDList();
 
+  void addPartitionCardinality(unsigned partitoin_index, unsigned long value);
+
+  void addPartitionBlocks(unsigned partitoin_index, unsigned value);
+
+  void addPartitionChunks(unsigned partition_index, unsigned value);
+
+  void setPartitionCardinality(unsigned partition_index, unsigned long value);
+
+  void setPartitionBlocks(unsigned partition_index, unsigned value);
+
+  void setPartitionChunks(unsigned partition_index, unsigned value);
+
  private:
   Attribute *partition_key_;
   PartitionFunction *partition_function_;

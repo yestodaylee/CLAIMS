@@ -39,11 +39,18 @@
 #include "../common/error_define.h"
 #include "../common/ids.h"
 #include "../common/Message.h"
+#include "../loader/load_packet.h"
 #include "../Environment.h"
+#include "../txn_manager/txn.hpp"
 using caf::io::remote_actor;
 using caf::make_message;
 using std::make_pair;
 using claims::common::rConRemoteActorError;
+using claims::loader::AddBlockAtom;
+using claims::txn::GetTableIdFromGlobalPartId;
+using claims::txn::GetProjectionIdFromGlobalPartId;
+using claims::txn::GetPartitionIdFromGlobalPartId;
+
 namespace claims {
 MasterNode* MasterNode::instance_ = 0;
 class MasterNodeActor : public event_based_actor {
@@ -64,17 +71,22 @@ class MasterNodeActor : public event_based_actor {
               ->RegisterNewSlave(id);
           return make_message(OkAtom::value, id, *((BaseNode*)master_node_));
         },
-        [&](StorageBudgetAtom, const StorageBudgetMessage& message) {
-          Environment::getInstance()
-              ->getResourceManagerMaster()
-              ->RegisterDiskBuget(message.nodeid, message.disk_budget);
-          Environment::getInstance()
-              ->getResourceManagerMaster()
-              ->RegisterMemoryBuget(message.nodeid, message.memory_budget);
-          LOG(INFO) << "receive storage budget message!! node: "
-                    << message.nodeid << " : disk = " << message.disk_budget
-                    << " , mem = " << message.memory_budget << endl;
-          return make_message(OkAtom::value);
+        [&](StorageBudgetAtom, const StorageBudgetMessage& message)
+            -> caf::message {
+              Environment::getInstance()
+                  ->getResourceManagerMaster()
+                  ->RegisterDiskBuget(message.nodeid, message.disk_budget);
+              Environment::getInstance()
+                  ->getResourceManagerMaster()
+                  ->RegisterMemoryBuget(message.nodeid, message.memory_budget);
+              LOG(INFO) << "receive storage budget message!! node: "
+                        << message.nodeid << " : disk = " << message.disk_budget
+                        << " , mem = " << message.memory_budget << endl;
+              return make_message(OkAtom::value);
+            },
+        [=](AddBlockAtom, int part_id, int block_num) -> caf::message {
+          RetCode ret = master_node_->AddBlock(part_id, block_num);
+          return make_message(ret);
         },
         [=](ExitAtom) {
           LOG(INFO) << "master " << master_node_->get_node_id() << " finish!"
@@ -167,4 +179,20 @@ void MasterNode::FinishAllNode() {
   }
   self->send(master_actor_, ExitAtom::value);
 }
+
+RetCode MasterNode::AddBlock(int g_part_id, int block_num) {
+  /* cout << "try to add block on patition:" << part_id << " block num"
+        << block_num << endl;*/
+  auto cata = Environment::getInstance()->getCatalog();
+  auto table_id = GetTableIdFromGlobalPartId(g_part_id);
+  auto proj_id = GetProjectionIdFromGlobalPartId(g_part_id);
+  auto part_id = GetPartitionIdFromGlobalPartId(g_part_id);
+
+  auto table = cata->getTable(table_id);
+  auto proj = table->getProjectoin(proj_id);
+  proj->getPartitioner()->addPartitionBlocks(part_id, block_num);
+  cout << "add " << block_num << " on part " << part_id << endl;
+  return cata->saveCatalog();
+}
+
 }  // namespace claims

@@ -97,10 +97,11 @@ RetCode TxnClient::BeginIngest(const FixTupleIngestReq& request,
                caf::others >> []() { cout << " unkown message" << endl; },
                caf::after(seconds(kTimeout)) >> [&] {
                                                   ret = -1;
-                                                  cout << "time out" << endl;
+                                                  cout << "begin ingest timeout"
+                                                       << endl;
                                                 });
   } catch (...) {
-    cout << "link fail" << endl;
+    cout << "begin ingest link fail" << endl;
     //    return rLinkTmFail;
     return -1;
   }
@@ -121,7 +122,9 @@ RetCode TxnClient::CommitIngest(UInt64 ts) {
                                                   //           ret =
                                                   //           rLinkTmTimeout;
                                                   ret = -1;
-                                                  cout << "time out" << endl;
+                                                  cout
+                                                      << "commit ingest timeout"
+                                                      << endl;
                                                 });
   } catch (...) {
     cout << "link fail" << endl;
@@ -144,7 +147,8 @@ RetCode TxnClient::AbortIngest(UInt64 id) {
                                                   //                ret =
                                                   //                rLinkTmTimeout;
                                                   ret = -1;
-                                                  cout << "time out" << endl;
+                                                  cout << "abort ingest timeout"
+                                                       << endl;
                                                 });
   } catch (...) {
     cout << "link fail" << endl;
@@ -162,12 +166,13 @@ RetCode TxnClient::BeginQuery(const QueryReq& request, Query& query) {
     self->sync_send(TxnServer::active_ ? TxnServer::proxy_ : proxy_,
                     QueryAtom::value, request)
         .await([&query](const Query& q) { query = q; },
-               caf::after(seconds(kTimeout)) >> [&ret] {
-                                                  ret = -1;
-                                                  cout << "time out" << endl;
-                                                });
+               caf::after(seconds(15)) >> [&ret] {
+                                            ret = -1;
+                                            cout << "begin query time out"
+                                                 << endl;
+                                          });
   } catch (...) {
-    cout << "link fail" << endl;
+    cout << "begin query link fail" << endl;
     //    return rLinkTmFail;
     return -1;
   }
@@ -183,7 +188,8 @@ RetCode TxnClient::CommitQuery(UInt64 ts) {
         .await([&ret](RetCode r) { ret = r; },
                caf::after(seconds(kTimeout)) >> [&ret] {
                                                   ret = -1;
-                                                  cout << "time out" << endl;
+                                                  cout << "commit query timeout"
+                                                       << endl;
                                                 });
   } catch (...) {
     cout << "link to proxy fail in commitQuery" << endl;
@@ -193,8 +199,7 @@ RetCode TxnClient::CommitQuery(UInt64 ts) {
 
 RetCode TxnClient::CommitCheckpoint(UInt64 ts, UInt64 part, UInt64 his_cp,
                                     UInt64 rt_cp) {
-  //  RetCode ret = rSuccess;
-  RetCode ret = 0;
+  RetCode ret = rSuccess;
   try {
     caf::scoped_actor self;
     self->sync_send(TxnServer::active_ ? TxnServer::proxy_ : proxy_,
@@ -204,7 +209,8 @@ RetCode TxnClient::CommitCheckpoint(UInt64 ts, UInt64 part, UInt64 his_cp,
                                                   //   ret =
                                                   //   rLinkTmTimeout;
                                                   ret = -1;
-                                                  cout << "time out" << endl;
+                                                  cout << "commit cp timeout"
+                                                       << endl;
                                                 });
   } catch (...) {
     cout << "link fail @ CommitCheckpoint" << endl;

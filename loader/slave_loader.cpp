@@ -50,6 +50,9 @@
 #include "../storage/PartitionStorage.h"
 #include "../txn_manager/txn.hpp"
 #include "../utility/resource_guard.h"
+
+#include "../node_manager/base_node.h"
+
 using caf::behavior;
 using caf::event_based_actor;
 using caf::io::remote_actor;
@@ -60,6 +63,7 @@ using claims::common::rFailure;
 using claims::txn::GetPartitionIdFromGlobalPartId;
 using claims::txn::GetProjectionIdFromGlobalPartId;
 using claims::txn::GetTableIdFromGlobalPartId;
+using claims::MasterNode;
 using std::chrono::milliseconds;
 using std::chrono::seconds;
 
@@ -475,7 +479,9 @@ behavior SlaveLoader::WorkInCAF(event_based_actor* self) {
 }
 
 behavior SlaveLoader::PersistInCAF(event_based_actor* self) {
-  // self->delayed_send(self, seconds(20), CheckpointAtom::value);
+  self->delayed_send(self,
+                     seconds(30 + Environment::getInstance()->getNodeID() * 2),
+                     CheckpointAtom::value);
   return {[self](CheckpointAtom) {
     QueryReq query_req;
     query_req.include_abort_ = true;
@@ -493,23 +499,61 @@ behavior SlaveLoader::PersistInCAF(event_based_actor* self) {
                 part);
         auto new_rt_cp = query.snapshot_[g_part_id].rbegin()->first +
                          query.snapshot_[g_part_id].rbegin()->second;
+        /*for debug new_rt_cp = query.snapshot_[g_part_id].begin()->first +
+                                  query.snapshot_[g_part_id].begin()->second;*/
+        /* for debug vector<PStrip> ch_list = {
+            {query.snapshot_[g_part_id].begin()->first,
+             query.snapshot_[g_part_id].begin()->second}}; */
+        auto old_rt_cp = query.snapshot_[g_part_id].begin()->first;
         // merge from historical to real time
         auto old_his_cp = query.his_cp_list_[g_part_id];
-        cout << "before merge " << endl;
-        auto new_his_cp =
-            part_handler->MergeToHis(old_his_cp, query.snapshot_[g_part_id]);
-        cout << "after merge" << endl;
+        auto new_his_cp = part_handler->MergeToHis(
+            old_his_cp, /*ch_list */ query.snapshot_[g_part_id]);
+        cout << "merge his:<" << old_his_cp / BLOCK_SIZE << ","
+             << old_his_cp % BLOCK_SIZE << "> => <" << new_his_cp / BLOCK_SIZE
+             << "," << new_his_cp % BLOCK_SIZE << ">" << endl;
+        cout << "merge rt:<" << old_rt_cp / BLOCK_SIZE << ","
+             << old_rt_cp % BLOCK_SIZE << "> => <" << new_rt_cp / BLOCK_SIZE
+             << "," << new_rt_cp % BLOCK_SIZE << ">" << endl;
         // cout << "new_his_cp:" << new_his_cp << endl;
-        /*  if (new_his_cp == old_his_cp) continue;
-          if (!part_handler->Persist(old_his_cp, new_his_cp)) continue;
-           */
-        TxnClient::CommitCheckpoint(query.ts_, g_part_id, new_his_cp,
-                                    new_rt_cp);
-        /*   cout << "persist:" << g_part_id << ":" << new_his_cp << "，"
-                << new_rt_cp << endl;*/
+        if (new_his_cp == old_his_cp) {
+          cout << "don't need to create checkpoint" << endl;
+          continue;
+        }
+        RetCode ret = rSuccess;
+        if (ret == rSuccess)
+          ret = part_handler->Persist(old_his_cp, new_his_cp);
+        else
+          continue;
+        if (ret == rSuccess)
+          ret = TxnClient::CommitCheckpoint(query.ts_, g_part_id, new_his_cp,
+                                            new_rt_cp);
+        else
+          continue;
+        if (ret == rSuccess) {
+          auto slave_node = Environment::getInstance()->get_slave_node();
+          ret = slave_node->AddBlocks(g_part_id,
+                                      (new_his_cp - old_his_cp) / BLOCK_SIZE);
+          /*         auto cata = Catalog::getInstance();
+                   auto proj = cata->getProjection(part.projection_id);
+                   proj->getPartitioner()->addPartitionBlocks(
+                       part.partition_off, (new_his_cp - old_his_cp) /
+             BLOCK_SIZE);
+                   auto schema = proj->getSchema();
+                   MemoryGuard<Schema> schema_guard(schema);
+                   auto tuple_size = schema->getTupleMaxSize();
+                   proj->getPartitioner()->addPartitionCardinality(
+                       part.partition_off, (new_rt_cp - old_rt_cp) /
+             tuple_size);
+                   ret = cata->saveCatalog();*/
+        }
+        if (ret == rSuccess)
+          cout << "Persist success" << endl;
+        else
+          cout << "Persist fail" << endl;
       }
     }
-    self->delayed_send(self, seconds(20), CheckpointAtom::value);
+    self->delayed_send(self, seconds(30), CheckpointAtom::value);
   }};
 }
 

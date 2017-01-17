@@ -44,7 +44,8 @@ data="/home/imdb/config/tpc-h/1-partition/sf-1/"
 #data="/home/imdb/data/POC/"
 
 #hdfs主节点
-hdfs_master_ip="58.198.176.92"
+#hdfs_master_ip="58.198.176.92"
+hdfs_master_ip="219.228.147.33"
 
 #hdfs主节点端口
 hdfs_master_port=9000
@@ -71,9 +72,9 @@ master_loader_ip="127.0.0.1"
 
 master_loader_port=9002
 
-master_loader_thread_num=1
+master_loader_thread_num=8
 
-slave_loader_thread_num=1
+slave_loader_thread_num=6
 
 amq_url="58.198.176.92:61616"
 

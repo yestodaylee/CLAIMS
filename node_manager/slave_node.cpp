@@ -53,6 +53,7 @@ using claims::common::rConRemoteActorError;
 using claims::common::rRegisterToMasterTimeOut;
 using claims::common::rRegisterToMasterError;
 using claims::loader::RegNodeAtom;
+using claims::loader::AddBlockAtom;
 namespace claims {
 SlaveNode* SlaveNode::instance_ = 0;
 class SlaveNodeActor : public event_based_actor {
@@ -265,6 +266,19 @@ RetCode SlaveNode::RegisterToMaster() {
     }
   }
 
+  return ret;
+}
+
+RetCode SlaveNode::AddBlocks(int part_id, int block_num) {
+  RetCode ret = rSuccess;
+  try {
+    // cout << "try slave send add block on part:" << part_id << endl;
+    caf::scoped_actor self;
+    self->sync_send(master_actor_, AddBlockAtom::value, part_id, block_num)
+        .await([&](int r) { ret = r; });
+  } catch (exception& e) {
+    cout << "slave send add block on part:" << part_id << " fail" << endl;
+  }
   return ret;
 }
 

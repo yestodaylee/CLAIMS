@@ -61,6 +61,7 @@ using claims::txn::TxnClient;
 using claims::txn::LogServer;
 using claims::txn::LogClient;
 using claims::txn::GetGlobalPartId;
+using claims::txn::TimeStamp;
 using claims::NodeAddr;
 using claims::NodeSegmentID;
 using claims::StmtExecTracker;
@@ -286,14 +287,14 @@ bool Environment::InitTxnManager() {
     auto table_count = cat->getNumberOfTable();
     // cout << "table count:" << table_count << endl;
     for (unsigned table_id : cat->getAllTableIDs()) {
-      // cout << "table id :" << table_id << endl;
+      // cout << "start table id :" << table_id << endl;
       auto table = cat->getTable(table_id);
       if (NULL == table) {
-        cout << " No table whose id is:" << table_id << endl;
+        // cout << " No table whose id is:" << table_id << endl;
         assert(false);
       }
       auto proj_count = table->getNumberOfProjection();
-      // cout << "proj_count:" << proj_count << endl;
+
       for (auto proj_id = 0; proj_id < proj_count; proj_id++) {
         auto proj = table->getProjectoin(proj_id);
         if (NULL == proj) {
@@ -301,23 +302,42 @@ bool Environment::InitTxnManager() {
                << " in table:" << table->getTableName() << endl;
           assert(false);
         }
+        // cout << "start proj_id:" << proj_id << endl;
         auto part = proj->getPartitioner();
         auto part_count = part->getNumberOfPartitions();
-        // cout << "part_count:" << part_count << endl;
         for (auto part_id = 0; part_id < part_count; part_id++) {
+          // cout << "start part_id:" << part_id << endl;
           auto global_part_id = GetGlobalPartId(table_id, proj_id, part_id);
           pos_list[global_part_id] = his_cp_list[global_part_id] =
               rt_cp_list[global_part_id] =
-                  part->getPartitionBlocks(part_id) * BLOCK_SIZE;
+                  static_cast<int64>(part->getPartitionBlocks(part_id)) *
+                  BLOCK_SIZE;
+          // cout << "pos2 => " << pos_list[global_part_id] << " bytes" << endl;
         }
       }
     }
+    // cout << "before init pos list..." << endl;
+    // for (auto& pos : pos_list)
+    //  cout << pos.first << " => " << pos.second << endl;
+    // cout << "before init his cp list..." << endl;
+    // for (auto& cp : his_cp_list)
+    //  cout << cp.first << " => " << cp.second << endl;
+    // cout << "before init rt list..." << endl;
+    // for (auto& cp : rt_cp_list) cout << cp.first << " => " << cp.second <<
+    // endl;
+
     TxnServer::LoadCPList(0, his_cp_list, rt_cp_list);
     TxnServer::LoadPos(pos_list);
-    cout << "*******pos_list*******" << endl;
-    for (auto& pos : TxnServer::pos_list_)
-      cout << "partition[" << pos.first << "] => " << pos.second << endl;
+    // cout << "init pos list..." << endl;
+    // for (auto& pos : TxnServer::pos_list_)
+    //  cout << "part[" << pos.first << "] => " << pos.second << endl;
+    // cout << "init checkpoint list..." << endl;
+    // for (auto& pos : TxnServer::cp_list_) {
+    //  cout << "part[" << pos.first << "] => his:" << pos.second.GetHisCP(0)
+    //      << ", rt:" << pos.second.GetRtCP(0) << endl;
+    //}
   }
+  sleep(1);
   TxnClient::Init(Config::txn_server_ip, Config::txn_server_port);
   return true;
 }

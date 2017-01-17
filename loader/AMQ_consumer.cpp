@@ -101,7 +101,7 @@ void claims::loader::AMQConsumer::onMessage(const Message* message) {
   try {
     const TextMessage* textMessage = dynamic_cast<const TextMessage*>(message);
     string text = "";
-
+    mloader_->AddCount();
     if (textMessage != NULL) {
       text = textMessage->getText();
       //  message->acknowledge();
