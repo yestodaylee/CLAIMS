@@ -4,8 +4,10 @@
  *  Created on: 2013-10-11
  *      Author: casa
  */
-#include <sstream>
 #include "BlockManager.h"
+
+#include <glog/logging.h>
+#include <sstream>
 #include <assert.h>
 #include "../common/file_handle/hdfs_connector.h"
 #include "../Environment.h"
@@ -15,11 +17,12 @@
 #include "../Config.h"
 #include "../common/error_define.h"
 #include "../common/error_no.h"
+// #include "../utility/lock_guard.h"
 using claims::common::rLoadFromHdfsOpenFailed;
 using claims::common::rLoadFromDiskOpenFailed;
 using claims::common::rUnbindPartitionFailed;
 using claims::common::HdfsConnector;
-
+// using claims::utility::LockGuard;
 BlockManager* BlockManager::blockmanager_ = NULL;
 
 BlockManager* BlockManager::getInstance() {
@@ -340,7 +343,8 @@ string BlockManager::askForMatch(string filename, BlockManagerId bmi) {
   //  return file_proj_[filename.c_str()];
 }
 
-bool BlockManager::ContainsPartition(const PartitionID& part) const {
+bool BlockManager::ContainsPartition(const PartitionID& part) {
+  LockGuard<Lock> guard(lock);
   boost::unordered_map<PartitionID, PartitionStorage*>::const_iterator it =
       partition_id_to_storage_.find(part);
   return !(it == partition_id_to_storage_.cend());
@@ -349,6 +353,7 @@ bool BlockManager::ContainsPartition(const PartitionID& part) const {
 bool BlockManager::AddPartition(const PartitionID& partition_id,
                                 const unsigned& number_of_chunks,
                                 const StorageLevel& desirable_storage_level) {
+ 
   lock.acquire();  // test
   boost::unordered_map<PartitionID, PartitionStorage*>::const_iterator it =
       partition_id_to_storage_.find(partition_id);
@@ -380,6 +385,7 @@ bool BlockManager::AddPartition(const PartitionID& partition_id,
 }
 
 bool BlockManager::RemovePartition(const PartitionID& partition_id) {
+  LockGuard<Lock> guard(lock);
   boost::unordered_map<PartitionID, PartitionStorage*>::iterator it =
       partition_id_to_storage_.find(partition_id);
   if (it == partition_id_to_storage_.cend()) {
@@ -394,11 +400,24 @@ bool BlockManager::RemovePartition(const PartitionID& partition_id) {
 }
 
 PartitionStorage* BlockManager::GetPartitionHandle(
-    const PartitionID& partition_id) const {
+    const PartitionID& partition_id) {
+  LockGuard<Lock>  guard(lock);
+  DLOG(INFO) << "partid2storage size is:" << partition_id_to_storage_.size();
+  DLOG(INFO) << "going to find storage [" << partition_id.getName() << "]";
   boost::unordered_map<PartitionID, PartitionStorage*>::const_iterator it =
       partition_id_to_storage_.find(partition_id);
   if (it == partition_id_to_storage_.cend()) {
     return NULL;
   }
   return it->second;
+}
+
+vector<PartitionID> BlockManager::GetAllPartition() {
+  LockGuard<Lock> guard(lock);
+  vector<PartitionID> part_list;
+  for (auto itr = partition_id_to_storage_.begin();
+       itr != partition_id_to_storage_.end(); itr++) {
+    part_list.push_back(itr->first);
+  }
+  return part_list;
 }
