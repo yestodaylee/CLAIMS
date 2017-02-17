@@ -416,7 +416,7 @@ RetCode SlaveNode::RegisterToMaster(bool isFirstRegister) {
   return ret;
 }
 
-RetCode SlaveNode::AddBlocks(int part_id, int block_num) {
+RetCode SlaveNode::AddBlocks(uint64_t part_id, int block_num) {
   RetCode ret = rSuccess;
   try {
     // cout << "try slave send add block on part:" << part_id << endl;

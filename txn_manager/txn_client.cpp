@@ -28,7 +28,6 @@
 
 #include "txn_client.hpp"
 #include "txn_log.hpp"
-//#include "../common/error_define.h"
 namespace claims {
 namespace txn {
 

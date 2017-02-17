@@ -50,7 +50,7 @@ class SlaveNode : public BaseNode {
 
   RetCode RegisterToMaster(bool isFirstRegister);
   RetCode reRegisterToMaster();
-  RetCode AddBlocks(int part, int block_num);
+  RetCode AddBlocks(uint64_t part, int block_num);
 
   static SlaveNode* GetInstance();
   RetCode AddOneNode(const unsigned int& node_id, const string& node_ip,

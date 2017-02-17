@@ -64,19 +64,46 @@ using std::chrono::milliseconds;
 
 namespace claims {
 namespace txn {
-
+/**
+ * @brief: Client  APIs to transactional operate data ingestion
+ * @param: [ip_],[port_] are network address of TxnServer
+ * @param: [proxy_] is remote actor that handles request to TxnServer
+ */
 class TxnClient {
  public:
   static string ip_;
   static int port_;
   static caf::actor proxy_;
+
+  /** Initialize [TxnClient] that [TxnServer] work at <ip, port> */
   static RetCode Init(string ip = kTxnIp, int port = kTxnPort);
+
+  /** Just for debug, print some information */
   static RetCode Debug(string flag);
+
+  /** Use [request] as parameter to request a ingestion transaction from
+   * TxnServer.
+   * The [ingest] is assigned to transaction information after function called.*/
   static RetCode BeginIngest(const FixTupleIngestReq& request, Ingest& ingest);
-  static RetCode CommitIngest(UInt64 id);
-  static RetCode AbortIngest(UInt64 id);
+
+  /** Commit ingestion transaction [ts].
+   * [ts] is write timestamp of ingestion transaction,
+   * set its visibility to true. */
+  static RetCode CommitIngest(UInt64 ts);
+
+  /** Abort ingestion transaction [ts].
+   * [id] is write timestamp of ingestion transaction. */
+  static RetCode AbortIngest(UInt64 ts);
+
+  /** Use [request] as parameter to request a query transaction from TxnServer.
+   * [query] assigned to transaction information after function called */
   static RetCode BeginQuery(const QueryReq& request, Query& query);
+
+  /** Announce query transaction [ts] is end*/
   static RetCode CommitQuery(UInt64 ts);
+
+  /** Commit checkpoint [ts] on [part],
+   * set new historical checkpoint [his_cp], and real-time checkpoint [rt_cp] */
   static RetCode CommitCheckpoint(UInt64 ts, UInt64 part, UInt64 his_cp,
                                   UInt64 rt_cp);
 };

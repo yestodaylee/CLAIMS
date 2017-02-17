@@ -114,11 +114,18 @@ static const int kBlockSize = 64 * 1024;
 static const int kTailSize = sizeof(unsigned);
 static const int kTxnBinSize = 10;  // 1024;
 
+/**
+ * @brief generate global partition id from
+ * <table_id,projection_id,partition_id>
+ */
 inline UInt64 GetGlobalPartId(UInt64 table_id, UInt64 projeciton_id,
                               UInt64 partition_id) {
   return partition_id + 1000 * (projeciton_id + 1000 * table_id);
 }
 
+/**
+ * @brief generate global partition id from claims build-in PartitionID
+ */
 inline UInt64 GetGlobalPartId(PartitionID part) {
   auto table_id = part.projection_id.table_id;
   auto proj_id = part.projection_id.projection_off;
@@ -126,20 +133,38 @@ inline UInt64 GetGlobalPartId(PartitionID part) {
   return GetGlobalPartId(table_id, proj_id, part_id);
 }
 
+/**
+ * @brief generate table id from global partition id.
+ */
 inline UInt64 GetTableIdFromGlobalPartId(UInt64 global_partition_id) {
   return global_partition_id / (1000 * 1000);
 }
 
+/**
+ * @brief generate projection id from global partition id.
+ */
 inline UInt64 GetProjectionIdFromGlobalPartId(UInt64 global_partition_id) {
   return (global_partition_id % (1000 * 1000)) / 1000;
 }
+
+/**
+ * @brief generate partition id from global partition id.
+ */
 inline UInt64 GetPartitionIdFromGlobalPartId(UInt64 global_partition_id) {
   return global_partition_id % (1000);
 }
 
-/********Strip******/
+/**
+ * @brief: position and offset of complete strip
+ */
 using PStrip = pair<UInt64, UInt64>;
 
+/**
+ * @brief: A tuple to describe set of rows
+ * @param: partition id [part_],
+ *         position of strip [_pos],
+ *         offset of strip[_offset]
+ */
 class Strip {
  public:
   UInt64 part_;
@@ -155,11 +180,18 @@ class Strip {
   void set_pos(UInt64 pos) { pos_ = pos; }
   void set_offset(UInt64 offset) { offset_ = offset; }
   string ToString();
+  /** input [strip stream] ==by partition==> output [[strip stream]...] */
   static void Map(vector<Strip> &input, map<UInt64, vector<Strip>> &output);
+
+  /** sort strip stream [input] by order of position */
   static void Sort(vector<Strip> &input);
   static void Sort(vector<PStrip> &input);
+
+  /** merge adjacent strip stream [input], input must be sorted beforehand */
   static void Merge(vector<Strip> &input);
   static void Merge(vector<PStrip> &input);
+
+  /** filter strip stream [input], delete item if predicate is not successful */
   static void Filter(vector<Strip> &input, function<bool(Strip &)> predicate);
   static void Filter(vector<PStrip> &input, function<bool(PStrip &)> predicate);
 };
@@ -167,7 +199,12 @@ class Strip {
 inline bool operator==(const Strip &a, const Strip &b) {
   return a.part_ == b.part_ && a.pos_ == b.pos_ && a.offset_ == b.offset_;
 }
-
+/**
+ * @brief: Describe the information about transaction state
+ * @param: transaction commit state [status_],
+ *         real begin timestamp of transaction [realtime_],
+ *         strip list of transaction writes [strip_list_]
+ */
 class Txn {
  public:
   static const int kActive = 0;
@@ -189,12 +226,16 @@ class Txn {
   string ToString();
 };
 
+/**
+ * @brief: The transaction information that a query needs.
+ * @param: [his_cp_list_] is tuple of <partition, historical checkpoint>
+ * @param: [rc_cp_list_] is <partition, real-time checkpoint>.
+ *          temporary, *need not to be serialized*
+ * @param: [part_pstrips] unmerged strip list after historical checkpoint
+ */
 class Snapshot {
  public:
   unordered_map<UInt64, UInt64> his_cp_list_;
-  /**
-   * real-time checkpoint will never be send.
-   */
   unordered_map<UInt64, UInt64> rt_cp_list_;
   unordered_map<UInt64, vector<PStrip>> part_pstrips_;
   string ToString() const;
@@ -203,11 +244,10 @@ class Snapshot {
     his_cp_list_ = cps;
   };
   unordered_map<UInt64, UInt64> getHisCPS() const { return his_cp_list_; }
+  // add strip into snapshot, ignore strip beforehand real-time checkpoint
   void setPStrips(const unordered_map<UInt64, vector<PStrip>> &part_pstrips) {
     if (rt_cp_list_.size() > 0) {
-      /**
-       * Need to cut off all strip before ahead real-time checkpoint
-       */
+      // Need to cut off all strip before ahead real-time checkpoint
       for (auto &pstrips : part_pstrips)
         for (auto &pstrip : pstrips.second)
           if (pstrip.first >= rt_cp_list_[pstrips.first])
@@ -219,6 +259,7 @@ class Snapshot {
   unordered_map<UInt64, vector<PStrip>> getPStrps() const {
     return part_pstrips_;
   }
+  // merge another snapshot or strip list
   void Merge(const vector<Strip> &strips);
   void Merge(const Snapshot &snapshot);
 };
@@ -228,9 +269,14 @@ inline bool operator==(const Snapshot &lhs, const Snapshot &rhs) {
          lhs.part_pstrips_ == rhs.part_pstrips_;
 }
 
+/**
+ * @brief: object to request to ingest tuple with fix length
+ *         use [InsertStrip] to add a request to ingest number of [tuple_count]
+ *         tuple with size of [tuple_Size]
+ *  @param: [content_] is  fix tuple part -> <tuple_size, tuple_count>
+ */
 class FixTupleIngestReq {
  public:
-  /*fix tuple part -> <tuple_size, tuple_count> */
   unordered_map<UInt64, PStrip> content_;
   void InsertStrip(UInt64 part, UInt64 tuple_size, UInt64 tuple_count) {
     content_[part] = make_pair(tuple_size, tuple_count);
@@ -245,6 +291,11 @@ inline bool operator==(const FixTupleIngestReq &a, const FixTupleIngestReq &b) {
   return a.content_ == b.content_;
 }
 
+/**
+ * @brief: TM return [Ingest] object to execute data ingestion
+ * @param: a write-time/transaction id [ts_] for ingestion transaction,
+ *         TM allocates [strip_list_] for ingestion transaction
+ */
 class Ingest {
  public:
   UInt64 ts_;
@@ -270,7 +321,12 @@ inline bool operator==(const Ingest &lhs, const Ingest &rhs) {
   return lhs.ts_ == rhs.ts_;
 }
 
-/************QueryReq************/
+/**
+ * @brief: SQL compiler use [QueryReq] to request a snapshot from TM
+ * @param: [part_list_] are partitions needed to scan,
+ *         [include_abort_] is whether to scan abort strip(
+ *         false for client query, true for create checkpoint).
+ */
 class QueryReq {
  public:
   vector<UInt64> part_list_;
@@ -289,7 +345,13 @@ inline bool operator==(const QueryReq &lhs, const QueryReq &rhs) {
   return lhs.part_list_ == rhs.part_list_;
 }
 
-/***********Snapshot***********/
+/**
+ * @brief: [Query] is information for scan partition
+ * @param: [ts_] is read timestamp,
+ *         [snapshot_] is strip list need to scan real-time chunk-list,
+ *         [his_cp_list_] is historical checkpoint to scan historical chunk-list
+ *
+ */
 class Query {
  public:
   UInt64 ts_;
@@ -342,7 +404,9 @@ class Query {
 inline bool operator==(const Query &lhs, const Query &rhs) {
   return lhs.snapshot_ == rhs.snapshot_ && lhs.his_cp_list_ == rhs.his_cp_list_;
 }
-
+/**
+ * *not used yet*
+ */
 class CheckpointReq {
  public:
   UInt64 ts_;
@@ -367,7 +431,9 @@ inline bool operator==(const CheckpointReq &lhs, const CheckpointReq &rhs) {
   return lhs.ts_ == rhs.ts_ && lhs.part_ == rhs.part_;
 }
 
-/*********Checkpoint***********/
+/**
+ * @brief: store versioned checkpoint
+ */
 class TsCheckpoint {
  public:
   UInt64 GetHisCP(UInt64 ts) {
@@ -397,8 +463,17 @@ class TsCheckpoint {
   map<UInt64, UInt64> vers_rt_cp_;
 };
 
+/**
+ *@brief: store a list of transaction state in [txn_list_]
+ *@param: [ct_commit_]  is number of all committed transaction,
+ *@param: [ct_abort] is number of all aborted transaction,
+ *@param: [ct_] is number of all transaction, ct_ >= ct_commit_ + ct_abort_
+ *@param: [status] is whether this bin has product a "mini snapshot" in
+ *        [snapshot_] + [abort_list_]
+ */
 class TxnBin {
  public:
+  // get & set pos-th txn in txn
   Txn GetTxn(int pos) const { return txn_list_[pos]; }
   void SetTxn(int pos, const Txn &txn) {
     txn_list_[pos] = txn;
@@ -408,6 +483,7 @@ class TxnBin {
     txn_list_[pos] = Txn(strip_list);
     ct_++;
   }
+  // set state tag of a transaction to "Commit" or Abort
   void CommitTxn(int pos) {
     txn_list_[pos].Commit();
     ct_commit_++;
@@ -416,6 +492,7 @@ class TxnBin {
     txn_list_[pos].Abort();
     ct_abort_++;
   }
+  /** Is this bin are filled with "terminated"(commit or abort) */
   bool IsFull() const { return ct_commit_ + ct_abort_ == kTxnBinSize; }
   bool IsSnapshot() const { return status_ == true; }
   int Count() const { return ct_; }
@@ -426,15 +503,18 @@ class TxnBin {
   void MergeSnapshot(Query &query) const;
   void MergeTxn(Query &query, int len) const;
   string ToString();
+  /** get bin id that transaction [ts] resides,
+   * [core_num] is number of cores in txn_manager */
   static UInt64 GetTxnBinID(UInt64 ts, UInt64 core_num) {
     return (ts / core_num) / kTxnBinSize;
   }
+  /** get position of transaction [ts] in this bin */
   static UInt64 GetTxnBinPos(UInt64 ts, UInt64 core_num) {
     return (ts / core_num) % kTxnBinSize;
   }
+  /** get the max timestamp of this bin can reside */
   static UInt64 GetTxnBinMaxTs(UInt64 txnbin_id, UInt64 core_num,
                                UInt64 core_id) {
-    // return (txnbin_id + 1) * kTxnBinSize * core_num + core_id;
     return txnbin_id * kTxnBinSize * core_num + kTxnBinSize + core_id;
   }
 
@@ -450,6 +530,9 @@ class TxnBin {
   unordered_map<UInt64, vector<PStrip>> abort_list_;
 };
 
+/**
+ * setting CAF serialization
+ */
 inline void CAFSerConfig() {
   caf::announce<FixTupleIngestReq>("FixTupleIngestReq",
                                    make_pair(&FixTupleIngestReq::get_content,

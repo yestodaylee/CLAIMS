@@ -300,7 +300,7 @@ int BlockManager::LoadFromHdfs(const ChunkID& chunk_id, void* const& desc,
 int BlockManager::LoadFromDisk(const ChunkID& chunk_id, void* const& desc,
                                const unsigned& length) const {
   int ret = 0;
-  unsigned offset = chunk_id.chunk_off;
+  uint64_t offset = chunk_id.chunk_off;
   int fd = FileOpen(chunk_id.partition_id.getPathAndName().c_str(), O_RDONLY);
   if (fd == -1) {
     //    logging_->elog("Fail to open file [%s].Reason:%s",
@@ -315,10 +315,9 @@ int BlockManager::LoadFromDisk(const ChunkID& chunk_id, void* const& desc,
     DLOG(INFO) << "file [" << chunk_id.partition_id.getPathAndName().c_str()
                << "] is opened for offset [" << offset << "]" << endl;
   }
-  long int file_length = lseek(fd, 0, SEEK_END);
+  uint64_t file_length = lseek(fd, 0, SEEK_END);
 
-  long start_pos = CHUNK_SIZE * offset;
-
+  uint64_t start_pos = CHUNK_SIZE * offset;
   //  logging_->log("start_pos=%ld**********\n", start_pos);
   DLOG(INFO) << "start_pos=" << start_pos << "*********" << endl;
 
@@ -353,7 +352,6 @@ bool BlockManager::ContainsPartition(const PartitionID& part) {
 bool BlockManager::AddPartition(const PartitionID& partition_id,
                                 const unsigned& number_of_chunks,
                                 const StorageLevel& desirable_storage_level) {
- 
   lock.acquire();  // test
   boost::unordered_map<PartitionID, PartitionStorage*>::const_iterator it =
       partition_id_to_storage_.find(partition_id);
@@ -401,7 +399,7 @@ bool BlockManager::RemovePartition(const PartitionID& partition_id) {
 
 PartitionStorage* BlockManager::GetPartitionHandle(
     const PartitionID& partition_id) {
-  LockGuard<Lock>  guard(lock);
+  LockGuard<Lock> guard(lock);
   DLOG(INFO) << "partid2storage size is:" << partition_id_to_storage_.size();
   DLOG(INFO) << "going to find storage [" << partition_id.getName() << "]";
   boost::unordered_map<PartitionID, PartitionStorage*>::const_iterator it =

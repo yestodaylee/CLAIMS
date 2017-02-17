@@ -30,11 +30,7 @@
 #include "txn_server.hpp"
 #include "caf/all.hpp"
 #include "txn_log.hpp"
-//#include "../catalog/catalog.h"
 #include "../utility/resource_guard.h"
-// using claims::catalog::Catalog;
-//#include "../loader/slave_loader.h"
-//#include "../Environment.h"
 #include "../txn_manager/txn_server.hpp"
 using caf::aout;
 using std::ofstream;
@@ -51,10 +47,7 @@ namespace txn {
 // using claims::common::rAbortIngestTxnFail;
 // using claims::common::rCommitCheckpointFail;
 
-/***************/
 atomic<UInt64> TimeStamp::now_;
-
-/**************/
 
 int TxnServer::port_ = kTxnPort;
 int TxnServer::concurrency_ = kConcurrency;
@@ -65,7 +58,6 @@ bool TxnServer::active_ = false;
 unordered_map<UInt64, atomic<UInt64>> TxnServer::pos_list_;
 unordered_map<UInt64, TsCheckpoint> TxnServer::cp_list_;
 set<UInt64> TxnServer::active_querys_;
-caf::actor test;
 
 caf::behavior TxnCore::make_behavior() {
   this->delayed_send(this, seconds(3 + core_id_), MergeAtom::value);
@@ -74,14 +66,12 @@ caf::behavior TxnCore::make_behavior() {
       [this](DebugAtom, string flag) { cout << ToString() << endl; },
       [this](IngestAtom, shared_ptr<Ingest> ingest) -> caf::message {
         RetCode ret = rSuccess;
-        // cout << "begin ingestion" << endl << ingest->ToString() << endl;
         auto id = TxnBin::GetTxnBinID(ingest->ts_, TxnServer::concurrency_);
         auto pos = TxnBin::GetTxnBinPos(ingest->ts_, TxnServer::concurrency_);
         txnbin_list_[id].SetTxn(pos, ingest->strip_list_);
         return caf::make_message(ret, *ingest);
       },
       [this](CommitIngestAtom, const UInt64 ts) -> caf::message {
-        // cout << "commit:" << ts << endl;
         RetCode ret = rSuccess;
         auto id = TxnBin::GetTxnBinID(ts, TxnServer::concurrency_);
         auto pos = TxnBin::GetTxnBinPos(ts, TxnServer::concurrency_);
@@ -89,7 +79,6 @@ caf::behavior TxnCore::make_behavior() {
         return caf::make_message(rSuccess);
       },
       [this](AbortIngestAtom, const UInt64 ts) -> caf::message {
-        cout << "!!!!!!!abort:" << ts << endl;
         RetCode ret = rSuccess;
         auto id = TxnBin::GetTxnBinID(ts, TxnServer::concurrency_);
         auto pos = TxnBin::GetTxnBinPos(ts, TxnServer::concurrency_);
@@ -102,7 +91,6 @@ caf::behavior TxnCore::make_behavior() {
         int bin_num = 0;
         if (query->ts_ >= TxnServer::concurrency_)
           bin_num = (query->ts_) / (TxnServer::concurrency_ * kTxnBinSize);
-        // cout << "bin_num:" << bin_num << endl;
         int remain = 0;
         if (query->ts_ > TxnServer::concurrency_) {
           auto all_remain =
@@ -132,7 +120,7 @@ caf::behavior TxnCore::make_behavior() {
             txnbin_list_[id].MergeTxn(*query, kTxnBinSize);
             auto count = txnbin_list_[id].Count();
             if (count < kTxnBinSize)
-              cout << "$$$$$$error:" << query->ts_ << "@" << core_id_ << ","
+              cout << "error:" << query->ts_ << "@" << core_id_ << ","
                    << bin_num << "?count:" << count << endl;
           }
         }
@@ -140,9 +128,7 @@ caf::behavior TxnCore::make_behavior() {
         if (next_core_id != TxnServer::GetCoreID(query->ts_)) {
           // scan next core
           this->forward_to(TxnServer::cores_[next_core_id]);
-        } else if (include_abort) {  //
-                                     // process the final subquery
-          // cout << "size of abort list: " << endl;
+        } else if (include_abort) {
           for (auto& part_cp : query->rt_cp_list_) {
             auto part = part_cp.first;
             auto checkpoint = part_cp.second;
@@ -182,27 +168,19 @@ caf::behavior TxnCore::make_behavior() {
         return caf::make_message(*query);
       },
       [this](MergeAtom) {
-        // cout << "start merge @ core:" << core_id_ << endl;
         while (txnbin_list_[txnbin_cur_].IsFull()) {
           if (txnbin_cur_ == 0) {
-            // cout << ToString() << endl;
             txnbin_list_[txnbin_cur_].GenSnapshot();
-            //  cout << "merge: <" << core_id_ << "," << txnbin_cur_ << ","
-            //      << txnbin_list_[txnbin_cur_].IsSnapshot() << ">\n";
           } else {
             txnbin_list_[txnbin_cur_].GenSnapshot(
                 txnbin_list_[txnbin_cur_ - 1]);
-            //  cout << "merge: <" << core_id_ << "," << txnbin_cur_ << ","
-            //        << txnbin_list_[txnbin_cur_].IsSnapshot() << ">\n";
           }
-          // cout << ToString() << endl;
           txnbin_cur_++;
         }
         this->delayed_send(this, seconds(3 + core_id_), MergeAtom::value);
       },
       [this](GCAtom, UInt64 min_ts_remain) {
-        // cout << "core:" << core_id_ << " gc:" << min_ts << endl;
-        //      if (core_id_ == 0)
+
         map<UInt64, TxnBin> new_txnbin_list;
         auto ct = 0;
         for (auto it = txnbin_list_.rbegin(); it != txnbin_list_.rend(); it++) {
@@ -220,16 +198,6 @@ caf::behavior TxnCore::make_behavior() {
             new_txnbin_list[id] = txnbin_list_[id];
           }
         }
-
-        //        if (core_id_ == 0 && new_txnbin_list.size() <
-        //        txnbin_list_.size()) {
-        //          cout << "gc :" << endl;
-        //          for (auto& txnbin : txnbin_list_)
-        //            if (new_txnbin_list.find(txnbin.first) ==
-        //            new_txnbin_list.end())
-        //              cout << "<" << core_id_ << "," << txnbin.first << ">";
-        //          cout << endl;
-        //        }
         if (new_txnbin_list.size() < txnbin_list_.size())
           txnbin_list_ = new_txnbin_list;
 
@@ -273,63 +241,69 @@ caf::behavior TxnServer::make_behavior() {
   } catch (...) {
     cout << "txn server bind to port:" << port_ << " fail" << endl;
   }
+  // this gc for txn_manager is not complete implemented
   // this->delayed_send(this, seconds(3), GCAtom::value);
-  return {
-      [this](DebugAtom, string flag) -> caf::message {
-        cout << "debug begin" << endl;
-        for (auto& core : cores_) caf::anon_send(core, DebugAtom::value, flag);
-        return caf::make_message(rSuccess);
-      },
-      [this](IngestAtom, const FixTupleIngestReq& request) {
-        auto ts = TimeStamp::GenAdd();
-        auto ingest = make_shared<Ingest>(request.content_, ts);
-        for (auto& part : ingest->strip_list_)
-          ingest->InsertStrip(
-              AtomicMalloc(part.first, part.second.first, part.second.second));
-        current_message() = caf::make_message(IngestAtom::value, ingest);
-        forward_to(cores_[GetCoreID(ts)]);
-      },
-      [this](CommitIngestAtom,
-             const UInt64 ts) { forward_to(cores_[GetCoreID(ts)]); },
-      [this](AbortIngestAtom,
-             const UInt64 ts) { forward_to(cores_[GetCoreID(ts)]); },
-      [this](QueryAtom, const QueryReq& request) {
-        auto ts = TimeStamp::Gen();
-        active_querys_.insert(ts);
-        auto query =
-            make_shared<Query>(ts, GetHisCPList(ts, request.part_list_),
-                               GetRtCPList(ts, request.part_list_));
-        current_message() =
-            caf::make_message(QueryAtom::value, query, request.include_abort_);
-        forward_to(cores_[GetCoreID(ts)]);
-        // cout << "**********query:" << ts << " begin**************" << endl;
-      },
-      [this](CommitQueryAtom, UInt64 ts) -> caf::message {
-        active_querys_.erase(ts);
-        return caf::make_message(rSuccess);
-      },
-      [this](CommitCPAtom, UInt64 ts, UInt64 part, UInt64 his_cp, UInt64 rt_cp)
-          -> caf::message {
-            cp_list_[part].SetHisCP(ts, his_cp);
-            cp_list_[part].SetRtCP(ts, rt_cp);
-            cout << "commit " << part << ":" << his_cp << "," << rt_cp << endl;
-
+  return {[this](DebugAtom, string flag) -> caf::message {
+            cout << "debug begin" << endl;
+            for (auto& core : cores_)
+              caf::anon_send(core, DebugAtom::value, flag);
             return caf::make_message(rSuccess);
           },
-      [this](GCAtom) {
-        UInt64 ts;
-        if (active_querys_.size() > 0)
-          ts = *active_querys_.begin();
-        else
-          ts = TimeStamp::Gen();
-        for (auto& core : TxnServer::cores_)
-          caf::anon_send(core, GCAtom::value, ts);
-        this->delayed_send(this, seconds(3), GCAtom::value);
-      },
-      caf::others >> [this]() {
-                       cout << "server unkown message:"
-                            << to_string(current_message()) << endl;
-                     }};
+          [this](IngestAtom, const FixTupleIngestReq& request) {
+            auto ts = TimeStamp::GenAdd();
+            // temporary object to store snapshot, etc. between cores
+            auto ingest = make_shared<Ingest>(request.content_, ts);
+            for (auto& part : ingest->strip_list_)
+              // atomic malloc a strip for each requested partition
+              ingest->InsertStrip(AtomicMalloc(part.first, part.second.first,
+                                               part.second.second));
+            current_message() = caf::make_message(IngestAtom::value, ingest);
+            // forward request to each "core"
+            forward_to(cores_[GetCoreID(ts)]);
+          },
+          [this](CommitIngestAtom,
+                 const UInt64 ts) { forward_to(cores_[GetCoreID(ts)]); },
+          [this](AbortIngestAtom,
+                 const UInt64 ts) { forward_to(cores_[GetCoreID(ts)]); },
+          [this](QueryAtom, const QueryReq& request) {
+            auto ts = TimeStamp::Gen();
+            active_querys_.insert(ts);
+            auto query =
+                make_shared<Query>(ts, GetHisCPList(ts, request.part_list_),
+                                   GetRtCPList(ts, request.part_list_));
+            current_message() = caf::make_message(QueryAtom::value, query,
+                                                  request.include_abort_);
+            // forward request to each core to get sub snapshot
+            forward_to(cores_[GetCoreID(ts)]);
+          },
+          [this](CommitQueryAtom, UInt64 ts) -> caf::message {
+            // query execution end
+            active_querys_.erase(ts);
+            return caf::make_message(rSuccess);
+          },
+          [this](CommitCPAtom, UInt64 ts, UInt64 part, UInt64 his_cp,
+                 UInt64 rt_cp) -> caf::message {
+            // commit a checkpoint on partition, set new one <his_cp, rt_cp>
+            cp_list_[part].SetHisCP(ts, his_cp);
+            cp_list_[part].SetRtCP(ts, rt_cp);
+            // cout << "commit " << part << ":" << his_cp << "," << rt_cp <<
+            // endl;
+            return caf::make_message(rSuccess);
+          },
+          [this](GCAtom) {
+            UInt64 ts;
+            if (active_querys_.size() > 0)
+              ts = *active_querys_.begin();
+            else
+              ts = TimeStamp::Gen();
+            for (auto& core : TxnServer::cores_)
+              caf::anon_send(core, GCAtom::value, ts);
+            this->delayed_send(this, seconds(3), GCAtom::value);
+          },
+          caf::others >> [this]() {
+                           cout << "server unkown message:"
+                                << to_string(current_message()) << endl;
+                         }};
 }
 
 RetCode TxnServer::Init(int concurrency, int port) {
@@ -337,12 +311,10 @@ RetCode TxnServer::Init(int concurrency, int port) {
   concurrency_ = concurrency;
   port_ = port;
   proxy_ = caf::spawn<TxnServer>();
+  // start all cores
   for (auto i = 0; i < concurrency_; i++)
     cores_.push_back(caf::spawn<TxnCore, caf::detached>(i));
   CAFSerConfig();
-  // RecoveryCheckpoint();
-  // RecoveryFromTxnLog();
-  // srand((unsigned)time(NULL));
   return 0;
 }
 
@@ -358,15 +330,16 @@ Strip TxnServer::AtomicMalloc(UInt64 part, UInt64 TupleSize,
     UInt64 remain_count = TupleCount;
     int count = 0;
     while (remain_count > 0) {
-      // 求出一个块内可以存放的最多元组数
+      // Calculate max tuple count that a block resides
       UInt64 use_count = (kBlockSize - block_pos - kTailSize) / TupleSize;
       if (use_count > remain_count) use_count = remain_count;
 
-      //使用块内可用区域
+      // update remain count to be allocated
       remain_count -= use_count;
       strip.offset_ += use_count * TupleSize;
       block_pos += use_count * TupleSize;
-      //将不可利用的空间也分配
+
+      // allocate unavailable space of block tail
       if (kBlockSize - block_pos - kTailSize < TupleSize) {
         strip.offset_ += kBlockSize - block_pos;
         block_pos = 0;

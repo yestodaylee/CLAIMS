@@ -49,7 +49,6 @@
 #include "caf/io/all.hpp"
 #include "../txn_manager/txn.hpp"
 #include "../utility/Timer.h"
-//#include "txn_log.hpp"
 
 namespace claims {
 namespace txn {
@@ -84,18 +83,32 @@ class TimeStamp {
  private:
   static atomic<UInt64> now_;
 };
-
+/**
+ * @brief: a work thread to process transaction, query, produce snapshot
+ * @param: [core_id] is the id of TxnCore
+ * @param：[txnbin_list_] store list of txnbin
+ * @param: [txnbin_cur_] is the current max txnbin id
+ */
 class TxnCore : public caf::event_based_actor {
  public:
   UInt64 core_id_;
   UInt64 txnbin_cur_ = 0;
-  // txnbin id <=> txnbin object
   map<UInt64, TxnBin> txnbin_list_;
   caf::behavior make_behavior() override;
   TxnCore(int coreId) : core_id_(coreId) {}
   string ToString();
 };
 
+/**
+ * @brief: a proxy thread to handle all request, operate state changes
+ * @param: [active_] is whether local [TxnServer] launched
+ *         If true, need not to send request by network
+ * @param: [port_] is service network port, setting in "config file"
+ * @param: [concurrency_] is number of TxnCore
+ * @param: [proxy_] is TxnServer singleton instance
+ * @param: [pos_list_] is current cursor for all partitions
+ * @param: [cp_list_] is checkpoints for all partitions
+ */
 class TxnServer : public caf::event_based_actor {
  public:
   static bool active_;
@@ -105,13 +118,14 @@ class TxnServer : public caf::event_based_actor {
   static vector<caf::actor> cores_;
   static unordered_map<UInt64, atomic<UInt64>> pos_list_;
   static unordered_map<UInt64, TsCheckpoint> cp_list_;
-  // static unordered_map<UInt64, atomic<UInt64>> CountList;
   /**************** User APIs ***************/
   static RetCode Init(int concurrency = kConcurrency, int port = kTxnPort);
+  /** Initialize [TxnServer], called when claims start **/
   static RetCode LoadCPList(UInt64 ts,
                             const unordered_map<UInt64, UInt64>& his_cp_list,
                             const unordered_map<UInt64, UInt64>& rt_cp_list);
   static RetCode LoadPos(const unordered_map<UInt64, UInt64>& pos_list);
+  /**  hash transaction with [ts] to core id **/
   static int GetCoreID(UInt64 ts) { return ts % concurrency_; }
   caf::behavior make_behavior() override;
   /**************** System APIs ***************/
@@ -121,6 +135,7 @@ class TxnServer : public caf::event_based_actor {
       UInt64 ts, const vector<UInt64>& parts);
   static unordered_map<UInt64, UInt64> GetRtCPList(UInt64 ts,
                                                    const vector<UInt64>& parts);
+  /** request atomic allocate next strip of [part] **/
   static inline Strip AtomicMalloc(UInt64 part, UInt64 TupleSize,
                                    UInt64 TupleCount);
 };

@@ -239,15 +239,6 @@ void TxnBin::MergeSnapshot(Query &query) const {
 }
 
 void TxnBin::MergeTxn(Query &query, int len) const {
-  /*  if (ct_ < len) {
-      cout << "ct:" << ct_ << ",len:" << len << endl;
-      assert(false);
-    }*/
-  for (auto i = 0; i < len; i++) {
-    if (!(txn_list_[i].IsCommit() || txn_list_[i].IsAbort())) {
-      // cout << "error to scan txn!!!!!!!!!" << endl;
-    }
-  }
   for (auto i = 0; i < len; i++)
     if (txn_list_[i].IsCommit()) {
       query.scan_count_++;

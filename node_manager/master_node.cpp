@@ -159,20 +159,9 @@ class MasterNodeActor : public event_based_actor {
           delayed_send(this, std::chrono::seconds(kTimeout / 5),
                        Updatelist::value);
         },
-        [&](StorageBudgetAtom, const StorageBudgetMessage& message)
-            -> caf::message {
-              Environment::getInstance()
-                  ->getResourceManagerMaster()
-                  ->RegisterDiskBuget(message.nodeid, message.disk_budget);
-              Environment::getInstance()
-                  ->getResourceManagerMaster()
-                  ->RegisterMemoryBuget(message.nodeid, message.memory_budget);
-              LOG(INFO) << "receive storage budget message!! node: "
-                        << message.nodeid << " : disk = " << message.disk_budget
-                        << " , mem = " << message.memory_budget << endl;
-              return make_message(OkAtom::value);
-            },
-        [=](AddBlockAtom, int part_id, int block_num) -> caf::message {
+        [=](AddBlockAtom, uint64_t part_id, int block_num) -> caf::message {
+          cout << "try to add block on partition:" << part_id << " block nums "
+               << block_num << endl;
           RetCode ret = master_node_->AddBlock(part_id, block_num);
           return make_message(ret);
         },

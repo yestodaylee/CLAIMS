@@ -302,8 +302,8 @@ PartitionStorage::TxnPartitionReaderIterator::TxnPartitionReaderIterator(
     auto end = begin + strip.second;
     while (begin < end) {
       auto block = begin / BLOCK_SIZE;
-      auto len = (block + 1) * BLOCK_SIZE <= end
-                     ? (block + 1) * BLOCK_SIZE - begin
+      auto len = (static_cast<UInt64>(block) + 1) * BLOCK_SIZE <= end
+                     ? (static_cast<UInt64>(block) + 1) * BLOCK_SIZE - begin
                      : end - begin;
       rt_strip_list_.push_back(PStrip(begin, len));
       begin += len;
@@ -316,6 +316,7 @@ PartitionStorage::TxnPartitionReaderIterator::TxnPartitionReaderIterator(
     }
     cout << str << endl;*/
   qylog << "*********query:" << qylog_count++ << "***********" << endl;
+  qylog << "last_his_block:" << last_his_block_ << endl;
 }
 
 PartitionStorage::TxnPartitionReaderIterator::~TxnPartitionReaderIterator() {
@@ -352,7 +353,8 @@ bool PartitionStorage::TxnPartitionReaderIterator::NextBlock(
                     << "," << 0 << "," << block->getTuplesInBlock() << ">" <<
          endl;*/
       if (!block->Full())
-        qylog << "H<id:" << block_cur_ - 1
+        qylog << "H<cid:" << chunk_cur_ << ",bid:" << block_cur_ - 1
+              << ",addr:" << block->getBlock()
               << ",sizes:" << block->getTuplesInBlock() << ">" << endl;
       return true;
     }
@@ -485,6 +487,7 @@ UInt64 PartitionStorage::MergeToHis(UInt64 old_his_cp,
           (new_his_cp + BLOCK_SIZE) % CHUNK_SIZE - sizeof(unsigned);
       auto his_addr = chunk_his.hook + new_his_cp % CHUNK_SIZE;
       auto rt_addr = chunk_rt.hook + begin % CHUNK_SIZE;
+
       if (move == BLOCK_SIZE) {  // full block
         memcpy(his_addr, rt_addr, BLOCK_SIZE);
         /*        logfile << "full<" << begin / BLOCK_SIZE << "," << begin %
@@ -506,6 +509,7 @@ UInt64 PartitionStorage::MergeToHis(UInt64 old_his_cp,
         memcpy(his_addr, rt_addr, real_move);
         *reinterpret_cast<unsigned*>(his_addr + BLOCK_SIZE - sizeof(unsigned)) =
             tuple_count;
+
         /*        logfile << "part<" << begin / BLOCK_SIZE << "," << begin %
            BLOCK_SIZE
                         << "," << tuple_count << "> => <" << new_his_cp /

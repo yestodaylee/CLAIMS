@@ -97,9 +97,10 @@ RetCode ChunkStorage::ApplyMemory() {
                                    sizeof(unsigned)) = 0;
     }
 
-/*    cout << "Success to apply mem chunk:"
-         << chunk_id_.partition_id.partition_off << "," << chunk_id_.chunk_off
-         << endl;*/
+    /*    cout << "Success to apply mem chunk:"
+             << chunk_id_.partition_id.partition_off << "," <<
+       chunk_id_.chunk_off
+             << endl;*/
     /* update the chunk info in the Chunk store in case that the
      * chunk_info is updated.*/
     BlockManager::getInstance()->getMemoryChunkStore()->UpdateChunkInfo(
@@ -109,8 +110,9 @@ RetCode ChunkStorage::ApplyMemory() {
      * The storage memory is full, some swap algorithm is needed here.
      * TODO: swap algorithm.
      */
-/*    cout << "Failed to apply mem chunk:" << chunk_id_.partition_id.partition_off
-         << "," << chunk_id_.chunk_off << endl;*/
+    /*    cout << "Failed to apply mem chunk:" <<
+       chunk_id_.partition_id.partition_off
+             << "," << chunk_id_.chunk_off << endl;*/
     ret = claims::common::rNoMemory;
     assert(false);
   }
@@ -124,7 +126,6 @@ RetCode ChunkStorage::ApplyMemory() {
  * file is chunk.
  */
 ChunkReaderIterator* ChunkStorage::CreateChunkReaderIterator() {
-
   lock_.acquire();
   ChunkReaderIterator* ret;
 
