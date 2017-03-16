@@ -297,7 +297,7 @@ int main(int argc, const char **argv) {
   } else if (type == "txnserver") {
     unordered_map<UInt64, UInt64> pos_list = {{1, 0}, {2, 0}, {3, 0}, {4, 0}};
     TxnServer::Init(4, 8089);
-    TxnServer::LoadPos(pos_list);
+    TxnServer::LoadPosList(pos_list);
     TxnServer::LoadCPList(0, pos_list, pos_list);
     // QueryTracker::Init();
     sleep(1);

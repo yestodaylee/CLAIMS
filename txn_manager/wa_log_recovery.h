@@ -16,21 +16,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * /CLAIMS/txn_manager/log_server.hpp
+ * /CLAIMS/txn_manager/recovery.hpp
  *
  *  Created on: 2017年2月25日
  *      Author: imdb
- *		   Email: 
- * 
+ *		   Email:
+ *
  * Description:
  *
  */
 
-#ifndef TXN_MANAGER_LOG_SERVER_HPP_
-#define TXN_MANAGER_LOG_SERVER_HPP_
+#ifndef TXN_MANAGER_WA_LOG_RECOVERY_H_
+#define TXN_MANAGER_WA_LOG_RECOVERY_H_
 
+#include <vector>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <memory>
+#include <iostream>
+#include "../txn_manager/txn.hpp"
+using std::shared_ptr;
+using std::make_shared;
+namespace claims {
+namespace txn {
 
+class LogRecovery {
+ public:
+  static shared_ptr<TxnState> GetTxnState();
+  //static RedoBeginLog
+};
+}
+}
 
-
-
-#endif //  TXN_MANAGER_LOG_SERVER_HPP_ 
+#endif  //  TXN_MANAGER_WA_LOG_RECOVERY_H_

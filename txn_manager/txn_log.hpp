@@ -20,8 +20,8 @@
  *
  *  Created on: 2016年2月24日
  *      Author: imdb
- *		   Email: 
- * 
+ *		   Email:
+ *
  * Description:
  *
  */
@@ -55,15 +55,9 @@ using std::ifstream;
 using std::to_string;
 using std::shared_ptr;
 
+namespace claims {
+namespace txn {
 
-namespace claims{
-namespace txn{
-
-
-
-
-using UInt64 = unsigned long long;
-using UInt32 = unsigned int;
 const UInt64 kMaxLogSize = 16 * 1024 * 1024;
 const string kTxnLogFileName = "txn_log_";
 const string kDataLogFileName = "data_log_";
@@ -74,64 +68,63 @@ const int kTypeAbort = 4;
 const int kTypeCP = 5;
 const int kTypeData = 6;
 
-
-class LogServer:public caf::event_based_actor {
+class LogServer : public caf::event_based_actor {
  public:
   static RetCode Init(const string path = ".");
-  static RetCode Append (const string & log);
-  static RetCode Append (void * buffer, UInt64 size);
-  static RetCode Refresh ();
-  inline static string BeginLog(UInt64 Tid){
-     return "begin<"+to_string(Tid) +">\n";
-   }
+  static RetCode Append(const string& log);
+  static RetCode Append(void* buffer, UInt64 size);
+  static RetCode Refresh();
+  inline static string BeginLog(UInt64 Tid) {
+    return "begin<" + to_string(Tid) + ">\n";
+  }
 
-   inline static string WriteLog(UInt64 id, UInt64 part, UInt64 pos,UInt64 offset) {
-     return "write<"+to_string(id)+","+to_string(part)+","+
-         to_string(pos)+","+to_string(offset)+">\n";
-   }
+  inline static string WriteLog(UInt64 id, UInt64 part, UInt64 pos,
+                                UInt64 offset) {
+    return "write<" + to_string(id) + "," + to_string(part) + "," +
+           to_string(pos) + "," + to_string(offset) + ">\n";
+  }
 
-   inline static string CommitLog(UInt64 id) {
-     return "commit<"+to_string(id)+">\n";
-   }
-   inline static string AbortLog(UInt64 id) {
-     return "abort<"+to_string(id)+">\n";
-   }
-   inline static string CheckpointLog(UInt64 part,UInt64 logic_cp, UInt64 phy_cp){
-     return "checkpoint<"+to_string(part)
-         +","+to_string(logic_cp)+","+to_string(phy_cp)+">\n";
-   }
-  inline static string DataLogPrefix(UInt64 part, UInt64 pos, UInt64 offset, UInt64 size ) {
-    return "data<"+to_string(part)+","+to_string(pos)+
-        ","+to_string(offset)+","+to_string(size)+">\n";
+  inline static string CommitLog(UInt64 id) {
+    return "commit<" + to_string(id) + ">\n";
+  }
+  inline static string AbortLog(UInt64 id) {
+    return "abort<" + to_string(id) + ">\n";
+  }
+  inline static string CheckpointLog(UInt64 part, UInt64 logic_cp,
+                                     UInt64 phy_cp) {
+    return "checkpoint<" + to_string(part) + "," + to_string(logic_cp) + "," +
+           to_string(phy_cp) + ">\n";
+  }
+  inline static string DataLogPrefix(UInt64 part, UInt64 pos, UInt64 offset,
+                                     UInt64 size) {
+    return "data<" + to_string(part) + "," + to_string(pos) + "," +
+           to_string(offset) + "," + to_string(size) + ">\n";
   }
   caf::behavior make_behavior();
   static caf::actor proxy_;
   static bool active_;
+
  private:
   static string file_path_;
-  static FILE * file_handler_;
+  static FILE* file_handler_;
   static UInt64 file_size_;
   static UInt64 file_capacity_;
-  static char * buffer_;
+  static char* buffer_;
   static UInt64 buffer_size_;
   static UInt64 buffer_capacity_;
-
 };
 
-
-class LogClient{
+class LogClient {
  public:
   static RetCode Begin(UInt64 id);
   static RetCode Write(UInt64 id, UInt64 part, UInt64 pos, UInt64 offset);
   static RetCode Commit(UInt64 id);
   static RetCode Abort(UInt64 id);
-  static RetCode Data(UInt64 part, UInt64 pos, UInt64 offset, void * buffer, UInt64 size);
+  static RetCode Data(UInt64 part, UInt64 pos, UInt64 offset, void* buffer,
+                      UInt64 size);
   static RetCode Checkpoint(UInt64 part, UInt64 logic_cp, UInt64 phy_cp);
   static RetCode Refresh();
-
 };
-
-
 }
 }
-#endif //  LOG_MANAGER_HPP_ 
+#endif  //  LOG_MANAGER_HPP_

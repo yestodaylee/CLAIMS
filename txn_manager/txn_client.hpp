@@ -83,13 +83,15 @@ class TxnClient {
 
   /** Use [request] as parameter to request a ingestion transaction from
    * TxnServer.
-   * The [ingest] is assigned to transaction information after function called.*/
+   * The [ingest] is assigned to transaction information after function
+   * called.*/
   static RetCode BeginIngest(const FixTupleIngestReq& request, Ingest& ingest);
 
   /** Commit ingestion transaction [ts].
    * [ts] is write timestamp of ingestion transaction,
    * set its visibility to true. */
   static RetCode CommitIngest(UInt64 ts);
+  static RetCode ReplayTxn(const Txn& txn);
 
   /** Abort ingestion transaction [ts].
    * [id] is write timestamp of ingestion transaction. */

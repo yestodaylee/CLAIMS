@@ -40,8 +40,11 @@ noinst_LIBRARIES=libtxnmanager.a
 libtxnmanager_a_SOURCES = \
 	txn.hpp txn.cpp \
 	txn_client.hpp txn_client.cpp \
-	txn_server.hpp txn_server.cpp  \
-	txn_log.hpp txn_log.cpp  
+	txn_server.hpp txn_server.cpp \
+	wa_log_server.h wa_log_server.cpp \
+	wa_log_impl.h wa_log_impl.cpp \
+	wa_log_store.h wa_log_store.cpp \
+	wa_log_recovery.h wa_log_recovery.cpp
 
 	
 

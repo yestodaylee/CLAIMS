@@ -91,7 +91,8 @@ class Config {
   static std::string txn_server_ip;
   static int txn_server_port;
 
-  static bool enable_txn_log;
+  static bool enable_cmd_log;
+  static bool enable_value_log;
   static std::string txn_log_path;
 
   static int master_loader_thread_num;

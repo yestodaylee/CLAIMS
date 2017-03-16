@@ -25,9 +25,11 @@
  * Description:
  *
  */
+#include <string>
+#include <sstream>
 #include "txn.hpp"
 #include "txn_server.hpp"
-
+using std::ostringstream;
 namespace claims {
 namespace txn {
 
@@ -317,5 +319,57 @@ void TxnBin::GenSnapshot() {
     Strip::Merge(part.second);
   }
 }
+
+RetCode TxnState::Checkpoint(uint64_t part, uint64_t his_cp, uint64_t rt_cp) {
+  his_cp_list_[part] = his_cp;
+  rt_cp_list_[part] = rt_cp;
+  unordered_map<uint64_t, Txn> new_txn_list;
+  for (auto &ts_txn : txn_list_) {
+    bool txn_valid = true;
+    if (ts_txn.second.IsCommit()) {
+      for (auto &strip : ts_txn.second.strip_list_)
+        if (strip.first == part && strip.second.first < rt_cp_list_[part]) {
+          txn_valid = false;
+          break;
+        }
+      if (txn_valid) new_txn_list[ts_txn.first] = ts_txn.second;
+    }
+  }
+  txn_list_ = new_txn_list;
+  return rSuccess;
+}
+
+RetCode TxnState::InitPosList() {
+  pos_list_ = rt_cp_list_;
+  for (auto &ts_txn : txn_list_) {
+    for (auto &strip : ts_txn.second.strip_list_) {
+      auto new_pos = strip.second.first + strip.second.second;
+      if (pos_list_.find(strip.first) == pos_list_.end())
+        pos_list_[strip.first] = new_pos;
+      else if (pos_list_[strip.first] < new_pos)
+        pos_list_[strip.first] = new_pos;
+    }
+  }
+  return rSuccess;
+}
+
+string TxnState::ToString() const {
+  ostringstream ost;
+  ost << "***txn state***" << endl;
+  ost << "*****pos_list***" << endl;
+  for (auto &part_pos : pos_list_)
+    ost << part_pos.first << "=>" << part_pos.second << endl;
+  ost << "*****rt_cp_list***" << endl;
+  for (auto &part_rt_cp : rt_cp_list_)
+    ost << part_rt_cp.first << "=>" << part_rt_cp.second << endl;
+  ost << "*****his_cp_list***" << endl;
+  for (auto &part_his_cp : his_cp_list_)
+    ost << part_his_cp.first << "=>" << part_his_cp.second << endl;
+  ost << "*****txn_list***" << endl;
+  for (auto &ts_txn : txn_list_)
+    ost << ts_txn.first << "," << ts_txn.second.ToString();
+  return ost.str();
+}
+
 }  // namespace txn
 }  // namespace claims

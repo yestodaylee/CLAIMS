@@ -189,7 +189,16 @@ RetCode HdfsFileHandleImp::Read(void* buffer, size_t length) {
             << file_name_ << endl;
   return rSuccess;
 }
-
+RetCode HdfsFileHandleImp::PRead(void* buffer, size_t length,
+                                 size_t start_pos) {
+  int ret;
+  EXEC_AND_RETURN_ERROR(ret, SwitchStatus(kInReading),
+                        "failed to switch status");
+  if (SetPosition(start_pos) == rSuccess)
+    return Read(buffer, length);
+  else
+    return rFailure;
+}
 RetCode HdfsFileHandleImp::SetPosition(size_t pos) {
   assert(NULL != fs_ && "failed to connect hdfs");
   assert(NULL != file_ && "make sure file is opened");
@@ -273,6 +282,16 @@ RetCode HdfsFileHandleImp::DeleteFile() {
     LOG(WARNING) << "The file " << file_name_ << "is not exits!\n" << std::endl;
   }
   return rSuccess;
+}
+
+uint64_t HdfsFileHandleImp::GetSize() {
+  hdfsFileInfo* hdfsfile = hdfsGetPathInfo(fs_, file_name_.c_str());
+  if (hdfsfile != nullptr)
+    return hdfsfile->mSize;
+  else
+    LOG(ERROR) << "Failed to get file size : [" + file_name_ + "]."
+               << std::endl;
+  return 0;
 }
 
 }  // namespace common

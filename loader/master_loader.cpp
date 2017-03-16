@@ -62,7 +62,7 @@
 #include "../Resource/NodeTracker.h"
 #include "../txn_manager/txn.hpp"
 #include "../txn_manager/txn_client.hpp"
-#include "../txn_manager/txn_log.hpp"
+//#include "../txn_manager/txn_log.hpp"
 #include "../utility/cpu_scheduler.h"
 #include "../utility/resource_guard.h"
 #include "../utility/Timer.h"
@@ -717,18 +717,18 @@ RetCode MasterLoader::WriteLog(
       if (0 == partition_buffers[prj_id][part_id].length_) continue;
       uint64_t global_part_id = GetGlobalPartId(table_id, prj_id, part_id);
 
-      EXEC_AND_DLOG(
-          ret, LogClient::Data(global_part_id,
-                               ingest.strip_list_.at(global_part_id).first,
-                               ingest.strip_list_.at(global_part_id).second,
-                               partition_buffers[prj_id][part_id].buffer_,
-                               partition_buffers[prj_id][part_id].length_),
-          "written data log for partition:" << global_part_id,
-          "failed to write data log for partition:" << global_part_id);
+      /*      EXEC_AND_DLOG(
+                ret, LogClient::Data(global_part_id,
+                                     ingest.strip_list_.at(global_part_id).first,
+                                     ingest.strip_list_.at(global_part_id).second,
+                                     partition_buffers[prj_id][part_id].buffer_,
+                                     partition_buffers[prj_id][part_id].length_),
+                "written data log for partition:" << global_part_id,
+                "failed to write data log for partition:" << global_part_id);*/
     }
   }
-  EXEC_AND_DLOG(ret, LogClient::Refresh(), "flushed data log into disk",
-                "failed to flush data log");
+  /* EXEC_AND_DLOG(ret, LogClient::Refresh(), "flushed data log into disk",
+                 "failed to flush data log");*/
   return ret;
 }
 

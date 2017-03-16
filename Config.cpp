@@ -102,7 +102,8 @@ int Config::txn_server_cores;
 std::string Config::txn_server_ip;
 int Config::txn_server_port;
 
-bool Config::enable_txn_log = false;
+bool Config::enable_cmd_log = false;
+bool Config::enable_value_log = false;
 std::string Config::txn_log_path;
 
 int Config::master_loader_thread_num;
@@ -189,7 +190,9 @@ void Config::initialize() {
   txn_server_port = getInt("txn_server_port", 9100);
 
   // txn log
-  enable_txn_log = getBoolean("txn_log", true);
+  enable_cmd_log = getBoolean("cmd_log", true);
+
+  enable_value_log = getBoolean("value_log", true);
 
   txn_log_path = getString("txn_log_path", ".");
 
@@ -264,8 +267,9 @@ void Config::print_configure() const {
   std::cout << "txn_server_ip:" << txn_server_ip << std::endl;
   std::cout << "txn_server_port:" << txn_server_port << std::endl;
 
-  std::cout << "enable_txn_log:" << enable_txn_log << std::endl;
-  std::cout << "txn_log_path:" << txn_log_path << std::endl;
+  std::cout << "enable_cmd_log:" << enable_cmd_log << std::endl;
+  std::cout << "enable_value_log:" << enable_value_log << std::endl;
+  // std::cout << "txn_log_path:" << txn_log_path << std::endl;
 }
 
 void Config::setConfigFile(std::string file_name) { config_file = file_name; }

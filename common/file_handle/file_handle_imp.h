@@ -116,7 +116,7 @@ class FileHandleImp {
    * @return rSuccess if succeed
    */
   virtual RetCode Read(void* buffer, size_t length) = 0;
-  RetCode PRead(void* buffer, size_t length, size_t start_pos);
+  virtual RetCode PRead(void* buffer, size_t length, size_t start_pos);
   virtual bool CanAccess(std::string file_name) = 0;
 
   virtual RetCode DeleteFile() = 0;
@@ -124,6 +124,8 @@ class FileHandleImp {
   const string& get_file_name() { return file_name_; }
 
   virtual RetCode SwitchStatus(FileStatus status_to_be) = 0;
+
+  virtual uint64_t GetSize() = 0;
 
  protected:
   virtual RetCode SetPosition(size_t pos) = 0;

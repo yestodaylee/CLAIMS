@@ -41,7 +41,7 @@
 #include "catalog/catalog.h"
 #include "txn_manager/txn_server.hpp"
 #include "txn_manager/txn_client.hpp"
-#include "txn_manager/txn_log.hpp"
+//#include "txn_manager/txn_log.hpp"
 #include "txn_manager/txn.hpp"
 
 using caf::announce;
@@ -58,8 +58,8 @@ using claims::loader::SlaveLoader;
 using claims::txn::UInt64;
 using claims::txn::TxnServer;
 using claims::txn::TxnClient;
-using claims::txn::LogServer;
-using claims::txn::LogClient;
+// using claims::txn::LogServer;
+// using claims::txn::LogClient;
 using claims::txn::GetGlobalPartId;
 using claims::txn::TimeStamp;
 using claims::NodeAddr;
@@ -327,7 +327,7 @@ bool Environment::InitTxnManager() {
     // endl;
 
     TxnServer::LoadCPList(0, his_cp_list, rt_cp_list);
-    TxnServer::LoadPos(pos_list);
+    TxnServer::LoadPosList(pos_list);
     // cout << "init pos list..." << endl;
     // for (auto& pos : TxnServer::pos_list_)
     //  cout << "part[" << pos.first << "] => " << pos.second << endl;
@@ -339,6 +339,10 @@ bool Environment::InitTxnManager() {
   }
   sleep(1);
   TxnClient::Init(Config::txn_server_ip, Config::txn_server_port);
+  if (Config::enable_cmd_log) {
+    cout << "txnserver is recovery...:" << endl;
+    TxnServer::Recovery();
+  }
   return true;
 }
 
@@ -361,9 +365,9 @@ bool Environment::AdvancedBindAllPart() {
 }
 
 bool Environment::InitTxnLog() {
-  if (Config::enable_txn_log) {
+  if (Config::enable_cmd_log) {
     LOG(INFO) << "I'm txn log server";
-    LogServer::Init(Config::txn_log_path);
+    // LogServer::Init(Config::txn_log_path);
   }
   return true;
 }

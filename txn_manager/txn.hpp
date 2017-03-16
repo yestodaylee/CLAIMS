@@ -70,8 +70,8 @@ using std::sort;
 using std::make_pair;
 using std::make_tuple;
 using claims::common::rSuccess;
-
-using UInt64 = unsigned long long;
+using claims::common::rFailure;
+using UInt64 = uint64_t;
 using UInt32 = unsigned int;
 using UInt16 = unsigned short;
 using UInt8 = char;
@@ -86,6 +86,7 @@ using OkAtom = caf::atom_constant<caf::atom("Ok")>;
 using FailAtom = caf::atom_constant<caf::atom("Fail")>;
 using IngestAtom = caf::atom_constant<caf::atom("Ingest")>;
 using WriteAtom = caf::atom_constant<caf::atom("Write")>;
+using ReplayTxnAtom = caf::atom_constant<caf::atom("ReplayTxn")>;
 
 using DebugAtom = caf::atom_constant<caf::atom("Debug")>;
 using QueryAtom = caf::atom_constant<caf::atom("Query")>;
@@ -218,6 +219,7 @@ class Txn {
     strip_list_ = strip_list;
     // realtime_ = GetCurrents();
   }
+  void Write(uint64_t part, const PStrip &strip) { strip_list_[part] = strip; }
   void Commit() { status_ = kCommit; }
   void Abort() { status_ = kAbort; }
   bool IsCommit() { return status_ == kCommit; }
@@ -529,7 +531,47 @@ class TxnBin {
   unordered_map<UInt64, vector<PStrip>> snapshot_;
   unordered_map<UInt64, vector<PStrip>> abort_list_;
 };
+class TxnState {
+ public:
+  RetCode Begin(uint64_t ts) {
+    if (txn_list_.find(ts) == txn_list_.end())
+      txn_list_[ts] = Txn();
+    else
+      return rFailure;
+    return rSuccess;
+  }
+  RetCode Write(uint64_t ts, uint64_t part, uint64_t pos, uint64_t offset) {
+    if (txn_list_.find(ts) == txn_list_.end())
+      return rFailure;
+    else
+      txn_list_[ts].Write(part, PStrip(pos, offset));
+    return rSuccess;
+  }
+  RetCode Commit(uint64_t ts) {
+    if (txn_list_.find(ts) == txn_list_.end()) {
+      cout << "commit ts:" << ts << endl;
+      return rFailure;
+    } else
+      txn_list_[ts].Commit();
+    return rSuccess;
+  }
+  RetCode Abort(uint64_t ts) {
+    if (txn_list_.find(ts) == txn_list_.end())
+      return rFailure;
+    else
+      txn_list_[ts].Abort();
+    return rSuccess;
+  }
+  RetCode Checkpoint(uint64_t part, uint64_t his_cp, uint64_t rt_cp);
+  RetCode InitPosList();
+  string ToString() const;
+  unordered_map<uint64_t, Txn> txn_list_;
 
+  unordered_map<uint64_t, uint64_t> pos_list_;
+  unordered_map<uint64_t, uint64_t> rt_cp_list_;
+  unordered_map<uint64_t, uint64_t> his_cp_list_;
+  // void Ingest
+};
 /**
  * setting CAF serialization
  */

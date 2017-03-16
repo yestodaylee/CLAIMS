@@ -37,7 +37,6 @@
 #include <unordered_map>
 #include <set>
 #include <utility>
-#include <unordered_map>
 #include <mutex>
 #include <time.h>
 #include <stdlib.h>
@@ -48,6 +47,7 @@
 #include "caf/all.hpp"
 #include "caf/io/all.hpp"
 #include "../txn_manager/txn.hpp"
+#include "../txn_manager/wa_log_server.h"
 #include "../utility/Timer.h"
 
 namespace claims {
@@ -94,6 +94,7 @@ class TxnCore : public caf::event_based_actor {
   UInt64 core_id_;
   UInt64 txnbin_cur_ = 0;
   map<UInt64, TxnBin> txnbin_list_;
+  CmdLogStream* log_stream_ = nullptr;
   caf::behavior make_behavior() override;
   TxnCore(int coreId) : core_id_(coreId) {}
   string ToString();
@@ -120,17 +121,20 @@ class TxnServer : public caf::event_based_actor {
   static unordered_map<UInt64, TsCheckpoint> cp_list_;
   /**************** User APIs ***************/
   static RetCode Init(int concurrency = kConcurrency, int port = kTxnPort);
+  static RetCode Recovery();
   /** Initialize [TxnServer], called when claims start **/
   static RetCode LoadCPList(UInt64 ts,
                             const unordered_map<UInt64, UInt64>& his_cp_list,
                             const unordered_map<UInt64, UInt64>& rt_cp_list);
-  static RetCode LoadPos(const unordered_map<UInt64, UInt64>& pos_list);
+  static RetCode LoadPosList(const unordered_map<UInt64, UInt64>& pos_list);
+  static RetCode RecoveryTxnState(shared_ptr<TxnState> txn_state);
   /**  hash transaction with [ts] to core id **/
   static int GetCoreID(UInt64 ts) { return ts % concurrency_; }
   caf::behavior make_behavior() override;
   /**************** System APIs ***************/
  private:
   static set<UInt64> active_querys_;
+  CmdLogStream* log_stream_ = nullptr;
   static unordered_map<UInt64, UInt64> GetHisCPList(
       UInt64 ts, const vector<UInt64>& parts);
   static unordered_map<UInt64, UInt64> GetRtCPList(UInt64 ts,

@@ -86,12 +86,16 @@ include_HEADERS = Config.h \
 				configure.h  \
 				txn_manager/txn.hpp \
 				txn_manager/txn_server.hpp \
-				txn_manager/txn_client.hpp
+				txn_manager/txn_client.hpp \
+				txn_manager/wa_log_impl.h \
+				txn_manager/wa_log_store.h \
+				txn_manager/wa_log_recovery.h \
+				Config.h
 				
 bin_PROGRAMS = claimsserver \
 				client \
 				test  \
-				txntest
+				wa_log_test
 				
 client_SOURCES = Client.cpp \
 					Environment.cpp \
@@ -107,8 +111,8 @@ test_SOURCES = Test/gtest_main.cpp\
 				Environment.cpp \
 				IDsGenerator.cpp \
 				Config.cpp
-				
-txntest_SOURCES = txn_manager/txn_client_test.cpp
+
+wa_log_test_SOURCES = txn_manager/wa_log_test.cpp Config.cpp Environment.cpp IDsGenerator.cpp				
 				
 
 SUBDIRS=  catalog Client common Daemon Executor IndexManager\

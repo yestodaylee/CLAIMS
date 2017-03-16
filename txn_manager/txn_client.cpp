@@ -27,7 +27,7 @@
  */
 
 #include "txn_client.hpp"
-#include "txn_log.hpp"
+//#include "txn_log.hpp"
 namespace claims {
 namespace txn {
 
@@ -218,5 +218,22 @@ RetCode TxnClient::CommitCheckpoint(UInt64 ts, UInt64 part, UInt64 his_cp,
   }
   return ret;
 }
+
+RetCode TxnClient::ReplayTxn(const Txn& txn) {
+  RetCode ret = rSuccess;
+  try {
+    caf::scoped_actor self;
+    self->sync_send(TxnServer::active_ ? TxnServer::proxy_ : proxy_,
+                    ReplayTxnAtom::value, txn)
+        .await([&ret](RetCode r) { ret = r; },
+               caf::after(seconds(kTimeout)) >> [&ret] {
+                                                  ret = -1;
+                                                  cout << "redo txn timeout"
+                                                       << endl;
+                                                });
+  } catch (...) {
+  }
+}
+
 }  // namespace txn
 }  // namespace claims

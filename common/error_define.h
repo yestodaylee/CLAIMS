@@ -286,6 +286,8 @@ const int rCommitCheckpointFail = -2506;
 const int rGetFileHandleFail = -2507;
 const int rGetMemoryHandleFail = -2508;
 
+const int rReachLogTail = -2509;
+
 /* errorno for codegen -3001 ~ -4000 */
 const int rTestError = -3001;
 

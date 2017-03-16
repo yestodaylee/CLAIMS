@@ -31,13 +31,13 @@
 //// it will also prohibit assert()
 // #define NDEBUG
 
-#include "./disk_file_handle_imp.h"
-
+#include <unistd.h>
+#include <sys/stat.h>
 #include <glog/logging.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <string>
-
+#include "./disk_file_handle_imp.h"
 #include "./file_handle_imp.h"
 #include "../../common/rename.h"
 #include "../memory_handle.h"
@@ -194,6 +194,16 @@ RetCode DiskFileHandleImp::Read(void* buffer, size_t length) {
   return ret;
 }
 
+RetCode DiskFileHandleImp::PRead(void* buffer, size_t length,
+                                 size_t start_pos) {
+  int ret;
+  EXEC_AND_RETURN_ERROR(ret, SwitchStatus(kInReading),
+                        "failed to switch status");
+  if (SetPosition(start_pos) == rSuccess)
+    return Read(buffer, length);
+  else
+    return rFailure;
+}
 RetCode DiskFileHandleImp::SetPosition(size_t pos) {
   assert(fd_ >= 3);
   assert(kInReading == file_status_ &&
@@ -266,6 +276,17 @@ RetCode DiskFileHandleImp::DeleteFile() {
     }
   }
   return rSuccess;
+}
+
+uint64_t DiskFileHandleImp::GetSize() {
+  struct stat buf;
+  if (CanAccess(file_name_) && stat(file_name_.c_str(), &buf) == 0) {
+    return buf.st_size;
+  } else {
+    LOG(ERROR) << "Cannot get disk file size : [" + file_name_ +
+                      "] ! Reason: " + strerror(errno) << std::endl;
+    return 0;
+  }
 }
 
 }  // namespace common
