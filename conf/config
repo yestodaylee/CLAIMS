@@ -1,6 +1,5 @@
 #本机IP地址
-ip = "219.228.147.162";
-
+ip="127.0.0.1"
 #端口范围（调试用）
 PortManager:
 {
@@ -11,8 +10,8 @@ PortManager:
 #master的IP地址和端口
 coordinator:
 {
-    ip="219.228.147.162"
-    port="12012"
+    ip="127.0.0.1"
+    port="12000"
 }
 
 #是否为master. 若为master，则master=1，否则master=0
@@ -38,13 +37,15 @@ client_listener_port = 10012
 #data = "/home/claims/hcs/data/"
 #data = "/home/imdb/data/"
 data = "/test/claims/"
+#data="/home/zzh/Desktop/test_data_old/"
+>>>>>>> for_merge
 #data="/home/fish/data/test/"
 #data="/home/imdb/data/POC/"
 #data="/home/imdb/data/POC/"
 #hdfs主节点
+#data="/home/claims/zzh/4-partiton/"
 
-
-hdfs_master_ip="219.228.147.162"
+hdfs_master_ip="58.198.176.92"
 
 #hdfs主节点端口
 hdfs_master_port=9000
