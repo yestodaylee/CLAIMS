@@ -22,9 +22,6 @@
  *      Author: yukai
  *		   Email: yukai2014@gmail.com
  *
- *		   Add the load_from_hdfs by hurry.huang
- *		   Email: hurry.huang@infosys.com
- *
  * Description:
  *
  */
@@ -70,9 +67,6 @@
 #include "../utility/thread_pool.h"
 #include "../utility/Timer.h"
 #include "./table_file_connector.h"
-#include "hdfs_loader.h"
-#include "../common/memory_handle.h"
-#define hdfsreadlength 64*1024*1024
 
 using claims::common::FileOpenFlag;
 using claims::common::FilePlatform;
@@ -153,7 +147,6 @@ uint64_t DataInjector::total_unread_sem_time_ = 0;
 uint64_t DataInjector::total_read_sem_fail_count_ = 0;
 uint64_t DataInjector::total_unread_sem_fail_count_ = 0;
 uint64_t DataInjector::total_append_warning_time_ = 0;
-string hdfs_name = "HDFS:";
 
 DataInjector::DataInjector(TableDescriptor* table, const string col_separator,
                            const string row_separator)
@@ -161,9 +154,7 @@ DataInjector::DataInjector(TableDescriptor* table, const string col_separator,
       col_separator_(col_separator),
       row_separator_(row_separator),
       row_id_in_table_(table_->row_number_),
-      connector_(table_->get_connector()),
-
-	   hdfsloader_ (new HdfsLoader()){
+      connector_(table_->get_connector()) {
   sub_tuple_generator_.clear();
   table_schema_ = table_->getSchema();
   for (int i = 0; i < table_->getNumberOfProjection(); i++) {
@@ -245,9 +236,12 @@ RetCode DataInjector::PrepareInitInfo(FileOpenFlag open_flag) {
                 j));
         tmp_block_num.push_back(
             table_->getProjectoin(i)->getPartitioner()->getPartitionBlocks(j));
-      } else {
+      } else if (kCreateFile == open_flag) {
         tmp_tuple_count.push_back(0);
         tmp_block_num.push_back(0);
+      } else {
+        LOG(ERROR) << "Invalid open_flag. kReadFile shouldn't be here.";
+        assert(open_flag != FileOpenFlag::kReadFile);
       }
       LOG(INFO) << "init number of partitions (" << i << "," << j
                 << "):" << tmp_block_num[j];
@@ -276,7 +270,7 @@ RetCode DataInjector::LoadFromFileSingleThread(vector<string> input_file_names,
   cout << endl;
 
   EXEC_AND_RETURN_ERROR(
-      ret, PrepareEverythingForLoading(input_file_names, open_flag, result, hdfsloader_),
+      ret, PrepareEverythingForLoading(input_file_names, open_flag, result),
       "failed to prepare everything for loading");
 
   GETCURRENTTIME(start_read_time);
@@ -400,46 +394,26 @@ RetCode DataInjector::SetTableState(FileOpenFlag open_flag,
       }
     }
     LOG(INFO) << "\n--------------------Load  Begin!------------------------\n";
-  } else {
+  } else if (FileOpenFlag::kAppendFile == open_flag) {
     LOG(INFO) << "\n------------------Append  Begin!-----------------------\n";
+  } else {
+    LOG(ERROR) << "Invalid open_flag, kReadFile shouldn't be here.";
+    assert(open_flag != FileOpenFlag::kReadFile);
   }
   return ret;
 }
 
 RetCode DataInjector::CheckFiles(vector<string> input_file_names,
-                                 ExecutedResult* result, HdfsLoader * hdfsloader_) {
+                                 ExecutedResult* result) {
   int ret = rSuccess;
-  for (auto &file_name : input_file_names) {
-	  //add the load from hdfs by hcs 22/feb/2017
-	  if(file_name.find(hdfs_name) == 0){
-		  file_name = file_name.substr(hdfs_name.length());
-		  ret = hdfsloader_->CheckHdfsFile(file_name);
-		  if(ret != rSuccess){
-			  ret = rOpenHdfsFileFail;
-			  PLOG(ERROR) << "[ " << ret << ", " << CStrError(ret) << " ]"
-			  					  << "File name:" << file_name << ". Reason";
-			  result->SetError("Can't access file :" + file_name);
-			  return ret;
-		  }
-		  /*
-		  hdfsFileInfo* hdfsfile = hdfsGetPathInfo(fs_,file_name.c_str());
-		  if(NULL == hdfsfile){
-			  PLOG(ERROR) << "failed to open file :" << file_name << " in mode"
-			                  << file_status_info[FileHandleImp::kInReading] << " .";
-			      return rOpenHdfsFileFail;
-		  }
-*/
-	  }
-	  else{
-		ifstream input_file(file_name.c_str());
-		if (!input_file.good()) {
-		  ret = rOpenDiskFileFail;
-		  PLOG(ERROR) << "[ " << ret << ", " << CStrError(ret) << " ]"
-					  << "File name:" << file_name << ". Reason";
-		  result->SetError("Can't access file :" + file_name);
-		  return ret;
-
-		}
+  for (auto file_name : input_file_names) {
+    ifstream input_file(file_name.c_str());
+    if (!input_file.good()) {
+      ret = rOpenDiskFileFail;
+      PLOG(ERROR) << "[ " << ret << ", " << CStrError(ret) << " ]"
+                  << "File name:" << file_name << ". Reason";
+      result->SetError("Can't access file :" + file_name);
+      return ret;
     }
   }
   return ret;
@@ -447,13 +421,11 @@ RetCode DataInjector::CheckFiles(vector<string> input_file_names,
 
 RetCode DataInjector::PrepareEverythingForLoading(
     vector<string> input_file_names, FileOpenFlag open_flag,
-    ExecutedResult* result, HdfsLoader * hdfsloader_) {
+    ExecutedResult* result) {
   int ret = rSuccess;
   GET_TIME_DI(prepare_start_time);
   EXEC_AND_RETURN_ERROR(ret, PrepareInitInfo(open_flag),
                         "failed to prepare initialization info");
-  EXEC_AND_RETURN_ERROR(ret, hdfsloader_->PrepareForLoadFromHdfs(),
-		  	  	  	  	  	  	  "failed to prepare load_from_hdfs .");
   PLOG_DI("prepare time: " << GetElapsedTimeInUs(prepare_start_time) /
                                   1000000.0);
 
@@ -476,7 +448,7 @@ RetCode DataInjector::PrepareEverythingForLoading(
 
   // check files
   GET_TIME_DI(start_check_file_time);
-  EXEC_AND_RETURN_ERROR(ret, CheckFiles(input_file_names, result, hdfsloader_),
+  EXEC_AND_RETURN_ERROR(ret, CheckFiles(input_file_names, result),
                         "some files are unaccessible");
   PLOG_DI("used " << GetElapsedTimeInUs(start_check_file_time) / 1000000.0
                   << " time to check file ");
@@ -508,8 +480,6 @@ RetCode DataInjector::LoadFromFileMultiThread(vector<string> input_file_names,
                                               double sample_rate) {
   int ret = rSuccess;
   int file_count = 0;
-  //HdfsLoader* hdfsloader_ = new HdfsLoader();
-  //LOG(INFO)<<"enter the loadfromfilemultithread and create the hdfsloader_"<<std::endl;
   uint64_t row_id_in_file = 0;
   uint64_t inserted_tuples_in_file = 0;
   uint64_t total_tuple_count = 0;
@@ -522,7 +492,7 @@ RetCode DataInjector::LoadFromFileMultiThread(vector<string> input_file_names,
   cout << endl;
 
   EXEC_AND_RETURN_ERROR(
-      ret, PrepareEverythingForLoading(input_file_names, open_flag, result, hdfsloader_),
+      ret, PrepareEverythingForLoading(input_file_names, open_flag, result),
       "failed to prepare everything for loading");
 
   // create threads handling tuples
@@ -538,93 +508,43 @@ RetCode DataInjector::LoadFromFileMultiThread(vector<string> input_file_names,
   // start to read every raw data file
   GETCURRENTTIME(start_read_time);
   for (auto file_name : input_file_names) {
-	  if(file_name.find(hdfs_name) == 0){
-		  file_name = file_name.substr(hdfs_name.length());
-		  //hdfsFileInfo* hdfsfile = hdfsGetPathInfo(fs_, file_name.c_str())	;
-		  DLOG_DI("Now handle hdfs_file :" << file_name);
-		  void * buffer;
-		  buffer = Malloc(hdfsreadlength + 1);
-		  int pos = 0; int read_num = 0;
-		  const int length = hdfsreadlength;
-//		  hdfsloader_->file_ =
-//				  hdfsOpenFile(hdfsloader_->fs_, file_name.c_str(),O_RDONLY,0,0,0);
-		  ret = hdfsloader_->OpenHdfsFile(file_name);
-		  if (ret != rSuccess) {
-		    cout << "open file error" << endl;
-		  }
-		  while(GetTupleTerminatedByFromHdfs(buffer,hdfsloader_, file_name, tuple_record,
-				  row_separator_, pos, read_num, length) || tuple_record != ""){
-			  if(tuple_record == "\r")
-				  tuple_record = "";  // eliminate the effect of '\r'
-			  //std::cout<<"get the tuple_record is"<<tuple_record<<std::endl;
-			  DLOG_DI("---------------read tuple "
-					  << tuple_record << "tuple size is " << tuple_record.length()
-					  << ". input file's eof is " << input_file.eof());
-			  // just to tell everyone "i am alive!!!"
-			  		  if (0 == row_id_in_file % 50000) AnnounceIAmLoading();
-			  		  ++row_id_in_file;
+    ifstream input_file(file_name.c_str());
+    DLOG_DI("Now handle file :" << file_name);
+    // read every tuple
+    while (GetTupleTerminatedBy(input_file, tuple_record, row_separator_) ||
+           tuple_record != "") {
+      if (tuple_record == "\r")
+        tuple_record = "";  // eliminate the effect of '\r'
+      DLOG_DI("---------------read tuple "
+              << tuple_record << "tuple size is " << tuple_record.length()
+              << ". input file's eof is " << input_file.eof());
 
-			  		  if (GetRandomDecimal() >= sample_rate) continue;  // sample
+      // just to tell everyone "i am alive!!!"
+      if (0 == row_id_in_file % 50000) AnnounceIAmLoading();
+      ++row_id_in_file;
 
-			  		  int list_index = row_id_in_file % thread_count;
-			  		  {  // push into one thread local tuple pool
-			  			GET_TIME_DI(start_tuple_buffer_lock_time);
-			  			LockGuard<SpineLock> guard(
-			  				task_list_access_lock_[list_index]);  /// lock/sem
-			  			ATOMIC_ADD(total_lock_tuple_buffer_time_,
-			  					   GetElapsedTimeInUs(start_tuple_buffer_lock_time));
-			  			task_lists_[list_index].push_back(
-			  				std::move(LoadTask(tuple_record, file_name, row_id_in_file)));
-			  		  }
+      if (GetRandomDecimal() >= sample_rate) continue;  // sample
 
-			  		  tuple_count_sem_in_lists_[list_index].post();
+      int list_index = row_id_in_file % thread_count;
+      {  // push into one thread local tuple pool
+        GET_TIME_DI(start_tuple_buffer_lock_time);
+        LockGuard<SpineLock> guard(
+            task_list_access_lock_[list_index]);  /// lock/sem
+        ATOMIC_ADD(total_lock_tuple_buffer_time_,
+                   GetElapsedTimeInUs(start_tuple_buffer_lock_time));
+        task_lists_[list_index].push_back(
+            std::move(LoadTask(tuple_record, file_name, row_id_in_file)));
+      }
 
-		  }
-		  free(buffer);
-		  buffer = NULL;
-		  hdfsloader_->CloseHdfsFile();
-	  }
-	  //the function for load_from_hdfs by hurry.
-	  else{
-		ifstream input_file(file_name.c_str());
-		DLOG_DI("Now handle file :" << file_name);
-		// read every tuple
-		while (GetTupleTerminatedBy(input_file, tuple_record, row_separator_) ||
-			   tuple_record != "") {
-		  if (tuple_record == "\r")
-			tuple_record = "";  // eliminate the effect of '\r'
-		  DLOG_DI("---------------read tuple "
-				  << tuple_record << "tuple size is " << tuple_record.length()
-				  << ". input file's eof is " << input_file.eof());
+      tuple_count_sem_in_lists_[list_index].post();
+    }
 
-		  // just to tell everyone "i am alive!!!"
-		  if (0 == row_id_in_file % 50000) AnnounceIAmLoading();
-		  ++row_id_in_file;
-
-		  if (GetRandomDecimal() >= sample_rate) continue;  // sample
-
-		  int list_index = row_id_in_file % thread_count;
-		  {  // push into one thread local tuple pool
-			GET_TIME_DI(start_tuple_buffer_lock_time);
-			LockGuard<SpineLock> guard(
-				task_list_access_lock_[list_index]);  /// lock/sem
-			ATOMIC_ADD(total_lock_tuple_buffer_time_,
-					   GetElapsedTimeInUs(start_tuple_buffer_lock_time));
-			task_lists_[list_index].push_back(
-				std::move(LoadTask(tuple_record, file_name, row_id_in_file)));
-		  }
-
-		  tuple_count_sem_in_lists_[list_index].post();
-		}
-
-		DLOG_DI("--------------- input file's eof is " << input_file.eof());
-		LOG(INFO) << "insert all " << row_id_in_file
-				  << " line into tuple pool from " << file_name << " into blocks"
-				  << endl;
-		input_file.close();
-		++file_count;
-	  }
-
+    DLOG_DI("--------------- input file's eof is " << input_file.eof());
+    LOG(INFO) << "insert all " << row_id_in_file
+              << " line into tuple pool from " << file_name << " into blocks"
+              << endl;
+    input_file.close();
+    ++file_count;
   }
   __sync_add_and_fetch(&all_tuple_read_, 1);
   LOG(INFO) << "used "
@@ -672,7 +592,6 @@ RetCode DataInjector::LoadFromFileMultiThread(vector<string> input_file_names,
   DELETE_ARRAY(task_list_access_lock_);
   DELETE_ARRAY(tuple_count_sem_in_lists_);
 
-
   return ret;
 }
 
@@ -702,7 +621,7 @@ RetCode DataInjector::LoadFromFile(vector<string> input_file_names,
   total_read_sem_fail_count_ = 0;
   total_unread_sem_fail_count_ = 0;
   total_append_warning_time_ = 0;
-
+  assert(open_flag != FileOpenFlag::kReadFile);
 #ifndef MULTI_THREAD_LOAD
   return LoadFromFileSingleThread(input_file_names, open_flag, result,
                                   sample_rate);
@@ -1172,72 +1091,6 @@ istream& DataInjector::GetTupleTerminatedBy(ifstream& ifs, string& res,
     }
   }
   return ifs;
-}
-
-bool DataInjector::GetTupleTerminatedByFromHdfs(void*& buffer, HdfsLoader* hdfsloader_, string & file_name,
-														string & res, const string & terminator,int & pos, int & read_num,
-														const int & length){
-	res.clear();
-	int c = 0;
-	int total_read_num = 0;
-	//cout<<"terminator is "<<terminator<<endl;
-	if(terminator.length() == 1){
-		while(true){
-			c = hdfsloader_->GetCharFromBuffer(buffer, pos, read_num, length, total_read_num);
-			//std::cout<<"get the char c:"<<c<<"\n And the total_read_num is "<<total_read_num<<std::endl;
-			if( c == -1)break;
-			res += c;
-			if (c == '\n') {
-				int coincide_length = 1;
-				res = res.substr(0, res.length() - terminator.length());
-				return true;
-			}/*
-				while (true) {
-					c = hdfsloader_->GetCharFromBuffer(buffer, pos, read_num, length, hdfsloader_, file_name, total_read_num);
-					if(c == -1)break;
-					res += c;
-					if (terminator[coincide_length] == c) {
-						if (++coincide_length == terminator.length()) {
-							// don't read terminator into string, same as getline()
-							res = res.substr(0, res.length() - terminator.length());
-							return true;
-						}
-					} else {
-						break;
-					}
-				}*/
-
-
-		}
-	}
-	while (true){
-		c = hdfsloader_->GetCharFromBuffer(buffer, pos, read_num, length, total_read_num);
-		std::cout<<"get the char c:"<<c<<"\n And the total_read_num is "<<total_read_num<<std::endl;
-		if( c == -1)break;
-		res += c;
-		if (c == terminator[0]) {
-			int coincide_length = 1;
-			while (true) {
-				c = hdfsloader_->GetCharFromBuffer(buffer, pos, read_num, length, total_read_num);
-				if(c == -1)break;
-				res += c;
-				if (terminator[coincide_length] == c) {
-					if (++coincide_length == terminator.length()) {
-						// don't read terminator into string, same as getline()
-						res = res.substr(0, res.length() - terminator.length());
-						return true;
-					}
-				} else {
-					break;
-				}
-			}
-		}
-	}
-	return false;
-
-
-
-	//return true;
 }
 
 void DataInjector::AnnounceIAmLoading() {

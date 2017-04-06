@@ -36,6 +36,7 @@
 
 #include "../../common/rename.h"
 #include "../../Config.h"
+
 using std::endl;
 namespace claims {
 namespace common {

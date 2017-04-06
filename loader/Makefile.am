@@ -29,8 +29,7 @@ libloader_a_SOURCES = \
 	single_file_connector.h 		single_file_connector.cpp \
 	single_thread_single_file_connector.h single_thread_single_file_connector.cpp \
 	table_file_connector.cpp 		table_file_connector.h  \
-	validity.h 						validity.cpp	\
-	hdfs_loader.cpp					hdfs_loader.h 
+	validity.h 						validity.cpp
 	
 
 SUBDIRS = test

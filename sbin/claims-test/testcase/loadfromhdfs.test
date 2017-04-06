@@ -1,3 +1,0 @@
-
-load table CUSTOMER from "HDFS:/test/claims/customer.tbl" with '|','\n';
-exit;
