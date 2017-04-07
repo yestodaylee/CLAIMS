@@ -32,6 +32,9 @@
 #include <vector>
 #include <string>
 #include <atomic>
+#include <iosfwd>
+#include <set>
+
 #include "../common/ids.h"
 #include "../common/Schema/SchemaFix.h"
 #include "../logical_operator/plan_context.h"
@@ -114,8 +117,9 @@ class LogicalOperator {
       const unsigned& block_size = 4096 * 1024){};
 
   virtual void Print(int level = 0) const = 0;
-
+  virtual void PruneProj(set<string>& above_attrs) {}
   OperatorType get_operator_type() { return operator_type_; }
+
   /**
    * Get the information(list of partition to scan) for txn creation
    * Set the txn concurrency information to operator
@@ -123,6 +127,9 @@ class LogicalOperator {
    */
   virtual void GetTxnInfo(QueryReq& request) const {}
   virtual void SetTxnInfo(const Query& query) {}
+
+  LogicalOperator* DecideAndCreateProject(set<string>& attrs,
+                                          LogicalOperator* child);
 
  protected:
   Schema* GetSchema(const std::vector<Attribute>&) const;

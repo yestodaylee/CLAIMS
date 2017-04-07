@@ -31,7 +31,6 @@ client_listener_port = 10000
  
 data="/home/imdb/config/tpc-h/1-partition/sf-1/"
 #data="/home/claims/data/tpc-h/sf1/1partition/"
-
 #data="/home/imdb/data/SF-1/"
 #data="/home/imdb/data/SF-1/"
 #data="/home/imdb/data/stock/"
@@ -40,15 +39,9 @@ data="/home/imdb/config/tpc-h/1-partition/sf-1/"
 #data="/claimsdata/"
 #data="/home/zzh/data/sf-1-p4/"
 
-#data="/home/fish/data/test/"
-#data="/home/imdb/data/POC/"
-#data="/home/imdb/data/POC/"
-
- 
 #hdfs主节点
-#hdfs_master_ip="58.198.176.92"
-hdfs_master_ip="219.228.147.33"
- 
+hdfs_master_ip="58.198.176.92"
+
 
 #hdfs主节点端口
 hdfs_master_port=9000

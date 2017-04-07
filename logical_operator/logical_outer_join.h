@@ -110,14 +110,17 @@ class LogicalOuterJoin : public LogicalOperator {
   bool GetOptimalPhysicalPlan(Requirement requirement,
                               PhysicalPlanDescriptor& physical_plan_descriptor,
                               const unsigned& block_size = 4096 * 1024);
+
   void GetTxnInfo(QueryReq& request) const override {
-      left_child_->GetTxnInfo(request);
-      right_child_->GetTxnInfo(request);
-    }
-    void SetTxnInfo(const Query& query) override  {
-      left_child_->SetTxnInfo(query);
-      right_child_->SetTxnInfo(query);
-    }
+    left_child_->GetTxnInfo(request);
+    right_child_->GetTxnInfo(request);
+  }
+  void SetTxnInfo(const Query& query) override {
+    left_child_->SetTxnInfo(query);
+    right_child_->SetTxnInfo(query);
+  }
+
+  void PruneProj(set<string>& above_attrs);
 
  private:
   std::vector<unsigned> GetLeftJoinKeyIds() const;

@@ -94,6 +94,7 @@ class LogicalAggregation : public LogicalOperator {
                      vector<ExprUnary*> aggregation_attrs,
                      LogicalOperator* child);
   virtual ~LogicalAggregation();
+  void PruneProj(set<string>& above_attrs);
 
   void GetTxnInfo(QueryReq& request) const override {
     child_->GetTxnInfo(request);

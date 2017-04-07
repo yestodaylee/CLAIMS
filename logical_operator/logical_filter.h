@@ -87,12 +87,13 @@ class LogicalFilter : public LogicalOperator {
    * @param level: As an index.
    */
   void Print(int level = 0) const;
+
   void GetTxnInfo(QueryReq& request) const override {
-      child_->GetTxnInfo(request);
-    }
-    void SetTxnInfo(const Query& query) override  {
-      child_->SetTxnInfo(query);
-    }
+    child_->GetTxnInfo(request);
+  }
+  void SetTxnInfo(const Query& query) override { child_->SetTxnInfo(query); }
+
+  void PruneProj(set<string>& above_attrs);
 
  private:
   /**

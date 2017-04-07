@@ -55,6 +55,7 @@ class LogicalCrossJoin : public LogicalOperator {
   PlanContext GetPlanContext();
   PhysicalOperatorBase* GetPhysicalPlan(const unsigned& blocksize);
   void Print(int level = 0) const;
+
   void GetTxnInfo(QueryReq& request) const override {
     left_child_->GetTxnInfo(request);
     right_child_->GetTxnInfo(request);
@@ -63,6 +64,8 @@ class LogicalCrossJoin : public LogicalOperator {
     left_child_->SetTxnInfo(query);
     right_child_->SetTxnInfo(query);
   }
+
+  void PruneProj(set<string>& above_attrs);
 
  protected:
   /**

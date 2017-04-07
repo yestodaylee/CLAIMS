@@ -48,12 +48,13 @@ class LogicalSubquery : public LogicalOperator {
   PlanContext GetPlanContext();
   PhysicalOperatorBase *GetPhysicalPlan(const unsigned &blocksize);
   void Print(int level = 0) const;
-  void GetTxnInfo(QueryReq& request) const override {
-      child_->GetTxnInfo(request);
-    }
-    void SetTxnInfo(const Query& query) override  {
-      child_->SetTxnInfo(query);
-    }
+
+  void GetTxnInfo(QueryReq &request) const override {
+    child_->GetTxnInfo(request);
+  }
+  void SetTxnInfo(const Query &query) override { child_->SetTxnInfo(query); }
+
+  void PruneProj(set<string> &above_attrs) { child_->PruneProj(above_attrs); }
 
  private:
   vector<Attribute> subquery_attrs_;
