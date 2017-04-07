@@ -93,7 +93,7 @@ txn_server_ip="127.0.0.1"
 txn_server_port=9100
 
 #事务日志
-cmd_log =1
+cmd_log =0
 
 value_log=0
 
