@@ -32,7 +32,8 @@ using std::dynamic_pointer_cast;
 namespace claims {
 namespace txn {
 
-shared_ptr<TxnState> LogRecovery::GetTxnState() {
+shared_ptr<TxnState> LogRecovery::GetTxnState(
+    const unordered_set<UInt64> &part_list) {
   shared_ptr<TxnState> txn_state = make_shared<TxnState>();
   auto log_stream = LogServer::GetCmdLogStream();
   auto du_stream = log_stream->GetDurableStream();
@@ -44,6 +45,8 @@ shared_ptr<TxnState> LogRecovery::GetTxnState() {
   shared_ptr<CheckpointLog> cp_log;
   shared_ptr<WALog> log;
   while ((log = iterator->NextLog()) != nullptr) {
+    if (dynamic_pointer_cast<CommandLog>(log)->GetTs() > txn_state->max_ts_)
+      txn_state->max_ts_ = dynamic_pointer_cast<CommandLog>(log)->GetTs();
     switch (log->GetType()) {
       case kBegin:
         begin_log = dynamic_pointer_cast<BeginLog>(log);
@@ -53,6 +56,7 @@ shared_ptr<TxnState> LogRecovery::GetTxnState() {
       case kWrite:
         write_log = dynamic_pointer_cast<WriteLog>(log);
         // cout << "scan write " << write_log->GetTs() << endl;
+        if (part_list.find(write_log->GetPart()) == part_list.end()) continue;
         assert(txn_state->Write(write_log->GetTs(), write_log->GetPart(),
                                 write_log->GetPos(),
                                 write_log->GetOffset()) == rSuccess);
@@ -69,6 +73,7 @@ shared_ptr<TxnState> LogRecovery::GetTxnState() {
         break;
       case kCheckpoint:
         cp_log = dynamic_pointer_cast<CheckpointLog>(log);
+        if (part_list.find(cp_log->GetPart()) == part_list.end()) continue;
         assert(txn_state->Checkpoint(cp_log->GetPart(), cp_log->GetHisCP(),
                                      cp_log->GetRtCP()) == rSuccess);
         break;

@@ -117,6 +117,8 @@ class FileHandleImp {
    */
   virtual RetCode Read(void* buffer, size_t length) = 0;
   virtual RetCode PRead(void* buffer, size_t length, size_t start_pos);
+  virtual RetCode Truncate(size_t new_length) = 0;
+
   virtual bool CanAccess(std::string file_name) = 0;
 
   virtual RetCode DeleteFile() = 0;

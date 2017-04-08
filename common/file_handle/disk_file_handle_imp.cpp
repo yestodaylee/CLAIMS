@@ -204,6 +204,12 @@ RetCode DiskFileHandleImp::PRead(void* buffer, size_t length,
   else
     return rFailure;
 }
+
+RetCode DiskFileHandleImp::Truncate(size_t new_length) {
+  if (ftruncate(fd_, new_length) == 0) return rSuccess;
+  return rFailure;
+}
+
 RetCode DiskFileHandleImp::SetPosition(size_t pos) {
   assert(fd_ >= 3);
   assert(kInReading == file_status_ &&

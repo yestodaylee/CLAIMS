@@ -117,9 +117,9 @@ bool DurableStream::Iterator::IsCacheHit(uint64_t size) const {
     // cout << "cache hit" << endl;
     return true;
   } else {
-    cout << "<cache miss> cursor," << cursor_ << " ,size:" << size
-         << " ,cache range:" << cache_pos_ << "->" << cache_pos_ + CacheSize
-         << endl;
+    /*    cout << "<cache miss> cursor," << cursor_ << " ,size:" << size
+             << " ,cache range:" << cache_pos_ << "->" << cache_pos_ + CacheSize
+             << endl;*/
     // assert(!cache_valid_);
     return false;
   }

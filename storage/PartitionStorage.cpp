@@ -542,6 +542,14 @@ RetCode PartitionStorage::Persist(UInt64 old_his_cp, UInt64 new_his_cp) {
     file_handle = FileHandleImpFactory::Instance().CreateFileHandleImp(
         kDisk, partition_id_.getPathAndName());
   if (file_handle == nullptr) return rGetFileHandleFail;
+  if (file_handle->GetSize() > old_his_cp) {
+    if (file_handle->Truncate(old_his_cp) == rSuccess)
+      cout << "<Truncate " << file_handle->get_file_name() << " success>!!!"
+           << endl;
+    else
+      cout << "<Truncate " << file_handle->get_file_name() << " fail>!!!"
+           << endl;
+  }
   HdfsInMemoryChunk chunk_his;
   auto begin = old_his_cp;
   auto end = new_his_cp;

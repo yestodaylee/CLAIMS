@@ -81,6 +81,7 @@ class HdfsFileHandleImp : public FileHandleImp {
   // see more in FileHandleImp class
   virtual RetCode Read(void* buffer, size_t length);
   virtual RetCode PRead(void* buffer, size_t length, size_t start_pos);
+  virtual RetCode Truncate(size_t new_length);
   virtual bool CanAccess(std::string file_name) {
     assert(fs_ != NULL && "failed to connect hdfs");
     return 0 == hdfsExists(fs_, file_name.c_str());

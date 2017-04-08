@@ -35,6 +35,7 @@
 #include <memory>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 #include <set>
 #include <utility>
 #include <mutex>
@@ -59,6 +60,7 @@ using std::vector;
 using std::string;
 using std::map;
 using std::unordered_map;
+using std::unordered_set;
 using std::pair;
 using std::to_string;
 using std::function;
@@ -121,7 +123,7 @@ class TxnServer : public caf::event_based_actor {
   static unordered_map<UInt64, TsCheckpoint> cp_list_;
   /**************** User APIs ***************/
   static RetCode Init(int concurrency = kConcurrency, int port = kTxnPort);
-  static RetCode Recovery();
+  static RetCode Recovery(const unordered_set<UInt64>& part_list);
   /** Initialize [TxnServer], called when claims start **/
   static RetCode LoadCPList(UInt64 ts,
                             const unordered_map<UInt64, UInt64>& his_cp_list,

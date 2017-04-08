@@ -32,19 +32,22 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 #include <set>
 #include <memory>
 #include <iostream>
 #include "../txn_manager/txn.hpp"
 using std::shared_ptr;
 using std::make_shared;
+using std::unordered_set;
 namespace claims {
 namespace txn {
 
 class LogRecovery {
  public:
-  static shared_ptr<TxnState> GetTxnState();
-  //static RedoBeginLog
+  static shared_ptr<TxnState> GetTxnState(
+      const unordered_set<UInt64> &part_list);
+  // static RedoBeginLog
 };
 }
 }

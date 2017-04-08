@@ -66,6 +66,7 @@ class DiskFileHandleImp : public FileHandleImp {
   // see more in FileHandleImp class
   virtual RetCode Read(void* buffer, size_t length);
   virtual RetCode PRead(void* buffer, size_t length, size_t start_pos);
+  virtual RetCode Truncate(size_t new_lgngth);
   virtual bool CanAccess(std::string file_name) {
     return 0 == access(file_name.c_str(), 0);
   }

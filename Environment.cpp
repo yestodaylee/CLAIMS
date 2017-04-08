@@ -18,6 +18,7 @@
 #include <sstream>
 #include <string>
 #include <thread>  // NOLINT
+#include <unordered_set>
 #include "caf/all.hpp"
 #include "common/Message.h"
 #include "exec_tracker/stmt_exec_tracker.h"
@@ -44,6 +45,7 @@
 //#include "txn_manager/txn_log.hpp"
 #include "txn_manager/txn.hpp"
 
+using std::unordered_set;
 using caf::announce;
 using claims::BaseNode;
 using claims::catalog::Catalog;
@@ -316,33 +318,19 @@ bool Environment::InitTxnManager() {
         }
       }
     }
-    // cout << "before init pos list..." << endl;
-    // for (auto& pos : pos_list)
-    //  cout << pos.first << " => " << pos.second << endl;
-    // cout << "before init his cp list..." << endl;
-    // for (auto& cp : his_cp_list)
-    //  cout << cp.first << " => " << cp.second << endl;
-    // cout << "before init rt list..." << endl;
-    // for (auto& cp : rt_cp_list) cout << cp.first << " => " << cp.second <<
-    // endl;
 
     TxnServer::LoadCPList(0, his_cp_list, rt_cp_list);
     TxnServer::LoadPosList(pos_list);
-    // cout << "init pos list..." << endl;
-    // for (auto& pos : TxnServer::pos_list_)
-    //  cout << "part[" << pos.first << "] => " << pos.second << endl;
-    // cout << "init checkpoint list..." << endl;
-    // for (auto& pos : TxnServer::cp_list_) {
-    //  cout << "part[" << pos.first << "] => his:" << pos.second.GetHisCP(0)
-    //      << ", rt:" << pos.second.GetRtCP(0) << endl;
-    //}
+    if (Config::enable_cmd_log) {
+      cout << "txnserver is recovery...:" << endl;
+      unordered_set<UInt64> part_list;
+      for (auto& part_cp : his_cp_list) part_list.insert(part_cp.first);
+      TxnServer::Recovery(part_list);
+    }
   }
   sleep(1);
   TxnClient::Init(Config::txn_server_ip, Config::txn_server_port);
-  if (Config::enable_cmd_log) {
-    cout << "txnserver is recovery...:" << endl;
-    TxnServer::Recovery();
-  }
+
   return true;
 }
 

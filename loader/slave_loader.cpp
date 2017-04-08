@@ -264,7 +264,7 @@ RetCode SlaveLoader::ReceiveAndWorkLoop() {
     uint64_t real_packet_length = data_length + LoadPacket::kHeadLength;
     DLOG(INFO) << "real packet length is :" << real_packet_length
                << ". date length is " << data_length;
-    assert(data_length >= 4 && data_length <= 10000000);
+    // assert(data_length >= 4 && data_length <= 10000000);
     char* data_buffer = Malloc(data_length);
     if (NULL == data_buffer) {
       ELOG((ret = claims::common::rNoMemory),

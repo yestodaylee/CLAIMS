@@ -199,6 +199,13 @@ RetCode HdfsFileHandleImp::PRead(void* buffer, size_t length,
   else
     return rFailure;
 }
+
+RetCode HdfsFileHandleImp::Truncate(size_t new_length) {
+  if (hdfsTruncateFile(fs_, file_name_.c_str(), new_length) > 0)
+    return rSuccess;
+  return rFailure;
+}
+
 RetCode HdfsFileHandleImp::SetPosition(size_t pos) {
   assert(NULL != fs_ && "failed to connect hdfs");
   assert(NULL != file_ && "make sure file is opened");

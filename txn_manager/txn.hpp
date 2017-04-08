@@ -561,6 +561,9 @@ class TxnState {
   RetCode Checkpoint(uint64_t part, uint64_t his_cp, uint64_t rt_cp);
   RetCode InitPosList();
   string ToString() const;
+  void SetMAxTs(uint64_t max_ts) { max_ts_ = max_ts; }
+  uint64_t max_ts_ = 0;
+
   unordered_map<uint64_t, Txn> txn_list_;
 
   unordered_map<uint64_t, uint64_t> pos_list_;

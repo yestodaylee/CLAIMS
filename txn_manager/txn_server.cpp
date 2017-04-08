@@ -35,6 +35,7 @@
 #include "../txn_manager/wa_log_server.h"
 #include "../txn_manager/wa_log_recovery.h"
 #include "../Environment.h"
+#include "../Config.h"
 using caf::aout;
 using std::ofstream;
 ofstream txn_log;
@@ -75,14 +76,16 @@ caf::behavior TxnCore::make_behavior() {
         // auto local_bin_id = TxnBin::GetTxnBinPos(ingest->ts_,
         // TxnServer::concurrency_);
         txnbin_list_[local_bin_id].SetTxn(ingest->ts_, ingest->strip_list_);
-        vector<shared_ptr<CommandLog>> logs;
-        logs.push_back(BeginLog::Gen(ingest->ts_));
-        auto strip_list = ingest->get_strip_list();
-        for (auto& strip : strip_list)
-          logs.push_back(WriteLog::Gen(ingest->ts_, strip.first,
-                                       strip.second.first,
-                                       strip.second.second));
-        log_stream_->Append(logs);
+        if (Config::enable_cmd_log) {
+          vector<shared_ptr<CommandLog>> logs;
+          logs.push_back(BeginLog::Gen(ingest->ts_));
+          auto strip_list = ingest->get_strip_list();
+          for (auto& strip : strip_list)
+            logs.push_back(WriteLog::Gen(ingest->ts_, strip.first,
+                                         strip.second.first,
+                                         strip.second.second));
+          log_stream_->Append(logs);
+        }
         return caf::make_message(ret, *ingest);
       },
       [this](ReplayTxnAtom, const Txn& txn, uint64_t ts) -> caf::message {
@@ -95,18 +98,22 @@ caf::behavior TxnCore::make_behavior() {
         RetCode ret = rSuccess;
         auto local_bin_id = TxnBin::GetTxnBinID(ts, TxnServer::concurrency_);
         txnbin_list_[local_bin_id].CommitTxn(ts);
-        vector<shared_ptr<CommandLog>> logs;
-        logs.push_back(CommitLog::Gen(ts));
-        log_stream_->Append(logs);
+        if (Config::enable_cmd_log) {
+          vector<shared_ptr<CommandLog>> logs;
+          logs.push_back(CommitLog::Gen(ts));
+          log_stream_->Append(logs);
+        }
         return caf::make_message(rSuccess);
       },
       [this](AbortIngestAtom, const UInt64 ts) -> caf::message {
         RetCode ret = rSuccess;
         auto local_bin_id = TxnBin::GetTxnBinID(ts, TxnServer::concurrency_);
         txnbin_list_[local_bin_id].AbortTxn(ts);
-        vector<shared_ptr<CommandLog>> logs;
-        logs.push_back(AbortLog::Gen(ts));
-        log_stream_->Append(logs);
+        if (Config::enable_cmd_log) {
+          vector<shared_ptr<CommandLog>> logs;
+          logs.push_back(AbortLog::Gen(ts));
+          log_stream_->Append(logs);
+        }
         return caf::make_message(rSuccess);
       },
       [this](QueryAtom, shared_ptr<Query> query,
@@ -383,16 +390,18 @@ RetCode TxnServer::LoadPosList(const unordered_map<UInt64, UInt64>& pos_list) {
   return rSuccess;
 }
 
-RetCode TxnServer::Recovery() {
-  auto txn_state = LogRecovery::GetTxnState();
-  cout << txn_state->ToString() << endl;
+RetCode TxnServer::Recovery(const unordered_set<UInt64>& part_list) {
+  auto txn_state = LogRecovery::GetTxnState(part_list);
+  // cout << txn_state->ToString() << endl;
   return RecoveryTxnState(txn_state);
 }
 
 RetCode TxnServer::RecoveryTxnState(shared_ptr<TxnState> txn_state) {
+  TimeStamp::Init(txn_state->max_ts_ + 1);
   LoadPosList(txn_state->pos_list_);
   LoadCPList(0, txn_state->his_cp_list_, txn_state->rt_cp_list_);
-  for (auto& txn : txn_state->txn_list_) TxnClient::ReplayTxn(txn.second);
+  for (auto& txn : txn_state->txn_list_)
+    if (txn.second.strip_list_.size() > 0) TxnClient::ReplayTxn(txn.second);
   return rSuccess;
 }
 }
