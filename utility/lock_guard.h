@@ -29,7 +29,7 @@
 #ifndef UTILITY_LOCK_GUARD_H_
 #define UTILITY_LOCK_GUARD_H_
 #include "../common/rename.h"
-namespace claims {
+namespace ginkgo {
 
 namespace utility {
 
@@ -46,6 +46,6 @@ class LockGuard {
 };
 
 }  // namespace utility
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // UTILITY_LOCK_GUARD_H_

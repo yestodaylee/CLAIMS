@@ -19,7 +19,7 @@
 
 <<<<<<< HEAD
 =======
-using claims::catalog::TableDescriptor;
+using ginkgo::catalog::TableDescriptor;
 
 >>>>>>> FETCH_HEAD
 static int test_index_scan_iterator() {

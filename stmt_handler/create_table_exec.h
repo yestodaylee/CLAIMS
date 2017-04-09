@@ -33,7 +33,7 @@
 
 #include "../stmt_handler/stmt_exec.h"
 
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 /**
  * @brief create table and give the information during create a table.
@@ -71,6 +71,6 @@ class CreateTableExec : public StmtExec {
 };
 
 }  // namespace stmt_handler
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // STMT_HANDLER_CREATE_TABLE_EXEC_H_

@@ -37,9 +37,9 @@
 using std::endl;
 using std::string;
 using std::vector;
-using claims::catalog::Catalog;
+using ginkgo::catalog::Catalog;
 
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 
 DescExec::DescExec(AstNode* stmt) : StmtExec(stmt) {
@@ -251,4 +251,4 @@ RetCode DescExec::Execute(ExecutedResult* exec_result) {
 }
 
 } /* namespace stmt_handler */
-} /* namespace claims */
+} /* namespace ginkgo */

@@ -49,10 +49,10 @@
 #include "../common/expression/expr_node.h"
 #include "../physical_operator/physical_operator_base.h"
 #include "../physical_operator/physical_operator.h"
-using claims::common::ExprNode;
-using claims::common::ExprEvalCnxt;
+using ginkgo::common::ExprNode;
+using ginkgo::common::ExprEvalCnxt;
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 
 /**
@@ -210,6 +210,6 @@ class PhysicalHashJoin : public PhysicalOperator {
 };
 
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // PHYSICAL_OPERATOR_PHYSICAL_HASH_JOIN_H_

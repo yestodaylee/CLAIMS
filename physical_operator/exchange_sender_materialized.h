@@ -47,7 +47,7 @@
 #include "../common/error_define.h"
 #include "../physical_operator/exchange_sender.h"
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 /**
  * write block come from child into disk file, and send thread fetch block from
@@ -142,5 +142,5 @@ class ExchangeSenderMaterialized : public ExchangeSender {
   }
 };
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // PHYSICAL_OPERATOR_EXCHANGE_SENDER_MATERIALIZED_H_

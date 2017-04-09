@@ -39,14 +39,14 @@
 #include "../txn_manager/txn.hpp"
 #include "../common/error_define.h"
 
-namespace claims {
+namespace ginkgo {
 namespace txn {
 using std::shared_ptr;
 using std::unique_ptr;
 using std::make_shared;
 using std::string;
-using claims::common::rSuccess;
-using claims::common::rFailure;
+using ginkgo::common::rSuccess;
+using ginkgo::common::rFailure;
 enum LogType { kBegin, kWrite, kCommit, kAbort, kCheckpoint, kValue, kTail };
 class WALog {
  public:
@@ -227,6 +227,6 @@ class ValueLog : public WALog {
   bool is_buffer_copy_ = false;
 };
 }  // namespace txn
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  TXN_MANAGER_WA_LOG_IMPL_H_

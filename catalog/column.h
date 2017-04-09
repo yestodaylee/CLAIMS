@@ -33,9 +33,9 @@
 #include "../catalog/attribute.h"
 #include "../common/ids.h"
 
-using claims::catalog::Attribute;
+using ginkgo::catalog::Attribute;
 
-namespace claims {
+namespace ginkgo {
 namespace catalog {
 
 class Column : public Attribute {
@@ -55,6 +55,6 @@ class Column : public Attribute {
 };
 
 } /* namespace catalog */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // CATALOG_COLUMN_H_

@@ -19,7 +19,7 @@
 #include "../../catalog/catalog.h"
 #include "../../logical_operator/logical_query_plan_root.h"
 
-using claims::catalog::Catalog;
+using ginkgo::catalog::Catalog;
 >>>>>>> FETCH_HEAD
 
 static int test_logical_csb_index_building() {

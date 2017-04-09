@@ -14,8 +14,8 @@
 #include "../../logical_operator/logical_query_plan_root.h"
 #include "../../physical_operator/physical_operator_base.h"
 
-using claims::logical_operator::LogicalOperator;
-using claims::logical_operator::LogicalQueryPlanRoot;
+using ginkgo::logical_operator::LogicalOperator;
+using ginkgo::logical_operator::LogicalQueryPlanRoot;
 
 char sql[1000];
 int sql_parser_test() {

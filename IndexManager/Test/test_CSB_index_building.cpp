@@ -16,8 +16,8 @@
 #include "../CSBIndexBuilding.h"
 #include "test_index_manager.cpp"
 
-using claims::catalog::Catalog;
-using claims::catalog::TableDescriptor;
+using ginkgo::catalog::Catalog;
+using ginkgo::catalog::TableDescriptor;
 
 using namespace std;
 

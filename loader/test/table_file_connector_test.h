@@ -47,14 +47,14 @@
 
 #include "../../Daemon/Daemon.h"
 #include "../../Daemon/Executing.h"
-namespace claims {
+namespace ginkgo {
 namespace loader {
 using std::vector;
 using std::endl;
 using std::string;
-using claims::catalog::Catalog;
+using ginkgo::catalog::Catalog;
 
-using namespace claims::common;  // NOLINT
+using namespace ginkgo::common;  // NOLINT
 
 class TableFileConnectorTest : public ::testing::Test {
  public:
@@ -245,6 +245,6 @@ TEST_F(TableFileConnectorTest, HdfsOverWrite) {
 
 }  // namespace loader
 
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // LOADER_TEST_TABLE_FILE_CONNECTOR_TEST_H_

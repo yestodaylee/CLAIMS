@@ -40,12 +40,12 @@
 #include "../stmt_handler/drop_table_exec.h"
 
 #include "../loader/data_ingestion.h"
-using claims::common::FilePlatform;
-using claims::loader::TableFileConnector;
-using claims::catalog::Catalog;
+using ginkgo::common::FilePlatform;
+using ginkgo::loader::TableFileConnector;
+using ginkgo::catalog::Catalog;
 using std::vector;
-using claims::common::rNULLDropTableName;
-namespace claims {
+using ginkgo::common::rNULLDropTableName;
+namespace ginkgo {
 namespace stmt_handler {
 
 DropTableExec::DropTableExec(AstNode* stmt) : StmtExec(stmt) {
@@ -205,4 +205,4 @@ RetCode DropTableExec::DeleteTableFiles(const string& table_name) {
   return ret;
 }
 } /* namespace stmt_handler */
-} /* namespace claims */
+} /* namespace ginkgo */

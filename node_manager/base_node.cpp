@@ -40,7 +40,7 @@ using caf::actor;
 using std::make_pair;
 using std::string;
 using std::vector;
-namespace claims {
+namespace ginkgo {
 
 BaseNode::BaseNode() : node_id_(-1) {
   ReadNodeAddr();
@@ -101,4 +101,4 @@ vector<NodeID> BaseNode::GetAllNodeID() {
   lock_.release();
   return all_node_id;
 }
-}  // namespace claims
+}  // namespace ginkgo

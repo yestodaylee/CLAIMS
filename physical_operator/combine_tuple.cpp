@@ -26,7 +26,7 @@
  */
 
 #include "../physical_operator/combine_tuple.h"
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 
 CombineTuple::CombineTuple(State state) : state_(state) {}
@@ -153,4 +153,4 @@ void CombineTuple::AtomicPushRemainingBlock(RemainingBlock rb) {
   lock_.release();
 }
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

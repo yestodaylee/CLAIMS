@@ -43,13 +43,13 @@
 #include "../utility/lock.h"
 #include "../txn_manager/txn.hpp"
 static std::atomic_uint MIDINADE_TABLE_ID(1000000);
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 #define kTabSize 4
-using claims::physical_operator::PhysicalOperatorBase;
-using claims::txn::QueryReq;
-using claims::txn::Query;
-using claims::txn::GetGlobalPartId;
+using ginkgo::physical_operator::PhysicalOperatorBase;
+using ginkgo::txn::QueryReq;
+using ginkgo::txn::Query;
+using ginkgo::txn::GetGlobalPartId;
 enum OperatorType {
   kLogicalScan,
   kLogicalFilter,
@@ -155,6 +155,6 @@ class LogicalOperator {
 };
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // LOGICAL_OPERATOR_LOGICAL_OPERATOR_H_

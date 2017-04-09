@@ -33,7 +33,7 @@
 #include "../logical_operator/logical_operator.h"
 #include "../physical_operator/physical_sort.h"
 
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 
 /**
@@ -220,5 +220,5 @@ class LogicalDeleteFilter : public LogicalOperator {
   PlanContext* dataflow_;
 };
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // LOGICAL_OPERATOR_LOGICAL_DELETE_FILTER_H_

@@ -12,7 +12,7 @@
 #include <string>
 #include <map>
 #include "./expr_node.h"
-namespace claims {
+namespace ginkgo {
 namespace common {
 class ExprUnary : public ExprNode {
  public:
@@ -45,5 +45,5 @@ class ExprUnary : public ExprNode {
   }
 };
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // COMMON_EXPRESSION_EXPR_UNARY_H_

@@ -29,7 +29,7 @@
 
 #include <string>
 #include "../utility/print_tool.h"
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 PlanPartitioner::PlanPartitioner(const Partitioner& partitioner) {
   partition_func_ = partitioner.getPartitionFunction();
@@ -125,4 +125,4 @@ void PlanPartitioner::set_partition_list(
 }
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo

@@ -44,13 +44,13 @@
 #include "../physical_operator/expander.h"
 #include "../physical_operator/physical_operator_base.h"
 #include "../physical_operator/physical_sort.h"
-using claims::common::ExprNode;
-using claims::common::LogicInitCnxt;
-using claims::physical_operator::ExchangeMerger;
-using claims::physical_operator::Expander;
-using claims::physical_operator::PhysicalSort;
+using ginkgo::common::ExprNode;
+using ginkgo::common::LogicInitCnxt;
+using ginkgo::physical_operator::ExchangeMerger;
+using ginkgo::physical_operator::Expander;
+using ginkgo::physical_operator::PhysicalSort;
 using std::endl;
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 LogicalSort::LogicalSort(
     LogicalOperator *child,
@@ -220,4 +220,4 @@ void LogicalSort::PruneProj(set<string> &above_attrs) {
 }
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo

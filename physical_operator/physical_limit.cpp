@@ -32,9 +32,9 @@
 #include "../common/error_define.h"
 #include "../physical_operator/physical_operator_base.h"
 #include "../utility/rdtsc.h"
-using claims::common::rSuccess;
+using ginkgo::common::rSuccess;
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 
 PhysicalLimit::PhysicalLimit() : received_tuples_(0), block_for_asking_(NULL) {
@@ -144,4 +144,4 @@ RetCode PhysicalLimit::GetAllSegments(stack<Segment*>* all_segments) {
   return ret;
 }
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

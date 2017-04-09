@@ -34,7 +34,7 @@
 #include "../catalog/partitioner.h"
 #include "../storage/StorageLevel.h"
 #include "../utility/lock.h"
-namespace claims {
+namespace ginkgo {
 namespace catalog {
 
 class ProjectionBinding {
@@ -52,6 +52,6 @@ class ProjectionBinding {
 };
 
 } /* namespace catalog */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // CATALOG_PROJECTION_BINDING_H_

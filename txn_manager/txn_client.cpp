@@ -28,21 +28,21 @@
 
 #include "txn_client.hpp"
 //#include "txn_log.hpp"
-namespace claims {
+namespace ginkgo {
 namespace txn {
 
-// using claims::txn::TxnClient;
-// using claims::txn::RetCode;
-// using claims::txn::FixTupleIngestReq;
-// using claims::txn::Ingest;
-// using claims::common::rSuccess;
-// using claims::common::rLinkTmTimeout;
-// using claims::common::rLinkTmFail;
-// using claims::common::rBeginIngestTxnFail;
-// using claims::common::rBeginQueryFail;
-// using claims::common::rBeginCheckpointFail;
-// using claims::common::rCommitIngestTxnFail;
-// using claims::common::rCommitCheckpointFail;
+// using ginkgo::txn::TxnClient;
+// using ginkgo::txn::RetCode;
+// using ginkgo::txn::FixTupleIngestReq;
+// using ginkgo::txn::Ingest;
+// using ginkgo::common::rSuccess;
+// using ginkgo::common::rLinkTmTimeout;
+// using ginkgo::common::rLinkTmFail;
+// using ginkgo::common::rBeginIngestTxnFail;
+// using ginkgo::common::rBeginQueryFail;
+// using ginkgo::common::rBeginCheckpointFail;
+// using ginkgo::common::rCommitIngestTxnFail;
+// using ginkgo::common::rCommitCheckpointFail;
 
 string TxnClient::ip_ = kTxnIp;
 int TxnClient::port_ = kTxnPort;
@@ -236,4 +236,4 @@ RetCode TxnClient::ReplayTxn(const Txn& txn) {
 }
 
 }  // namespace txn
-}  // namespace claims
+}  // namespace ginkgo

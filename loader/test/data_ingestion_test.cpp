@@ -33,12 +33,12 @@
 #include "../../catalog/attribute.h"
 #include "../../common/Block/ResultSet.h"
 #include "data_ingestion_test.h"
-using claims::catalog::TableDescriptor;
-using claims::catalog::Attribute;
+using ginkgo::catalog::TableDescriptor;
+using ginkgo::catalog::Attribute;
 using std::string;
 using std::vector;
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 
 TEST_F(DataIngestionTest, Load) {
@@ -53,4 +53,4 @@ TEST_F(DataIngestionTest, Append) {}
 TEST_F(DataIngestionTest, Insert) {}
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */

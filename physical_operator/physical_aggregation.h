@@ -48,10 +48,10 @@
 #include "../common/Expression/queryfunc.h"
 #include "../physical_operator/physical_operator.h"
 
-using claims::common::ExprUnary;
-using claims::common::ExprNode;
+using ginkgo::common::ExprUnary;
+using ginkgo::common::ExprNode;
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 #define NEWCONDI
 
@@ -137,6 +137,6 @@ class PhysicalAggregation : public PhysicalOperator {
 };
 
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // PHYSICAL_OPERATOR_PHYSICAL_AGGREGATION_H_

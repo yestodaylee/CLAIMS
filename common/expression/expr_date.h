@@ -17,7 +17,7 @@
 #include <iostream>
 #include "../../common/Schema/Schema.h"
 #include "./expr_type_cast.h"
-namespace claims {
+namespace ginkgo {
 namespace common {
 class ExprDate : public ExprNode {
  public:
@@ -51,5 +51,5 @@ class ExprDate : public ExprNode {
   }
 };
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // COMMON_EXPRESSION_EXPR_DATE_H_

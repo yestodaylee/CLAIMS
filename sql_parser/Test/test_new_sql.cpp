@@ -36,9 +36,9 @@
 #include "../ast_node/ast_node.h"
 #include "../../logical_operator/logical_query_plan_root.h"
 #include "../../physical_operator/physical_operator_base.h"
-using claims::logical_operator::LogicalQueryPlanRoot;
-using claims::physical_operator::PhysicalOperatorBase;
-using claims::SegmentExecStatus;
+using ginkgo::logical_operator::LogicalQueryPlanRoot;
+using ginkgo::physical_operator::PhysicalOperatorBase;
+using ginkgo::SegmentExecStatus;
 using std::endl;
 using std::cout;
 

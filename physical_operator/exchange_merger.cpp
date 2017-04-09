@@ -64,7 +64,7 @@
 #include "../utility/rdtsc.h"
 #include "../physical_operator/exchange_sender_pipeline.h"
 #include "../physical_operator/exchange_sender_materialized.h"
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 const int kBufferSizeInExchange = 1000;
 ExchangeMerger::ExchangeMerger(State state)
@@ -1017,4 +1017,4 @@ RetCode ExchangeMerger::GetAllSegments(stack<Segment*>* all_segments) {
   return ret;
 }
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

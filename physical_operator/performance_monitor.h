@@ -28,7 +28,7 @@
 #include <boost/archive/text_oarchive.hpp>
 #include "../common/Schema/Schema.h"
 #include "../physical_operator/physical_operator_base.h"
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 class PerformanceMonitor : public PhysicalOperatorBase {
  public:
@@ -78,5 +78,5 @@ class PerformanceMonitor : public PhysicalOperatorBase {
   }
 };
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  //  PHYSICAL_OPERATOR_PERFORMANCE_MONITOR_H_

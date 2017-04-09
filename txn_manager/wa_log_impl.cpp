@@ -33,7 +33,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
-namespace claims {
+namespace ginkgo {
 namespace txn {
 using std::istringstream;
 string WALog::EncodeLine(const string& type, const vector<uint64_t>& items) {
@@ -101,6 +101,6 @@ void ValueLog::DecodeData(const char* buffer, unsigned buffer_size,
 }
 
 }  // namespace txn
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  TXN_MANAGER_LOG_SERVER_CPP_

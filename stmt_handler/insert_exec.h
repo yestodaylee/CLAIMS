@@ -33,7 +33,7 @@
 
 #include "../stmt_handler/stmt_exec.h"
 
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 
 /**
@@ -88,6 +88,6 @@ class InsertExec : public StmtExec {
   static const int SMALLINT_LENGTH;
 };
 }  // namespace stmt_handler
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  STMT_HANDLER_INSERT_EXEC_H_

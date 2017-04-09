@@ -20,8 +20,8 @@
 #include "../storage/ChunkStorage.h"
 #include "CSBPlusTree.h"
 
-using claims::physical_operator::PhysicalOperator;
-using claims::SegmentExecStatus;
+using ginkgo::physical_operator::PhysicalOperator;
+using ginkgo::SegmentExecStatus;
 
 template <typename T>
 CSBPlusTree<T>* indexBuilding(Schema* schema, vector<void*> chunk_tuples);

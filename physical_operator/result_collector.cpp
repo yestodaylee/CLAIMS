@@ -35,7 +35,7 @@ using std::string;
 using std::cout;
 using std::endl;
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 ResultCollector::ResultCollector()
     : finished_thread_count_(0),
@@ -216,4 +216,4 @@ RetCode ResultCollector::GetAllSegments(stack<Segment*>* all_segments) {
   return ret;
 }
 }  //  namespace physical_operator
-}  //  namespace claims
+}  //  namespace ginkgo

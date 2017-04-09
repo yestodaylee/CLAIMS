@@ -36,7 +36,7 @@
 #include "./hdfs_connector.h"
 #include "../../common/rename.h"
 
-namespace claims {
+namespace ginkgo {
 namespace common {
 
 class FileHandleImpFactory;
@@ -105,6 +105,6 @@ class HdfsFileHandleImp : public FileHandleImp {
   int64_t read_start_pos_;
 };
 }  // namespace common
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // COMMON_FILE_HANDLE_HDFS_FILE_HANDLE_IMP_H_

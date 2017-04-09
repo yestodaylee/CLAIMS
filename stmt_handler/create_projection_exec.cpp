@@ -35,11 +35,11 @@
 #include "../Environment.h"
 #include "../../common/error_define.h"
 using std::vector;
-using claims::common::rStmtHandlerCreateProjectionWithEmptyColumn;
-using claims::common::rSuccess;
-using claims::common::rTableNotExisted;
+using ginkgo::common::rStmtHandlerCreateProjectionWithEmptyColumn;
+using ginkgo::common::rSuccess;
+using ginkgo::common::rTableNotExisted;
 
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 
 CreateProjectionExec::CreateProjectionExec(AstNode* stmt) : StmtExec(stmt) {
@@ -193,4 +193,4 @@ RetCode CreateProjectionExec::AddPartitionAttributeToDel(
 }
 
 } /* namespace stmt_handler */
-} /* namespace claims */
+} /* namespace ginkgo */

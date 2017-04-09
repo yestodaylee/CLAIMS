@@ -46,7 +46,7 @@
 #define TEST_SCAN_CMDLOG
 #define TEST_SCAN_VALUE
 using namespace std;
-using namespace claims::txn;
+using namespace ginkgo::txn;
 
 template <typename T>
 shared_ptr<T> make_shared_array(unsigned size) {

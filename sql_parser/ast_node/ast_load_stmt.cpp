@@ -34,14 +34,14 @@
 #include "../../catalog/table.h"
 #include "../../common/error_define.h"
 #include "../../Environment.h"
-using namespace claims::common;  // NOLINT
+using namespace ginkgo::common;  // NOLINT
 using std::cout;
 using std::endl;
 using std::cin;
 using std::string;
 using std::setw;
 using std::bitset;
-// namespace claims {
+// namespace ginkgo {
 // namespace sql_parser {
 AstLoadTable::AstLoadTable(AstNodeType ast_node_type, string table_name,
                            AstNode* path, string column_separator,
@@ -87,4 +87,4 @@ RetCode AstLoadTable::SemanticAnalisys(SemanticContext* sem_cnxt) {
   return ret;
 }
 //}  // namespace sql_parser
-//}  // namespace claims
+//}  // namespace ginkgo

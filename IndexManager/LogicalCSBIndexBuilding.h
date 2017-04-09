@@ -12,8 +12,8 @@
 #include "../common/ids.h"
 #include "../logical_operator/logical_operator.h"
 
-using namespace claims::catalog;
-using namespace claims::logical_operator;
+using namespace ginkgo::catalog;
+using namespace ginkgo::logical_operator;
 
 class LogicalCSBIndexBuilding : public LogicalOperator {
  public:

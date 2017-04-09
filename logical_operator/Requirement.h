@@ -15,7 +15,7 @@
 /**
  * This class describes what properties are required to the child data flow.
  */
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 
 enum NetworkTransfer { NONE, Shuffle, piped };
@@ -74,5 +74,5 @@ class Requirement {
   unsigned long cost_limit_;
 };
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // LOGICAL_OPERATOR_REQUIREMENT_H_

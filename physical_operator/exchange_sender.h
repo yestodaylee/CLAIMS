@@ -35,7 +35,7 @@
 #include "../common/ids.h"
 #include "../common/Logging.h"
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 /**
  * ExchangeSender is the base class of ExchangeSenderPipeline and
@@ -71,5 +71,5 @@ class ExchangeSender : public PhysicalOperatorBase {
   }
 };
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // PHYSICAL_OPERATOR_EXCHANGE_SENDER_H_

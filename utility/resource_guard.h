@@ -56,7 +56,7 @@ class MemoryGuardWithRetCode {
  public:
   MemoryGuardWithRetCode(T*& t, RetCode& ret) : t_(t), ret_(ret) {}
   ~MemoryGuardWithRetCode() {
-    if (claims::common::rSuccess != ret_) DELETE_PTR(t_);
+    if (ginkgo::common::rSuccess != ret_) DELETE_PTR(t_);
   }
 
   NO_COPY_AND_ASSIGN(MemoryGuardWithRetCode);
@@ -73,7 +73,7 @@ class STLGuardWithRetCode {
  public:
   STLGuardWithRetCode(T& t, RetCode& ret) : t_(t), ret_(ret) {}
   ~STLGuardWithRetCode() {
-    if (claims::common::rSuccess != ret_) {
+    if (ginkgo::common::rSuccess != ret_) {
       for (auto it : t_) DELETE_PTR(it);
       t_.clear();
     }
@@ -91,7 +91,7 @@ class TwoLayerSTLGuardWithRetCode {
  public:
   TwoLayerSTLGuardWithRetCode(T& t, RetCode& ret) : t_(t), ret_(ret) {}
   ~TwoLayerSTLGuardWithRetCode() {
-    if (claims::common::rSuccess != ret_) {
+    if (ginkgo::common::rSuccess != ret_) {
       for (auto it1 : t_) {
         for (auto it2 : it1) {
           DELETE_PTR(it2);
@@ -114,7 +114,7 @@ class ThreeLayerSTLGuardWithRetCode {
  public:
   ThreeLayerSTLGuardWithRetCode(T& t, RetCode& ret) : t_(t), ret_(ret) {}
   ~ThreeLayerSTLGuardWithRetCode() {
-    if (claims::common::rSuccess != ret_) {
+    if (ginkgo::common::rSuccess != ret_) {
       for (auto it1 : t_) {
         for (auto it2 : it1) {
           for (auto it3 : it2) {

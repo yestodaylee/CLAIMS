@@ -51,7 +51,7 @@
 #include "../txn_manager/wa_log_server.h"
 #include "../utility/Timer.h"
 
-namespace claims {
+namespace ginkgo {
 namespace txn {
 using std::cin;
 using std::cout;

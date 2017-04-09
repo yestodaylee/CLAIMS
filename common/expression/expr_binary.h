@@ -19,7 +19,7 @@
 #include "../../common/Schema/Schema.h"
 #include "./expr_type_cast.h"
 using std::string;
-namespace claims {
+namespace ginkgo {
 namespace common {
 class ExprBinary : public ExprNode {
  public:
@@ -53,5 +53,5 @@ class ExprBinary : public ExprNode {
   }
 };
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // COMMON_EXPRESSION_EXPR_BINARY_H_

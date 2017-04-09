@@ -42,11 +42,11 @@
 #include "../file_connector.h"
 #include "../single_file_connector.h"
 
-namespace claims {
+namespace ginkgo {
 
 namespace loader {
 using std::thread;
-using namespace claims::common;  // NOLINT
+using namespace ginkgo::common;  // NOLINT
 
 class SingleFileConnector;
 
@@ -323,6 +323,6 @@ TEST_F(SingleFileConnectorTest, HdfsTryDeleteInAppendingFile) {
 }
 
 }  // namespace loader
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // LOADER_TEST_SINGLE_FILE_CONNECTOR_TEST_H_

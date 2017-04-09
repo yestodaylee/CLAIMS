@@ -78,7 +78,7 @@ void handle_parameters(int argc, char** argv) {
   }
 }
 int main(int argc, char** argv) {
-  using claims::common::Logging;
+  using ginkgo::common::Logging;
   handle_parameters(argc, argv);
   Config::getInstance();
   handle_parameters(argc, argv);

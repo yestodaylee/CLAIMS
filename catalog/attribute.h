@@ -35,12 +35,12 @@
 #include "../common/memory_handle.h"
 #include "../common/error_define.h"
 
-using claims::common::rSuccess;
-using claims::common::rEmptyAttributeName;
-using claims::common::rColumnNotExist;
-using claims::common::rEmptyTableAlias;
+using ginkgo::common::rSuccess;
+using ginkgo::common::rEmptyAttributeName;
+using ginkgo::common::rColumnNotExist;
+using ginkgo::common::rEmptyTableAlias;
 using std::string;
-namespace claims {
+namespace ginkgo {
 namespace catalog {
 
 struct Attribute {
@@ -194,6 +194,6 @@ struct Attribute {
 };
 }  // namespace catalog
 
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // CATALOG_ATTRIBUTE_H_

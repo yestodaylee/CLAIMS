@@ -44,7 +44,7 @@
 #include "../common/hash.h"
 using std::string;
 
-namespace claims {
+namespace ginkgo {
 namespace catalog {
 
 typedef unsigned BlockID;
@@ -339,6 +339,6 @@ class Partitioner {
 };
 
 } /* namespace catalog */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // CATALOG_PARTITIONER_H_

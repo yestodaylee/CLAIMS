@@ -24,8 +24,8 @@
 #include "../common/error_define.h"
 #include "../physical_operator/result_printer.h"
 #include <stack>
-using claims::common::rSuccess;
-namespace claims {
+using ginkgo::common::rSuccess;
+namespace ginkgo {
 namespace physical_operator {
 ResultPrinter::ResultPrinter() : block_buffer_(0) {
   set_phy_oper_type(kPhysicalResult);
@@ -105,4 +105,4 @@ RetCode ResultPrinter::GetAllSegments(stack<Segment*>* all_segments) {
   return ret;
 }
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

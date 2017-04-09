@@ -43,14 +43,14 @@
 #include "../physical_operator/physical_operator_base.h"
 #include "../physical_operator/physical_hash_join.h"
 
-using claims::physical_operator::ExchangeMerger;
-using claims::physical_operator::Expander;
-using claims::physical_operator::PhysicalDeleteFilter;
-using claims::physical_operator::PhysicalOperatorBase;
-using claims::physical_operator::PhysicalHashJoin;
+using ginkgo::physical_operator::ExchangeMerger;
+using ginkgo::physical_operator::Expander;
+using ginkgo::physical_operator::PhysicalDeleteFilter;
+using ginkgo::physical_operator::PhysicalOperatorBase;
+using ginkgo::physical_operator::PhysicalHashJoin;
 using std::vector;
 
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 
 LogicalDeleteFilter::LogicalDeleteFilter(
@@ -996,4 +996,4 @@ void LogicalDeleteFilter::Print(int level = 0) const {
   right_child_->Print(level);
 }
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo

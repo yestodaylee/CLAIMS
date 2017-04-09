@@ -92,7 +92,7 @@ include_HEADERS = Config.h \
 				txn_manager/wa_log_recovery.h \
 				Config.h
 				
-bin_PROGRAMS = claimsserver \
+bin_PROGRAMS = ginkgo \
 				client \
 				test  \
 				wa_log_test
@@ -102,7 +102,7 @@ client_SOURCES = Client.cpp \
 					Config.cpp \
 					IDsGenerator.cpp 
 
-claimsserver_SOURCES = Config.cpp	\
+ginkgo_SOURCES = Config.cpp	\
 				Environment.cpp \
 				IDsGenerator.cpp \
 				Server.cpp

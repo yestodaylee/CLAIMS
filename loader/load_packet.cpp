@@ -31,9 +31,9 @@
 #include <glog/logging.h>
 #include "../common/memory_handle.h"
 
-using namespace claims::common;  // NOLINT
+using namespace ginkgo::common;  // NOLINT
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 
 LoadPacket::~LoadPacket() { DELETE_PTR(packet_buffer_); }
@@ -77,4 +77,4 @@ RetCode LoadPacket::Deserialize(const void* const head_buffer,
 }
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */

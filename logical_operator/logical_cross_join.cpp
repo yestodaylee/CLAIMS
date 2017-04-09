@@ -43,14 +43,14 @@
 #include "../physical_operator/exchange_merger.h"
 #include "../logical_operator/logical_cross_join.h"
 #include "../physical_operator/physical_nest_loop_join.h"
-using claims::common::LogicInitCnxt;
-using claims::physical_operator::ExchangeMerger;
-using claims::physical_operator::Expander;
-using claims::physical_operator::PhysicalNestLoopJoin;
-using claims::common::rUninitializedJoinPolicy;
-using claims::common::rGeneratePlanContextFailed;
-using claims::common::rGenerateSubPhyPlanFailed;
-namespace claims {
+using ginkgo::common::LogicInitCnxt;
+using ginkgo::physical_operator::ExchangeMerger;
+using ginkgo::physical_operator::Expander;
+using ginkgo::physical_operator::PhysicalNestLoopJoin;
+using ginkgo::common::rUninitializedJoinPolicy;
+using ginkgo::common::rGeneratePlanContextFailed;
+using ginkgo::common::rGenerateSubPhyPlanFailed;
+namespace ginkgo {
 namespace logical_operator {
 
 LogicalCrossJoin::LogicalCrossJoin()
@@ -127,7 +127,7 @@ PlanContext LogicalCrossJoin::GetPlanContext() {
   PlanContext left_plan_context = left_child_->GetPlanContext();
   PlanContext right_plan_context = right_child_->GetPlanContext();
   PlanContext ret;
-  if (claims::common::rSuccess ==
+  if (ginkgo::common::rSuccess ==
       DecideJoinPolicy(left_plan_context, right_plan_context)) {
     const Attribute left_partition_key =
         left_plan_context.plan_partitioner_.get_partition_key();
@@ -251,7 +251,7 @@ int LogicalCrossJoin::DecideJoinPolicy(const PlanContext& left_plan_context,
     }
   }
   if (kUninitialized != join_policy_) {
-    return claims::common::rSuccess;
+    return ginkgo::common::rSuccess;
   } else {
     LOG(WARNING) << "[CROSS JOIN]:"
                  << "[" << CStrError(rUninitializedJoinPolicy) << ",]"
@@ -311,7 +311,7 @@ int LogicalCrossJoin::GenerateChildPhysicalQueryPlan(
     PhysicalOperatorBase*& left_child_iterator_tree,
     PhysicalOperatorBase*& right_child_iterator_tree,
     const unsigned& blocksize) {
-  int ret = claims::common::rSuccess;
+  int ret = ginkgo::common::rSuccess;
   PlanContext left_plan_context = left_child_->GetPlanContext();
   PlanContext right_plan_context = right_child_->GetPlanContext();
   switch (join_policy_) {
@@ -452,4 +452,4 @@ bool LogicalCrossJoin::CanLocalJoin(
              .get_location();
 }
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo

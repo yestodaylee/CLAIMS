@@ -31,7 +31,7 @@
 #include "../ast_node/ast_node.h"
 
 using std::string;
-// namespace claims {
+// namespace ginkgo {
 // namespace sql_parser {
 /***
  * @brief The AST of insert statement.
@@ -112,6 +112,6 @@ class AstInsertAssignList : public AstNode {
   AstNode* next_;
 };
 //}  // namespace sql_parser
-//}  // namespace claims
+//}  // namespace ginkgo
 
 #endif  // SQL_PARSER_AST_NODE_AST_INSERT_STMT_H_

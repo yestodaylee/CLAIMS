@@ -36,7 +36,7 @@
 #include "../sql_parser/ast_node/ast_update_stmt.h"
 using std::string;
 
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 
 class UpdateStmtExec : public StmtExec {
@@ -67,6 +67,6 @@ class UpdateStmtExec : public StmtExec {
 };
 
 } /* namespace stmt_handler */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  //  STMT_HANDLER_UPDATE_STMT_EXEC_H_

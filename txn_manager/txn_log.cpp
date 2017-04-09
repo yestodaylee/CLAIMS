@@ -27,7 +27,7 @@
  */
 #include "txn_log.hpp"
 
-namespace claims {
+namespace ginkgo {
 namespace txn {
 
 string LogServer::file_path_ = ".";

@@ -15,7 +15,7 @@
 #include "../common/ids.h"
 #include "../common/data_type.h"
 
-using claims::catalog::Attribute;
+using ginkgo::catalog::Attribute;
 
 struct attr_index_list {
   attr_index_list() {}

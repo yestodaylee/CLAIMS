@@ -47,13 +47,13 @@
 #include "../physical_operator/physical_operator_base.h"
 #include "../Resource/NodeTracker.h"
 
-using claims::physical_operator::ExchangeMerger;
-using claims::physical_operator::Expander;
-using claims::physical_operator::PerformanceMonitor;
-using claims::physical_operator::PhysicalLimit;
-using claims::physical_operator::ResultPrinter;
+using ginkgo::physical_operator::ExchangeMerger;
+using ginkgo::physical_operator::Expander;
+using ginkgo::physical_operator::PerformanceMonitor;
+using ginkgo::physical_operator::PhysicalLimit;
+using ginkgo::physical_operator::ResultPrinter;
 
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 LogicalQueryPlanRoot::LogicalQueryPlanRoot(NodeID collecter,
                                            LogicalOperator* child,
@@ -446,4 +446,4 @@ void LogicalQueryPlanRoot::PruneProj(set<string>& above_attrs) {
 }
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo

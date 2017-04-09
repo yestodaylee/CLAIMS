@@ -43,16 +43,16 @@
 #include "../txn_manager/txn.hpp"
 #include "../txn_manager/wa_log_impl.h"
 #include "../Config.h"
-using claims::common::FileHandleImpFactory;
-using claims::common::FileHandleImp;
-using claims::common::kHdfs;
-using claims::common::kDisk;
-using claims::utility::LockGuard;
-using claims::common::rReachLogTail;
+using ginkgo::common::FileHandleImpFactory;
+using ginkgo::common::FileHandleImp;
+using ginkgo::common::kHdfs;
+using ginkgo::common::kDisk;
+using ginkgo::utility::LockGuard;
+using ginkgo::common::rReachLogTail;
 using std::shared_ptr;
 using std::dynamic_pointer_cast;
 using std::map;
-namespace claims {
+namespace ginkgo {
 namespace txn {
 
 class DurableStream {
@@ -127,6 +127,6 @@ class DurableStream {
 };
 
 }  // namespace txn
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  TXN_MANAGER_WA_LOG_STORE_H_

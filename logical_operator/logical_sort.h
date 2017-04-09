@@ -42,8 +42,8 @@
 #include "../common/expression/expr_node.h"
 using std::vector;
 using std::pair;
-using claims::common::ExprNode;
-namespace claims {
+using ginkgo::common::ExprNode;
+namespace ginkgo {
 namespace logical_operator {
 /**
  * @brief The LogicalSort contains the information of attributes to be
@@ -125,5 +125,5 @@ class LogicalSort : public LogicalOperator {
   map<string, int> column_to_id_;
 };
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // LOGICAL_OPERATOR_LOGICAL_SORT_H_

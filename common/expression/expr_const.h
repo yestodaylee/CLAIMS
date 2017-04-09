@@ -18,7 +18,7 @@
 #include <iostream>
 #include "../../common/Schema/Schema.h"
 #include "./expr_type_cast.h"
-namespace claims {
+namespace ginkgo {
 namespace common {
 class ExprConst : public ExprNode {
  public:
@@ -43,5 +43,5 @@ class ExprConst : public ExprNode {
   }
 };
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // COMMON_EXPRESSION_EXPR_CONST_H_

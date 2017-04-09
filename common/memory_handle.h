@@ -32,7 +32,7 @@
 #include <malloc.h>
 #include <stdlib.h>
 
-namespace claims {
+namespace ginkgo {
 
 namespace common {
 
@@ -65,6 +65,6 @@ static inline void* Malloc(size_t length) {
 
 }  // namespace common
 
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // COMMON_MEMORY_H_

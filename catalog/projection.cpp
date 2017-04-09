@@ -35,7 +35,7 @@
 #include "../catalog/partitioner.h"
 #include "../common/Schema/Schema.h"
 #include "../common/Schema/SchemaFix.h"
-namespace claims {
+namespace ginkgo {
 namespace catalog {
 ProjectionDescriptor::ProjectionDescriptor(ProjectionID pid)
     : projection_id_(pid) {}
@@ -127,4 +127,4 @@ unsigned int ProjectionDescriptor::getProjectionCost() const {
   return sum;
 }
 } /* namespace catalog */
-} /* namespace claims */
+} /* namespace ginkgo */

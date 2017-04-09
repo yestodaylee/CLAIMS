@@ -38,7 +38,7 @@
 
 // #define _DEBUG_
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 
 PhysicalOuterHashJoin::PhysicalOuterHashJoin(State state)
@@ -620,4 +620,4 @@ RetCode PhysicalOuterHashJoin::GetAllSegments(stack<Segment*>* all_segments) {
   return ret;
 }
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

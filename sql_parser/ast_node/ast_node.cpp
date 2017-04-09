@@ -38,15 +38,15 @@
 #include "./ast_expr_node.h"
 #include "../../logical_operator/logical_operator.h"
 #include "../../common/error_define.h"
-using namespace claims::common;  // NOLINT
-using claims::logical_operator::LogicalOperator;
+using namespace ginkgo::common;  // NOLINT
+using ginkgo::logical_operator::LogicalOperator;
 using std::cout;
 using std::setw;
 using std::endl;
 using std::string;
 using std::endl;
 using std::vector;
-// namespace claims {
+// namespace ginkgo {
 // namespace sql_parser {
 AstNode::AstNode(AstNodeType ast_node_type) : ast_node_type_(ast_node_type) {}
 AstNode::AstNode(AstNode* node)
@@ -599,4 +599,4 @@ void PushDownConditionContext::GetSubExprInfo(AstNode* expr) {
   }
 }
 //}  // namespace sql_parser
-//}  // namespace claims
+//}  // namespace ginkgo

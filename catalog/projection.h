@@ -40,7 +40,7 @@ using std::vector;
 using std::string;
 
 class Schema;
-namespace claims {
+namespace ginkgo {
 namespace catalog {
 class Partitioner;
 /**
@@ -120,6 +120,6 @@ class ProjectionDescriptor {
 };
 
 } /* namespace catalog */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // CATALOG_PROJECTION_H_

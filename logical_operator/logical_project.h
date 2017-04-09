@@ -44,8 +44,8 @@
 #include "../logical_operator/Requirement.h"
 #include "../physical_operator/physical_operator_base.h"
 #include "../physical_operator/physical_project.h"
-using claims::common::ExprNode;
-namespace claims {
+using ginkgo::common::ExprNode;
+namespace ginkgo {
 namespace logical_operator {
 
 class LogicalProject : public LogicalOperator {
@@ -102,6 +102,6 @@ class LogicalProject : public LogicalOperator {
 };
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // LOGICAL_OPERATOR_LOGICAL_PROJECT_H_

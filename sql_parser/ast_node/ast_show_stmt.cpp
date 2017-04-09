@@ -31,14 +31,14 @@
 #include <string>
 #include "../ast_node/ast_show_stmt.h"
 #include "../../common/error_define.h"
-using namespace claims::common;  // NOLINT
+using namespace ginkgo::common;  // NOLINT
 using std::cout;
 using std::endl;
 using std::cin;
 using std::string;
 using std::setw;
 
-// namespace claims {
+// namespace ginkgo {
 // namespace sql_parser {
 AstShowStmt::AstShowStmt(AstNodeType ast_node_type, int show_type, bool full,
                          string database_name, string like_string)
@@ -57,4 +57,4 @@ void AstShowStmt::Print(int level) const {
        << "like string: " << like_string_ << endl;
 }
 //}  // namespace sql_parser
-//}  // namespace claims
+//}  // namespace ginkgo

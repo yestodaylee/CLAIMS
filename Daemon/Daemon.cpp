@@ -14,7 +14,7 @@
 #include "../Client/ClaimsServer.h"
 #include "../stmt_handler/stmt_handler.h"
 
-using claims::stmt_handler::StmtHandler;
+using ginkgo::stmt_handler::StmtHandler;
 #define WORK_THREAD_COUNT 3
 
 Daemon* Daemon::instance_ = 0;

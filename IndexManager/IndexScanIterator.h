@@ -13,7 +13,7 @@
 #include "../physical_operator/physical_operator.h"
 #include "CSBPlusTree.h"
 #include "../storage/PartitionStorage.h"
-using claims::physical_operator::PhysicalOperator;
+using ginkgo::physical_operator::PhysicalOperator;
 
 class IndexScanIterator : public PhysicalOperator {
  public:

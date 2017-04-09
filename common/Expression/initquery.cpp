@@ -12,7 +12,7 @@
 #include "../error_define.h"
 #include "sql_node_struct.h"
 
-using claims::common::rNoMemory;
+using ginkgo::common::rNoMemory;
 /*
  * the transformqual() transform the ast(the parsetree) to expression tree
  */

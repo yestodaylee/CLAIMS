@@ -32,7 +32,7 @@
 #include "../common/error_define.h"
 #include "../common/ids.h"
 using std::vector;
-namespace claims {
+namespace ginkgo {
 
 namespace physical_operator {
 class PhysicalOperatorBase;
@@ -54,6 +54,6 @@ class Segment {
   PhysicalOperatorBase* plan_segment_;
 };
 }
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  PHYSICAL_OPERATOR_SEGMENT_H_

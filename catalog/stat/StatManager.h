@@ -16,7 +16,7 @@
 #include "../../catalog/stat/TableStatistic.h"
 #include "../../common/ids.h"
 #include "../attribute.h"
-using namespace claims::catalog;
+using namespace ginkgo::catalog;
 
 class StatManager {
  public:

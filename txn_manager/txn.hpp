@@ -50,7 +50,7 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/vector.hpp>
-namespace claims {
+namespace ginkgo {
 namespace txn {
 
 using std::cin;
@@ -69,8 +69,8 @@ using std::function;
 using std::sort;
 using std::make_pair;
 using std::make_tuple;
-using claims::common::rSuccess;
-using claims::common::rFailure;
+using ginkgo::common::rSuccess;
+using ginkgo::common::rFailure;
 using UInt64 = uint64_t;
 using UInt32 = unsigned int;
 using UInt16 = unsigned short;

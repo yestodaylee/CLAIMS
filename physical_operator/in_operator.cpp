@@ -27,7 +27,7 @@
 #include <assert.h>
 #include <vector>
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 InOperator::InOperator(State state)
     : state_(state),
@@ -304,4 +304,4 @@ void InOperator::AtomicPushFreeHtBlockStream(BlockStreamBase* block) {
   lock_.release();
 }
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

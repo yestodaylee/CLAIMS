@@ -30,7 +30,7 @@
 
 #include "../txn_manager/wa_log_server.h"
 
-namespace claims {
+namespace ginkgo {
 namespace txn {
 LogServer LogServer::proxy_;
 
@@ -95,4 +95,4 @@ RetCode LogServer::CloseValueLogStream(PartitionID part) {
 }
 
 }  // namespace txn
-}  // namespace claims
+}  // namespace ginkgo

@@ -19,7 +19,7 @@
 using boost::gregorian::months;
 using boost::gregorian::weeks;
 using boost::gregorian::years;
-namespace claims {
+namespace ginkgo {
 namespace common {
 
 typedef void *(*TypeCastFunc)(void *value, void *tovalue);
@@ -535,5 +535,5 @@ inline void InitTypeCastFunc() {
 }
 
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // COMMON_EXPRESSION_EXPR_TYPE_CAST_H_

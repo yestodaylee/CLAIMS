@@ -43,11 +43,11 @@
 #include "../storage/ChunkStorage.h"
 #include "../Executor/expander_tracker.h"
 #include "../storage/PartitionStorage.h"
-using claims::common::rNoPartitionIdScan;
-using claims::common::rSuccess;
-using claims::common::rCodegenFailed;
-using claims::txn::GetGlobalPartId;
-namespace claims {
+using ginkgo::common::rNoPartitionIdScan;
+using ginkgo::common::rSuccess;
+using ginkgo::common::rCodegenFailed;
+using ginkgo::txn::GetGlobalPartId;
+namespace ginkgo {
 namespace physical_operator {
 PhysicalProjectionScan::PhysicalProjectionScan(State state)
     : state_(state), partition_reader_iterator_(NULL), perf_info_(NULL) {
@@ -238,4 +238,4 @@ RetCode PhysicalProjectionScan::GetAllSegments(stack<Segment*>* all_segments) {
   return rSuccess;
 }
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

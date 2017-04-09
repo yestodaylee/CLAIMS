@@ -11,7 +11,7 @@
 #include "../NValue.hpp"
 #include "../decimal.h"
 
-using claims::common::Decimal;
+using ginkgo::common::Decimal;
 
 #include "../../Schema/SchemaFix.h"
 

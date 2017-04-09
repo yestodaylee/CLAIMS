@@ -19,7 +19,7 @@
 #endif
 #include "./Schema.h"
 
-using claims::loader::Validity;
+using ginkgo::loader::Validity;
 
 class SchemaFix : public Schema {
  public:

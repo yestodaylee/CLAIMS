@@ -44,10 +44,10 @@ using std::map;
 // using std::unordered_map;
 using std::shared_ptr;
 using std::make_shared;
-using claims::utility::LockGuard;
-using claims::common::rSuccess;
-using claims::common::rFailure;
-namespace claims {
+using ginkgo::utility::LockGuard;
+using ginkgo::common::rSuccess;
+using ginkgo::common::rFailure;
+namespace ginkgo {
 namespace txn {
 
 class LogStream {
@@ -97,6 +97,6 @@ class LogServer {
 };
 
 }  // namespace txn
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  TXN_MANAGER_WA_LOG_SERVER_H_

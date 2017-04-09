@@ -28,7 +28,7 @@
 
 #include "delete_filter_test.h"
 
-namespace claims {
+namespace ginkgo {
 namespace physical_query_plan {
 
 DeleteFilterTest::DeleteFilterTest() {
@@ -40,4 +40,4 @@ DeleteFilterTest::~DeleteFilterTest() {
 }
 
 } /* namespace physical_query_plan */
-} /* namespace claims */
+} /* namespace ginkgo */

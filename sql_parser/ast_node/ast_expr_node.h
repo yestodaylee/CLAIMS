@@ -45,7 +45,7 @@
 using std::string;
 using std::set;
 using std::vector;
-// namespace claims {
+// namespace ginkgo {
 // namespace sql_parser {
 
 /**
@@ -197,6 +197,6 @@ class AstExprList : public AstNode {
   AstNode* next_;
 };
 //}  // namespace sql_parser
-//}  // namespace claims
+//}  // namespace ginkgo
 
 #endif  // SQL_PARSER_AST_NODE_AST_EXPR_NODE_H_

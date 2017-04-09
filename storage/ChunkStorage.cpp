@@ -38,14 +38,14 @@
 #include "../utility/rdtsc.h"
 #include "../utility/warmup.h"
 #include "../loader/slave_loader.cpp"
-using claims::common::CStrError;
-using claims::common::rUnkownStroageLevel;
-using claims::common::rFailOpenFileInDiskChunkReaderIterator;
-using claims::common::rFailReadOneBlockInDiskChunkReaderIterator;
-using claims::common::rFailOpenHDFSFileInStorage;
-using claims::common::rFailSetStartOffsetInStorage;
-using claims::common::HdfsConnector;
-using claims::loader::SlaveLoader;
+using ginkgo::common::CStrError;
+using ginkgo::common::rUnkownStroageLevel;
+using ginkgo::common::rFailOpenFileInDiskChunkReaderIterator;
+using ginkgo::common::rFailReadOneBlockInDiskChunkReaderIterator;
+using ginkgo::common::rFailOpenHDFSFileInStorage;
+using ginkgo::common::rFailSetStartOffsetInStorage;
+using ginkgo::common::HdfsConnector;
+using ginkgo::loader::SlaveLoader;
 bool ChunkReaderIterator::NextBlock() {
   lock_.acquire();
   if (this->cur_block_ >= this->number_of_blocks_) {
@@ -80,7 +80,7 @@ ChunkStorage::~ChunkStorage() {
 
 // apply memory for chunk size for writing later by slave loader
 RetCode ChunkStorage::ApplyMemory() {
-  RetCode ret = claims::common::rSuccess;
+  RetCode ret = ginkgo::common::rSuccess;
   HdfsInMemoryChunk chunk_info;
   chunk_info.length = CHUNK_SIZE;
   if (BlockManager::getInstance()->getMemoryChunkStore()->ApplyChunk(
@@ -113,7 +113,7 @@ RetCode ChunkStorage::ApplyMemory() {
     /*    cout << "Failed to apply mem chunk:" <<
        chunk_id_.partition_id.partition_off
              << "," << chunk_id_.chunk_off << endl;*/
-    ret = claims::common::rNoMemory;
+    ret = ginkgo::common::rNoMemory;
     assert(false);
   }
   return ret;

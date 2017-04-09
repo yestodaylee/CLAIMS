@@ -26,19 +26,19 @@
 #include "node_manager/slave_node.h"
 #include "Resource/BufferManager.h"
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 class SlaveLoader;
 class MasterLoader;
 }
 }
-using claims::catalog::Catalog;
-using claims::loader::SlaveLoader;
-using claims::loader::MasterLoader;
-using claims::MasterNode;
-using claims::SegmentExecTracker;
-using claims::SlaveNode;
-using claims::StmtExecTracker;
+using ginkgo::catalog::Catalog;
+using ginkgo::loader::SlaveLoader;
+using ginkgo::loader::MasterLoader;
+using ginkgo::MasterNode;
+using ginkgo::SegmentExecTracker;
+using ginkgo::SlaveNode;
+using ginkgo::StmtExecTracker;
 class Catalog;
 class IteratorExecutorSlave;
 class BlockManager;
@@ -57,7 +57,7 @@ class Environment {
   InstanceResourceManager* getResourceManagerSlave();
   NodeID getNodeID() const;
   void setNodeID(NodeID node_id){ node_id_ = node_id ;}
-  claims::catalog::Catalog* getCatalog() const;
+  ginkgo::catalog::Catalog* getCatalog() const;
   ThreadPool* getThreadPool() const;
   IteratorExecutorSlave* getIteratorExecutorSlave() const;
   Environment(bool ismaster = false);

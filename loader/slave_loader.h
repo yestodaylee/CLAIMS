@@ -42,7 +42,7 @@
 #include "../txn_manager/txn_client.hpp"
 #include "caf/all.hpp"
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 
 using std::unordered_map;
@@ -51,13 +51,13 @@ using caf::behavior;
 using caf::event_based_actor;
 using std::string;
 using std::fstream;
-using claims::catalog::Catalog;
-using claims::txn::CheckpointAtom;
-using claims::txn::UInt64;
-using claims::txn::Query;
-using claims::txn::QueryReq;
-using claims::txn::GetGlobalPartId;
-using claims::txn::TxnClient;
+using ginkgo::catalog::Catalog;
+using ginkgo::txn::CheckpointAtom;
+using ginkgo::txn::UInt64;
+using ginkgo::txn::Query;
+using ginkgo::txn::QueryReq;
+using ginkgo::txn::GetGlobalPartId;
+using ginkgo::txn::TxnClient;
 class LoadPacket;
 
 class SlaveLoader {
@@ -119,6 +119,6 @@ class SlaveLoader {
 };
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // LOADER_SLAVE_LOADER_H_

@@ -33,9 +33,9 @@
 #include "../common/file_handle/file_handle_imp_factory.h"
 #include "../common/Schema/SchemaFix.h"
 #include "../loader/table_file_connector.h"
-using claims::common::FilePlatform;
-using claims::utility::LockGuard;
-namespace claims {
+using ginkgo::common::FilePlatform;
+using ginkgo::utility::LockGuard;
+namespace ginkgo {
 namespace catalog {
 
 // only for deserialization
@@ -231,4 +231,4 @@ void TableDescriptor::InitConnector() {
 }
 
 } /* namespace catalog */
-} /* namespace claims */
+} /* namespace ginkgo */

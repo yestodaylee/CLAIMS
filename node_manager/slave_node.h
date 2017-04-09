@@ -38,7 +38,7 @@ using caf::event_based_actor;
 using std::string;
 using caf::behavior;
 
-namespace claims {
+namespace ginkgo {
 class SlaveNode : public BaseNode {
  public:
   friend class SlaveNodeActor;
@@ -61,6 +61,6 @@ class SlaveNode : public BaseNode {
   unsigned int heartbeat_count_;
 };
 
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  NODE_MANAGER_SLAVE_NODE_H_

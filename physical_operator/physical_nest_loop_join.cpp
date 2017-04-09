@@ -34,11 +34,11 @@
 #include "../physical_operator/physical_operator_base.h"
 #include "../common/expression/expr_node.h"
 #include "../common/memory_handle.h"
-using claims::common::ExprNode;
+using ginkgo::common::ExprNode;
 #define GLOG_NO_ABBREVIATED_SEVERITIES
 #include "../common/log/logging.h"
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 
 PhysicalNestLoopJoin::PhysicalNestLoopJoin()
@@ -409,4 +409,4 @@ RetCode PhysicalNestLoopJoin::GetAllSegments(stack<Segment *> *all_segments) {
 }
 
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

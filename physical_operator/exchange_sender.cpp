@@ -38,7 +38,7 @@
 
 #define CONNECTION_VERIFY
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 ExchangeSender::ExchangeSender() {}
 
@@ -134,4 +134,4 @@ unsigned ExchangeSender::GetHashPartitionId(void* input_tuple, Schema* schema,
       .operate->getPartitionValue(hash_key_address, nuppers);
 }
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

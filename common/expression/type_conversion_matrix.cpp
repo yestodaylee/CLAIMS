@@ -6,9 +6,9 @@
  */
 
 #include "./type_conversion_matrix.h"
-namespace claims {
+namespace ginkgo {
 namespace common {
 data_type TypeConversionMatrix::type_conversion_matrix[DATA_TYPE_NUMBER]
                                                       [DATA_TYPE_NUMBER];
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo

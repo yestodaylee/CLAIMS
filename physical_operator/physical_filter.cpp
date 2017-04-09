@@ -45,10 +45,10 @@
 #include "../common/expression/expr_node.h"
 #include "../common/memory_handle.h"
 
-using claims::common::rSuccess;
-using claims::common::rCodegenFailed;
+using ginkgo::common::rSuccess;
+using ginkgo::common::rCodegenFailed;
 #define NEWCONDITION
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 
 PhysicalFilter::PhysicalFilter(State state)
@@ -367,5 +367,5 @@ RetCode PhysicalFilter::GetAllSegments(stack<Segment*>* all_segments) {
   }
   return ret;
 }
-}  // namespace claims
+}  // namespace ginkgo
 }  // namespace physical_operator

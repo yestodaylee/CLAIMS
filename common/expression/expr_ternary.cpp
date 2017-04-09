@@ -17,7 +17,7 @@
 
 #include "./data_type_oper.h"
 #include "./expr_type_cast.h"
-namespace claims {
+namespace ginkgo {
 namespace common {
 ExprTernary::ExprTernary(ExprNodeType expr_node_type, data_type actual_type,
                          string alias, OperType oper_type, ExprNode* arg0,
@@ -79,4 +79,4 @@ void ExprTernary::GetUniqueAttr(set<string>& attrs) {
 }
 
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo

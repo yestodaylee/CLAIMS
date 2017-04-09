@@ -25,7 +25,7 @@
 #include "../../../logical_operator/logical_scan.h"
 #include "../../../physical_operator/physical_operator_base.h"
 
-using claims::catalog::Catalog;
+using ginkgo::catalog::Catalog;
 
 using namespace std;
 

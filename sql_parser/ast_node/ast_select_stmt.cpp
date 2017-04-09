@@ -55,20 +55,20 @@
 #include "../ast_node/ast_expr_node.h"
 #include "../ast_node/ast_node.h"
 #include "../../common/error_define.h"
-using namespace claims::common;
-using claims::common::ExprColumn;
-using claims::common::ExprNodeType;
-using claims::common::ExprUnary;
-using claims::logical_operator::LogicalCrossJoin;
-using claims::logical_operator::LogicalEqualJoin;
-using claims::logical_operator::LogicalFilter;
-using claims::logical_operator::LogicalProject;
-using claims::logical_operator::LogicalScan;
-using claims::logical_operator::LogicalSort;
-using claims::logical_operator::LogicalLimit;
-using claims::logical_operator::LogicalSubquery;
-using claims::logical_operator::LogicalDeleteFilter;
-using claims::catalog::Attribute;
+using namespace ginkgo::common;
+using ginkgo::common::ExprColumn;
+using ginkgo::common::ExprNodeType;
+using ginkgo::common::ExprUnary;
+using ginkgo::logical_operator::LogicalCrossJoin;
+using ginkgo::logical_operator::LogicalEqualJoin;
+using ginkgo::logical_operator::LogicalFilter;
+using ginkgo::logical_operator::LogicalProject;
+using ginkgo::logical_operator::LogicalScan;
+using ginkgo::logical_operator::LogicalSort;
+using ginkgo::logical_operator::LogicalLimit;
+using ginkgo::logical_operator::LogicalSubquery;
+using ginkgo::logical_operator::LogicalDeleteFilter;
+using ginkgo::catalog::Attribute;
 using std::bitset;
 using std::endl;
 using std::cout;
@@ -79,7 +79,7 @@ using std::endl;
 using std::multimap;
 using std::sort;
 using std::vector;
-// namespace claims {
+// namespace ginkgo {
 // namespace sql_parser {
 //#define PRINTCONTEXT
 AstSelectList::AstSelectList(AstNodeType ast_node_type, bool is_all,
@@ -1940,4 +1940,4 @@ RetCode AstSelectStmt::GetLogicalPlan(LogicalOperator*& logic_plan) {
 }
 
 //}  // namespace sql_parser
-//}  // namespace claims
+//}  // namespace ginkgo

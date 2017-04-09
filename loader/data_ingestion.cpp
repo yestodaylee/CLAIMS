@@ -67,18 +67,18 @@
 #include "../utility/Timer.h"
 #include "./table_file_connector.h"
 
-using claims::common::FileOpenFlag;
-using claims::common::FilePlatform;
-using claims::common::Malloc;
+using ginkgo::common::FileOpenFlag;
+using ginkgo::common::FilePlatform;
+using ginkgo::common::Malloc;
 using std::basic_istream;
-using claims::catalog::TableDescriptor;
-using claims::catalog::Attribute;
-using claims::catalog::ProjectionBinding;
-using claims::catalog::Partitioner;
-using claims::catalog::ProjectionDescriptor;
-using claims::catalog::Catalog;
+using ginkgo::catalog::TableDescriptor;
+using ginkgo::catalog::Attribute;
+using ginkgo::catalog::ProjectionBinding;
+using ginkgo::catalog::Partitioner;
+using ginkgo::catalog::ProjectionDescriptor;
+using ginkgo::catalog::Catalog;
 using boost::lexical_cast;
-using namespace claims::common;  // NOLINT
+using namespace ginkgo::common;  // NOLINT
 /*
 #define DEFINE_DEBUG_LOG(FLAG, log) \
   #ifdef CLAIMS_DEBUG_LOG \
@@ -126,7 +126,7 @@ using namespace claims::common;  // NOLINT
 #define GET_TIME_DI(var)
 #endif
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 
 uint64_t DataIngestion::total_get_substr_time_ = 0;
@@ -1215,4 +1215,4 @@ string DataIngestion::GenerateDataValidityInfo(const Validity& vali,
 }
 */
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */

@@ -46,25 +46,25 @@
 #include "../../common/expression/expr_ternary.h"
 #include "../../common/expression/expr_unary.h"
 #include "../../common/error_define.h"
-using namespace claims::common;  // NOLINT
+using namespace ginkgo::common;  // NOLINT
 
-using claims::common::ExprBinary;
-using claims::common::ExprCaseWhen;
-using claims::common::ExprNodeType;
-using claims::common::ExprConst;
-using claims::common::ExprDate;
-using claims::common::ExprIn;
-using claims::common::ExprTernary;
-using claims::common::ExprUnary;
-using claims::common::OperType;
-using claims::common::TypeConversionMatrix;
+using ginkgo::common::ExprBinary;
+using ginkgo::common::ExprCaseWhen;
+using ginkgo::common::ExprNodeType;
+using ginkgo::common::ExprConst;
+using ginkgo::common::ExprDate;
+using ginkgo::common::ExprIn;
+using ginkgo::common::ExprTernary;
+using ginkgo::common::ExprUnary;
+using ginkgo::common::OperType;
+using ginkgo::common::TypeConversionMatrix;
 using std::cout;
 using std::endl;
 using std::cin;
 using std::string;
 using std::setw;
 using std::bitset;
-// namespace claims {
+// namespace ginkgo {
 // namespace sql_parser {
 
 AstExprConst::AstExprConst(AstNodeType ast_node_type, string expr_type,
@@ -609,7 +609,7 @@ void AstExprCmpBinary::Print(int level) const {
 RetCode AstExprCmpBinary::SemanticAnalisys(SemanticContext* sem_cnxt) {
   RetCode ret = rSuccess;
   if (expr_type_ == "EXPR_IN_SELECT") {
-    ret = claims::common::rNotSupport;
+    ret = ginkgo::common::rNotSupport;
     return ret;
   }
   if (NULL != arg0_) {
@@ -1359,4 +1359,4 @@ RetCode AstExprFunc::SolveSelectAlias(
   return rSuccess;
 }
 //}  // namespace sql_parser
-//}  // namespace claims
+//}  // namespace ginkgo

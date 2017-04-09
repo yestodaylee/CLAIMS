@@ -16,7 +16,7 @@
 
 #include "../common/memory_handle.h"
 using caf::io::remote_actor;
-using claims::SendPlanAtom;
+using ginkgo::SendPlanAtom;
 IteratorExecutorMaster* IteratorExecutorMaster::_instance = 0;
 
 IteratorExecutorMaster::IteratorExecutorMaster() { _instance = this; }

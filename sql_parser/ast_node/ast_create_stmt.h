@@ -16,7 +16,7 @@
 #include "../ast_node/ast_node.h"
 
 using std::string;
-// namespace claims {
+// namespace ginkgo {
 // namespace sql_parser {
 /**
  * @brief The AST of create database statement.
@@ -309,6 +309,6 @@ class AstOptCsc : public AstNode {
  private:
 };
 //}  // namespace sql_parser
-//}  // namespace claims
+//}  // namespace ginkgo
 
 #endif  // SQL_PARSER_AST_NODE_AST_CREATE_STMT_H_

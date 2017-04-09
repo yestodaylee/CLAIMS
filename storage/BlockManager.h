@@ -26,8 +26,8 @@
 #include "../txn_manager/txn.hpp"
 #include "../utility/lock.h"
 using namespace std;
-using claims::txn::UInt64;
-using claims::txn::PStrip;
+using ginkgo::txn::UInt64;
+using ginkgo::txn::PStrip;
 struct ChunkInfo {
   ChunkID chunkId;
   void *hook;

@@ -35,9 +35,9 @@
 #include "../../common/expression/expr_node.h"
 #include "../../logical_operator/logical_equal_join.h"
 #include "../common/error_define.h"
-using claims::logical_operator::LogicalOperator;
-using claims::common::ExprNode;
-using claims::logical_operator::LogicalEqualJoin;
+using ginkgo::logical_operator::LogicalOperator;
+using ginkgo::common::ExprNode;
+using ginkgo::logical_operator::LogicalEqualJoin;
 using std::vector;
 using std::pair;
 using std::map;
@@ -45,8 +45,8 @@ using std::multimap;
 using std::set;
 using std::string;
 
-using claims::common::rSuccess;
-// namespace claims {
+using ginkgo::common::rSuccess;
+// namespace ginkgo {
 // namespace sql_parser {
 
 enum AstNodeType {
@@ -324,6 +324,6 @@ class AstStmtList : public AstNode {
   AstNode* next_;
 };
 //}  // namespace sql_parser
-//}  // namespace claims
+//}  // namespace ginkgo
 
 #endif  // SQL_PARSER_AST_NODE_AST_NODE_H_

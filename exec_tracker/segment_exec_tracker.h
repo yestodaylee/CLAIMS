@@ -40,7 +40,7 @@ using caf::actor;
 using std::pair;
 using std::string;
 
-namespace claims {
+namespace ginkgo {
 // first=query_id, second=segment_id*kMaxNodeNum + node_id
 #define kReportIntervalTime 3000
 typedef std::pair<u_int64_t, u_int64_t> NodeSegmentID;
@@ -65,6 +65,6 @@ class SegmentExecTracker {
   Lock map_lock_;
 };
 
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  EXEC_TRACKER_SEGMENT_EXEC_TRACKER_H_

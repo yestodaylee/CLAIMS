@@ -38,8 +38,8 @@
 #include "caf/local_actor.hpp"
 using std::make_pair;
 using std::string;
-using claims::common::rCouldnotFindCancelQueryId;
-namespace claims {
+using ginkgo::common::rCouldnotFindCancelQueryId;
+namespace ginkgo {
 
 StmtExecTracker::StmtExecTracker() : query_id_gen_(0), logic_time_(0) {
   stmt_exec_tracker_actor_ = caf::spawn(CheckStmtExecStatus, this);
@@ -151,4 +151,4 @@ bool StmtExecTracker::UpdateSegExecStatus(
   return false;
 }
 
-}  // namespace claims
+}  // namespace ginkgo

@@ -53,7 +53,7 @@
 
 #define CONNECTION_VERIFY
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 /**
  * ExchangeMerger is mainly for
@@ -193,5 +193,5 @@ class ExchangeMerger : public PhysicalOperator {
   //  unsigned debug_winner_thread;
 };
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // PHYSICAL_OPERATOR_EXCHANGE_MERGER_H_

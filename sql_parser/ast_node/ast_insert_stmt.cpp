@@ -31,14 +31,14 @@
 #include <string>
 #include <bitset>
 #include "../../common/error_define.h"
-using namespace claims::common;  // NOLINT
+using namespace ginkgo::common;  // NOLINT
 using std::cout;
 using std::endl;
 using std::cin;
 using std::string;
 using std::setw;
 using std::bitset;
-// namespace claims {
+// namespace ginkgo {
 // namespace sql_parser {
 
 AstInsertStmt::AstInsertStmt(AstNodeType ast_node_type, int insert_opt,
@@ -129,4 +129,4 @@ void AstInsertAssignList::Print(int level) const {
   }
 }
 //}  // namespace sql_parser
-//}  // namespace claims
+//}  // namespace ginkgo

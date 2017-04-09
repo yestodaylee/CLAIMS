@@ -41,13 +41,13 @@
 #include "../Debug.h"
 #include "../utility/rdtsc.h"
 #include "../Executor/expander_tracker.h"
-using claims::common::DataTypeOper;
-using claims::common::DataTypeOperFunc;
-using claims::common::ExprEvalCnxt;
-using claims::common::ExprNode;
-using claims::common::ExprUnary;
+using ginkgo::common::DataTypeOper;
+using ginkgo::common::DataTypeOperFunc;
+using ginkgo::common::ExprEvalCnxt;
+using ginkgo::common::ExprNode;
+using ginkgo::common::ExprUnary;
 using std::vector;
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 
 PhysicalAggregation::PhysicalAggregation(State state)
@@ -525,4 +525,4 @@ RetCode PhysicalAggregation::GetAllSegments(stack<Segment *> *all_segments) {
 }
 
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

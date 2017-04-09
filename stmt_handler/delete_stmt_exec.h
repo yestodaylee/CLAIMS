@@ -36,7 +36,7 @@
 #include "../sql_parser/ast_node/ast_delete_stmt.h"
 using std::string;
 
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 
 class DeleteStmtExec : public StmtExec {
@@ -66,6 +66,6 @@ class DeleteStmtExec : public StmtExec {
 };
 
 } /* namespace stmt_handler */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  //  STMT_HANDLER_DELETE_STMT_EXEC_H_

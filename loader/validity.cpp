@@ -30,9 +30,9 @@
 #include <string>
 #include "../catalog/table.h"
 
-using claims::catalog::TableDescriptor;
-using namespace claims::common;  // NOLINT
-namespace claims {
+using ginkgo::catalog::TableDescriptor;
+using namespace ginkgo::common;  // NOLINT
+namespace ginkgo {
 namespace loader {
 
 Validity::~Validity() {}
@@ -121,4 +121,4 @@ string Validity::GenerateDataValidityInfo(const Validity& vali,
 }
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */

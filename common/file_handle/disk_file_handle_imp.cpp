@@ -44,9 +44,9 @@
 #include "../../utility/lock_guard.h"
 using std::endl;
 using std::string;
-using claims::utility::LockGuard;
+using ginkgo::utility::LockGuard;
 
-namespace claims {
+namespace ginkgo {
 namespace common {
 DiskFileHandleImp::~DiskFileHandleImp() {
   int ret = rSuccess;
@@ -296,4 +296,4 @@ uint64_t DiskFileHandleImp::GetSize() {
 }
 
 }  // namespace common
-} /* namespace claims */
+} /* namespace ginkgo */

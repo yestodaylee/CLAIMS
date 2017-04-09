@@ -28,7 +28,7 @@
 
 #include "fake_table_scan.h"
 
-namespace claims {
+namespace ginkgo {
 namespace physical_query_plan {
 namespace test {
 
@@ -50,4 +50,4 @@ bool FakeTableScan::Print() {}
 
 } /* namespace test */
 } /* namespace physical_query_plan */
-} /* namespace claims */
+} /* namespace ginkgo */

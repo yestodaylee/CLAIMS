@@ -40,17 +40,17 @@ using caf::aout;
 using std::ofstream;
 ofstream txn_log;
 // auto env = Environment::getInstance() -> getCatalog();
-namespace claims {
+namespace ginkgo {
 namespace txn {
-// using claims::common::rSuccess;
-// using claims::common::rLinkTmTimeout;
-// using claims::common::rLinkTmFail;
-// using claims::common::rBeginIngestTxnFail;
-// using claims::common::rBeginQueryFail;
-// using claims::common::rBeginCheckpointFail;
-// using claims::common::rCommitIngestTxnFail;
-// using claims::common::rAbortIngestTxnFail;
-// using claims::common::rCommitCheckpointFail;
+// using ginkgo::common::rSuccess;
+// using ginkgo::common::rLinkTmTimeout;
+// using ginkgo::common::rLinkTmFail;
+// using ginkgo::common::rBeginIngestTxnFail;
+// using ginkgo::common::rBeginQueryFail;
+// using ginkgo::common::rBeginCheckpointFail;
+// using ginkgo::common::rCommitIngestTxnFail;
+// using ginkgo::common::rAbortIngestTxnFail;
+// using ginkgo::common::rCommitCheckpointFail;
 
 atomic<UInt64> TimeStamp::now_;
 

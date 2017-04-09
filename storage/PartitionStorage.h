@@ -40,10 +40,10 @@
 #include "../utility/lock.h"
 #include "../utility/lock_guard.h"
 #include "../Debug.h"
-using claims::txn::PStrip;
-using claims::txn::UInt64;
-using claims::utility::LockGuard;
-// namespace claims {
+using ginkgo::txn::PStrip;
+using ginkgo::txn::UInt64;
+using ginkgo::utility::LockGuard;
+// namespace ginkgo {
 // namespace storage {
 /**
  * Design by The Iterator pattern. It is a container of partition. We should
@@ -237,6 +237,6 @@ class PartitionStorage {
   // static ofstream logfile;
 };
 //}  // namespace storage
-//}  // namespace claims
+//}  // namespace ginkgo
 
 #endif /* PARTITIONSTORAGE_H_ */

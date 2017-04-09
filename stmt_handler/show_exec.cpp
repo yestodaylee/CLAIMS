@@ -37,8 +37,8 @@
 using std::endl;
 using std::string;
 using std::vector;
-using claims::catalog::Catalog;
-namespace claims {
+using ginkgo::catalog::Catalog;
+namespace ginkgo {
 namespace stmt_handler {
 
 ShowExec::ShowExec(AstNode* stmt) : StmtExec(stmt) {
@@ -74,4 +74,4 @@ RetCode ShowExec::Execute(ExecutedResult* exec_result) {
   }
 }
 }  // namespace stmt_handler
-}  // namespace claims
+}  // namespace ginkgo

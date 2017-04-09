@@ -44,19 +44,19 @@
 #include "../common/rename.h"
 #include "../Config.h"
 #include "../loader/single_file_connector.h"
-using claims::common::FileHandleImpFactory;
+using ginkgo::common::FileHandleImpFactory;
 using std::vector;
 using std::string;
 using std::endl;
-using claims::common::rSuccess;
-using claims::common::rCatalogNotFound;
-using claims::common::rDataPathError;
-using claims::common::FileOpenFlag;
-using claims::common::FilePlatform;
-using claims::common::HdfsConnector;
-using claims::loader::SingleFileConnector;
+using ginkgo::common::rSuccess;
+using ginkgo::common::rCatalogNotFound;
+using ginkgo::common::rDataPathError;
+using ginkgo::common::FileOpenFlag;
+using ginkgo::common::FilePlatform;
+using ginkgo::common::HdfsConnector;
+using ginkgo::loader::SingleFileConnector;
 
-namespace claims {
+namespace ginkgo {
 namespace catalog {
 
 Catalog* Catalog::instance_ = NULL;
@@ -383,4 +383,4 @@ vector<TableID> Catalog::getAllTableIDs() const {
 }
 
 } /* namespace catalog */
-} /* namespace claims */
+} /* namespace ginkgo */

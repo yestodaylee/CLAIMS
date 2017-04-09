@@ -40,12 +40,12 @@
 #include "../physical_operator/physical_operator_base.h"
 #include "../common/expression/expr_unary.h"
 
-using claims::common::ExprNode;
-using claims::common::ExprUnary;
-using claims::physical_operator::PhysicalAggregation;
-using claims::physical_operator::PhysicalOperatorBase;
+using ginkgo::common::ExprNode;
+using ginkgo::common::ExprUnary;
+using ginkgo::physical_operator::PhysicalAggregation;
+using ginkgo::physical_operator::PhysicalOperatorBase;
 
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 #define NEWCONDI
 /**
@@ -146,5 +146,5 @@ class LogicalAggregation : public LogicalOperator {
   AggregationStyle aggregation_style_;
 };
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // LOGICAL_OPERATOR_LOGICAL_AGGREGATION_H_

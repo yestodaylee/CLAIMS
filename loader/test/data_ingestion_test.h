@@ -36,9 +36,9 @@
 #include "../data_ingestion.h"
 
 using std::ofstream;
-using claims::catalog::Catalog;
+using ginkgo::catalog::Catalog;
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 
 class DataIngestionTest : public ::testing::Test {
@@ -117,6 +117,6 @@ TEST_F(DataIngestionTest, GetTuple4) {
   }
 }
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // LOADER_TEST_DATA_INGESTION_TEST_H_

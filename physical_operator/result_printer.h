@@ -30,7 +30,7 @@
 #include "../physical_operator/physical_operator_base.h"
 #include "../common/Schema/Schema.h"
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 class ResultPrinter : public PhysicalOperatorBase {
  public:
@@ -78,5 +78,5 @@ class ResultPrinter : public PhysicalOperatorBase {
   }
 };
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // PHYSICAL_OPERATOR_RESULT_PRINTER_H_

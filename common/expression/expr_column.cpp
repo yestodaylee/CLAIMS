@@ -20,7 +20,7 @@
 #include "./expr_node.h"
 #include "./expr_type_cast.h"
 using std::string;
-namespace claims {
+namespace ginkgo {
 namespace common {
 ExprColumn::ExprColumn(ExprNodeType expr_node_type, data_type actual_type,
                        string alias, string table_name, string column_name)
@@ -95,4 +95,4 @@ void ExprColumn::GetUniqueAttr(set<string>& attrs) {
 }
 
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo

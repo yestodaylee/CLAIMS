@@ -39,7 +39,7 @@
 
 #include "../../memory_handle.h"
 using std::string;
-namespace claims {
+namespace ginkgo {
 
 namespace common {
 class DiskFileHandleImpTest : public ::testing::Test {
@@ -165,6 +165,6 @@ TEST_F(DiskFileHandleImpTest, GetName) {
 TEST_F(DiskFileHandleImpTest, AtomicAppend) {}
 
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // COMMON_FILE_HANDLE_TEST_DISK_FILE_HANDLE_IMP_TEST_H_

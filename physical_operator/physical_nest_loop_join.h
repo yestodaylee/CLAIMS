@@ -36,9 +36,9 @@
 #include "../physical_operator/physical_operator.h"
 #include "../Debug.h"
 
-using claims::common::ExprEvalCnxt;
-using claims::common::ExprNode;
-namespace claims {
+using ginkgo::common::ExprEvalCnxt;
+using ginkgo::common::ExprNode;
+namespace ginkgo {
 namespace physical_operator {
 
 class PhysicalNestLoopJoin : public PhysicalOperator {
@@ -115,5 +115,5 @@ class PhysicalNestLoopJoin : public PhysicalOperator {
 };
 
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  //  PHYSICAL_OPERATOR_PHYSICAL_NEST_LOOP_JOIN_H__

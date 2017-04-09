@@ -47,26 +47,26 @@
 
 using std::unordered_set;
 using caf::announce;
-using claims::BaseNode;
-using claims::catalog::Catalog;
-using claims::common::InitAggAvgDivide;
-using claims::common::InitOperatorFunc;
-using claims::common::InitTypeCastFunc;
-using claims::common::InitTypeConversionMatrix;
-using claims::common::rSuccess;
-using claims::loader::LoadPacket;
-using claims::loader::MasterLoader;
-using claims::loader::SlaveLoader;
-using claims::txn::UInt64;
-using claims::txn::TxnServer;
-using claims::txn::TxnClient;
-// using claims::txn::LogServer;
-// using claims::txn::LogClient;
-using claims::txn::GetGlobalPartId;
-using claims::txn::TimeStamp;
-using claims::NodeAddr;
-using claims::NodeSegmentID;
-using claims::StmtExecTracker;
+using ginkgo::BaseNode;
+using ginkgo::catalog::Catalog;
+using ginkgo::common::InitAggAvgDivide;
+using ginkgo::common::InitOperatorFunc;
+using ginkgo::common::InitTypeCastFunc;
+using ginkgo::common::InitTypeConversionMatrix;
+using ginkgo::common::rSuccess;
+using ginkgo::loader::LoadPacket;
+using ginkgo::loader::MasterLoader;
+using ginkgo::loader::SlaveLoader;
+using ginkgo::txn::UInt64;
+using ginkgo::txn::TxnServer;
+using ginkgo::txn::TxnClient;
+// using ginkgo::txn::LogServer;
+// using ginkgo::txn::LogClient;
+using ginkgo::txn::GetGlobalPartId;
+using ginkgo::txn::TimeStamp;
+using ginkgo::NodeAddr;
+using ginkgo::NodeSegmentID;
+using ginkgo::StmtExecTracker;
 
 Environment* Environment::_instance = 0;
 
@@ -81,7 +81,7 @@ Environment::Environment(bool ismaster) : ismaster_(ismaster) {
 
   AnnounceCafMessage();
 
-  catalog_ = claims::catalog::Catalog::getInstance();
+  catalog_ = ginkgo::catalog::Catalog::getInstance();
   logging_->log("restore the catalog ...");
   if (rSuccess != catalog_->restoreCatalog()) {
     LOG(ERROR) << "failed to restore catalog" << std::endl;
@@ -376,7 +376,7 @@ InstanceResourceManager* Environment::getResourceManagerSlave() {
   return resourceManagerSlave_;
 }
 NodeID Environment::getNodeID() const { return node_id_; }
-claims::catalog::Catalog* Environment::getCatalog() const { return catalog_; }
+ginkgo::catalog::Catalog* Environment::getCatalog() const { return catalog_; }
 
 void Environment::initializeClientListener() {
   listener_ = new ClientListener(Config::client_listener_port);

@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include "types/NValue.hpp"
 #include "types/decimal.h"
-using claims::common::Decimal;
+using ginkgo::common::Decimal;
 // =
 template<typename X,typename Y>
 bool equal(const void *x,const void *y){

@@ -39,9 +39,9 @@
 #include "../../common/memory_handle.h"
 #include "../single_thread_single_file_connector.h"
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
-using namespace claims::common;  // NOLINT
+using namespace ginkgo::common;  // NOLINT
 
 class SingleThreadSingleFileConnectorTest : public ::testing::Test {
  public:
@@ -184,5 +184,5 @@ TEST_F(SingleThreadSingleFileConnectorTest, HdfsEeayTranslate) {
 }
 
 }  // namespace loader
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // LOADER_TEST_SINGLE_THREAD_SINGLE_FILE_CONNECTOR_TEST_H_

@@ -28,7 +28,7 @@
 #ifndef LOGICAL_OPERATOR_PLAN_PARTITION_INFO_H_
 #define LOGICAL_OPERATOR_PLAN_PARTITION_INFO_H_
 #include "../common/ids.h"
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 /**
  * the partition info of every partition is changing during executing them.
@@ -54,5 +54,5 @@ class PlanPartitionInfo {
 };
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  //  LOGICAL_OPERATOR_PLAN_PARTITION_INFO_H_

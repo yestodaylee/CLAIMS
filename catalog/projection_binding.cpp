@@ -40,9 +40,9 @@
 #include "../Config.h"
 #include "../loader/load_packet.h"
 using caf::io::remote_actor;
-using claims::loader::BindPartAtom;
+using ginkgo::loader::BindPartAtom;
 
-namespace claims {
+namespace ginkgo {
 namespace catalog {
 
 ProjectionBinding::ProjectionBinding() {
@@ -225,4 +225,4 @@ bool ProjectionBinding::UnbindingEntireProjection(Partitioner* part) {
 }
 
 } /* namespace catalog */
-} /* namespace claims */
+} /* namespace ginkgo */

@@ -50,8 +50,8 @@
 #include "../physical_operator/physical_operator.h"
 #include "../common/ExpandedThreadTracker.h"
 #include "../txn_manager/txn.hpp"
-using claims::txn::Query;
-namespace claims {
+using ginkgo::txn::Query;
+namespace ginkgo {
 namespace physical_operator {
 
 typedef std::list<ChunkReaderIterator::block_accessor*> assigned_data;
@@ -168,6 +168,6 @@ class PhysicalProjectionScan : public PhysicalOperator {
 };
 
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  PHYSICAL_OPERATOR_PHYSICAL_PROJECTION_SCAN_H_

@@ -42,17 +42,17 @@
 #include "../sql_parser/ast_node/ast_select_stmt.h"
 #include "../stmt_handler/select_exec.h"
 #include "../common/error_define.h"
-using claims::loader::DataIngestion;
+using ginkgo::loader::DataIngestion;
 using std::endl;
 using std::string;
 using std::vector;
 using std::cout;
-using claims::catalog::TableDescriptor;
-using claims::common::rSuccess;
-using claims::common::rFailure;
-using claims::common::rNoProjection;
-using claims::common::rCreateProjectionOnDelTableFailed;
-namespace claims {
+using ginkgo::catalog::TableDescriptor;
+using ginkgo::common::rSuccess;
+using ginkgo::common::rFailure;
+using ginkgo::common::rNoProjection;
+using ginkgo::common::rCreateProjectionOnDelTableFailed;
+namespace ginkgo {
 namespace stmt_handler {
 
 UpdateStmtExec::UpdateStmtExec(AstNode* stmt) : StmtExec(stmt) {
@@ -241,4 +241,4 @@ void UpdateStmtExec::InsertUpdatedDataIntoTable(string table_name,
 }
 
 } /* namespace stmt_handler */
-} /* namespace claims */
+} /* namespace ginkgo */

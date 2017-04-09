@@ -33,7 +33,7 @@
 #include "../common/ids.h"
 #include "../common/memory_handle.h"
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 
 Segment::Segment() {
@@ -53,4 +53,4 @@ Segment::Segment(PhysicalOperatorBase* plan_segment,
       exchange_id_(exchange_id) {}
 RetCode Segment::Send_Plan_Segment() { return 0; }
 }
-}  // namespace claims
+}  // namespace ginkgo

@@ -58,7 +58,7 @@
 #include "../physical_operator/exchange_sender.h"
 #include "../physical_operator/physical_operator_base.h"
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 /**
  * get one block from child and send to mergers immediately during one active
@@ -148,5 +148,5 @@ class ExchangeSenderPipeline : public ExchangeSender {
   }
 };
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // PHYSICAL_OPERATOR_EXCHANGE_SENDER_PIPELINE_H_

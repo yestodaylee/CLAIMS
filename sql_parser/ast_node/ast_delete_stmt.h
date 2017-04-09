@@ -31,7 +31,7 @@
 
 #include "../ast_node/ast_node.h"
 
-// namespace claims {
+// namespace ginkgo {
 // namespace ast_node {
 
 class AstDeleteStmt : public AstNode {
@@ -49,6 +49,6 @@ class AstDeleteStmt : public AstNode {
 };
 
 // } /* namespace ast_node */
-// } /* namespace claims */
+// } /* namespace ginkgo */
 
 #endif  //  SQL_PARSER_AST_NODE_AST_DELETE_STMT_H_

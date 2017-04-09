@@ -39,7 +39,7 @@
 #include "../Environment.h"
 #include "../utility/print_tool.h"
 
-namespace claims {
+namespace ginkgo {
 namespace catalog {
 
 const int CHUNKSIZE_IN_MB = 64;
@@ -232,4 +232,4 @@ bool OneToManyPartitionInfo::is_colocated(const PartitionInfo& target) const {
 }
 
 } /* namespace catalog */
-} /* namespace claims */
+} /* namespace ginkgo */

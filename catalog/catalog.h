@@ -41,7 +41,7 @@
 #include "../common/Logging.h"
 #include "../utility/lock.h"
 
-namespace claims {
+namespace ginkgo {
 
 namespace loader {
 class SingleFileConnector;
@@ -133,6 +133,6 @@ class Catalog {
 };
 
 } /* namespace catalog */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // CATALOG_CATALOG_H_

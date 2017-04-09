@@ -35,11 +35,11 @@
 #include "../common/memory_handle.h"
 #include "../common/rename.h"
 
-using claims::common::FilePlatform;
-using claims::common::rSuccess;
+using ginkgo::common::FilePlatform;
+using ginkgo::common::rSuccess;
 using std::string;
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 
 class SingleThreadSingleFileConnector {
@@ -101,6 +101,6 @@ class SingleThreadSingleFileConnector {
 };
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // LOADER_SINGLE_THREAD_SINGLE_FILE_CONNECTOR_H_

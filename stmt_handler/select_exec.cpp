@@ -54,24 +54,24 @@
 #include "../txn_manager/txn_client.hpp"
 #include "caf/io/all.hpp"
 using caf::io::remote_actor;
-using claims::logical_operator::LogicalQueryPlanRoot;
-using claims::physical_operator::ExchangeSender;
-using claims::physical_operator::ExchangeSenderPipeline;
-using claims::physical_operator::PhysicalAggregation;
-using claims::physical_operator::PhysicalNestLoopJoin;
-using claims::physical_operator::PhysicalOperatorBase;
-using claims::physical_operator::PhysicalOperatorType;
+using ginkgo::logical_operator::LogicalQueryPlanRoot;
+using ginkgo::physical_operator::ExchangeSender;
+using ginkgo::physical_operator::ExchangeSenderPipeline;
+using ginkgo::physical_operator::PhysicalAggregation;
+using ginkgo::physical_operator::PhysicalNestLoopJoin;
+using ginkgo::physical_operator::PhysicalOperatorBase;
+using ginkgo::physical_operator::PhysicalOperatorType;
 using std::endl;
 using std::vector;
 using std::string;
 using std::cout;
 using std::make_pair;
-using claims::common::rStmtCancelled;
-using claims::txn::Query;
-using claims::txn::QueryReq;
-using claims::txn::TxnClient;
+using ginkgo::common::rStmtCancelled;
+using ginkgo::txn::Query;
+using ginkgo::txn::QueryReq;
+using ginkgo::txn::TxnClient;
 
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 //#define PRINTCONTEXT
 SelectExec::SelectExec(AstNode* stmt, string raw_sql)
@@ -364,4 +364,4 @@ RetCode SelectExec::IsUpperExchangeRegistered(
 }
 
 }  // namespace stmt_handler
-}  // namespace claims
+}  // namespace ginkgo

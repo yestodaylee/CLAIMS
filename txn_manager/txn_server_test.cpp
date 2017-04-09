@@ -64,7 +64,7 @@ using std::make_tuple;
 using std::get;
 using std::shared_ptr;
 using std::make_shared;
-//using namespace claims::txn;
+//using namespace ginkgo::txn;
 
 using UInt64 = unsigned long long;
 using UInt32 = unsigned int;
@@ -182,12 +182,12 @@ for (auto i=0;i<index;i++) {
 }
 
 
-using claims::txn::FixTupleIngestReq;
-using claims::txn::Ingest;
-using claims::txn::TxnServer;
-using claims::txn::TxnClient;
-using claims::txn::LogServer;
-using claims::txn::LogClient;
+using ginkgo::txn::FixTupleIngestReq;
+using ginkgo::txn::Ingest;
+using ginkgo::txn::TxnServer;
+using ginkgo::txn::TxnClient;
+using ginkgo::txn::LogServer;
+using ginkgo::txn::LogClient;
 char buffer[3*1024+10];
 void task2(int times){
 for (auto i=0; i<times; i++) {

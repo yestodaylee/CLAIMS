@@ -39,7 +39,7 @@
 #include "../exec_tracker/segment_exec_tracker.h"
 #include "../utility/lock.h"
 using std::string;
-namespace claims {
+namespace ginkgo {
 #define kMaxNodeNum 10000
 #define kCheckIntervalTime 5000
 /// tracker the execution status of every statement, each StmtExecStatus should
@@ -72,6 +72,6 @@ class StmtExecTracker {
   Lock lock_;
 };
 
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // EXEC_TRACKER_STMT_EXEC_TRACKER_H_

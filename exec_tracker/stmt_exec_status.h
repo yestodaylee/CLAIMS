@@ -37,7 +37,7 @@
 #include "../exec_tracker/segment_exec_tracker.h"
 #include "../utility/lock.h"
 using std::string;
-namespace claims {
+namespace ginkgo {
 /// for monitoring the execution status of every segment, slave node has
 /// remote_segment_status, coordinator has local_segment_status, and synchronize
 /// the underlying 2 status at every reporting time
@@ -84,6 +84,6 @@ class StmtExecStatus {
   std::atomic_short segment_id_gen_;
   Lock lock_;
 };
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  EXEC_TRACKER_STMT_EXEC_STATUS_H_

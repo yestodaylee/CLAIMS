@@ -25,7 +25,7 @@
  * Description:
  */
 #include "../logical_operator/plan_partition_info.h"
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 PlanPartitionInfo::PlanPartitionInfo(unsigned partition_id, int datasize,
                                      NodeID location)
@@ -57,4 +57,4 @@ void PlanPartitionInfo::set_filtered() {
 }
 NodeID PlanPartitionInfo::get_location() const { return location_; }
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo

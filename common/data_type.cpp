@@ -37,15 +37,15 @@
 #include <sstream>
 #include "./data_type.h"
 #include "./error_define.h"
-using claims::common::rSuccess;
-using claims::common::rTooSmallData;
-using claims::common::rTooLargeData;
-using claims::common::rTooLongData;
-using claims::common::rInterruptedData;
-using claims::common::rIncorrectData;
-using claims::common::rInvalidNullData;
-using claims::common::kErrorMessage;
-using namespace claims::common;
+using ginkgo::common::rSuccess;
+using ginkgo::common::rTooSmallData;
+using ginkgo::common::rTooLargeData;
+using ginkgo::common::rTooLongData;
+using ginkgo::common::rInterruptedData;
+using ginkgo::common::rIncorrectData;
+using ginkgo::common::rInvalidNullData;
+using ginkgo::common::kErrorMessage;
+using namespace ginkgo::common;
 int null_int_value = NULL_INT;
 float null_float_value = NULL_FLOAT;
 double null_double_value = NULL_DOUBLE;

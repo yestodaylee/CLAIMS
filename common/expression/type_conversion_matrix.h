@@ -9,7 +9,7 @@
 #define COMMON_EXPRESSION_TYPE_CONVERSION_MATRIX_H_
 #include <memory.h>
 #include "../common/data_type.h"
-namespace claims {
+namespace ginkgo {
 namespace common {
 class TypeConversionMatrix {
  public:
@@ -185,5 +185,5 @@ static void InitTypeConversionMatrix() {
       t_boolean;
 }
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo
 #endif  //  COMMON_EXPRESSION_TYPE_CONVERSION_MATRIX_H_

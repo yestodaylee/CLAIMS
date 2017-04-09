@@ -35,7 +35,7 @@
 using std::string;
 using std::vector;
 
-// namespace claims {
+// namespace ginkgo {
 // namespace sql_parser {
 
 /**
@@ -70,6 +70,6 @@ class AstDescStmt : public AstNode {
 };
 
 // } // namespace sql_parser
-// } // namespace claims
+// } // namespace ginkgo
 
 #endif  //  SQL_PARSER_AST_NODE_AST_DESC_STMT_H_

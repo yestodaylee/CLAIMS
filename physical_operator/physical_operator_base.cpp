@@ -27,7 +27,7 @@
 
 #include <assert.h>
 #include <iostream>
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 PhysicalOperatorBase::PhysicalOperatorBase() {
   // TODO Auto-generated constructor stub
@@ -51,4 +51,4 @@ ResultSet* PhysicalOperatorBase::GetResultSet() {
   return 0;
 }
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

@@ -30,10 +30,10 @@
 
 #include <stack>
 #include <vector>
-using claims::common::ExprNode;
+using ginkgo::common::ExprNode;
 
 #include "../common/expression/expr_node.h"
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 PhysicalProject::PhysicalProject() {
   set_phy_oper_type(kPhysicalProject);
@@ -234,4 +234,4 @@ RetCode PhysicalProject::GetAllSegments(stack<Segment*>* all_segments) {
   return ret;
 }
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

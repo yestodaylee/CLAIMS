@@ -17,7 +17,7 @@
 #include "./data_type_oper.h"
 #include "./expr_type_cast.h"
 #include "../../configure.h"
-namespace claims {
+namespace ginkgo {
 
 namespace common {
 ExprUnary::ExprUnary(ExprNodeType expr_node_type, data_type actual_type,
@@ -87,4 +87,4 @@ void ExprUnary::GetUniqueAttr(set<string>& attrs) {
   arg0_->GetUniqueAttr(attrs);
 }
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo

@@ -46,7 +46,7 @@
 #include "../sql_parser/ast_node/ast_drop_stmt.h"
 #include "../sql_parser/ast_node/ast_create_stmt.h"
 
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 
 class StmtExec {
@@ -81,5 +81,5 @@ class StmtExec {
 };
 
 }  // namespace stmt_handler
-}  // namespace claims
+}  // namespace ginkgo
 #endif  //  STMT_HANDLER_STMT_EXEC_H_

@@ -17,7 +17,7 @@
 #include "../../common/Schema/Schema.h"
 #include "./expr_type_cast.h"
 #include "./expr_node.h"
-namespace claims {
+namespace ginkgo {
 namespace common {
 class ExprColumn : public ExprNode {
  public:
@@ -47,5 +47,5 @@ class ExprColumn : public ExprNode {
   }
 };
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // COMMON_EXPRESSION_EXPR_COLUMN_H_

@@ -72,9 +72,9 @@ using IngestAtom = caf::atom_constant<caf::atom("ingest")>;
 using QueryAtom = caf::atom_constant<caf::atom("query")>;
 using FailAtom = caf::atom_constant<caf::atom("fail")>;
 using QuitAtom = caf::atom_constant<caf::atom("quit")>;
-using claims::txn::Snapshot;
-using claims::txn::CAFSerConfig;
-// using claims::txn::QueryTracker;
+using ginkgo::txn::Snapshot;
+using ginkgo::txn::CAFSerConfig;
+// using ginkgo::txn::QueryTracker;
 class Foo {
  public:
   vector<UInt64> request1;
@@ -137,14 +137,14 @@ void task(int index) {
   }
 }
 
-using claims::txn::FixTupleIngestReq;
-using claims::txn::Ingest;
-using claims::txn::QueryReq;
-using claims::txn::Query;
-using claims::txn::TxnServer;
-using claims::txn::TxnClient;
-using claims::txn::LogServer;
-using claims::txn::LogClient;
+using ginkgo::txn::FixTupleIngestReq;
+using ginkgo::txn::Ingest;
+using ginkgo::txn::QueryReq;
+using ginkgo::txn::Query;
+using ginkgo::txn::TxnServer;
+using ginkgo::txn::TxnClient;
+using ginkgo::txn::LogServer;
+using ginkgo::txn::LogClient;
 char buffer[20 * 1024 + 10];
 int is_log = 0;
 void task2(int id, int times) {

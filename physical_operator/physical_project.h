@@ -43,9 +43,9 @@
 #include "../common/Expression/execfunc.h"
 #include "../physical_operator/physical_operator_base.h"
 #include "../physical_operator/physical_operator.h"
-using claims::common::ExprEvalCnxt;
-using claims::common::ExprNode;
-namespace claims {
+using ginkgo::common::ExprEvalCnxt;
+using ginkgo::common::ExprNode;
+namespace ginkgo {
 namespace physical_operator {
 
 /**
@@ -183,6 +183,6 @@ class PhysicalProject : public PhysicalOperator {
 };
 
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  PHYSICAL_OPERATOR_PHYSICAL_PROJECT_H_

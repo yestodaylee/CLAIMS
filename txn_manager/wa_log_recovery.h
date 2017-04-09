@@ -40,7 +40,7 @@
 using std::shared_ptr;
 using std::make_shared;
 using std::unordered_set;
-namespace claims {
+namespace ginkgo {
 namespace txn {
 
 class LogRecovery {

@@ -18,7 +18,7 @@
 #define EXECUTED_RESULT_STATUS_ERROR 1
 #define NEWSQLINTERFACE
 
-using claims::utility::LockGuard;
+using ginkgo::utility::LockGuard;
 
 struct remote_command {
   remote_command() {}

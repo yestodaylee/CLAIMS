@@ -37,7 +37,7 @@
 #include "caf/all.hpp"
 #include <atomic>
 using std::string;
-namespace claims {
+namespace ginkgo {
 const int TryReportTimes = 20;
 // due to the conflict between deleting SegmentExecStatus and reporting the
 // last message (deleting is faster than reporting, so the last message doesn't
@@ -92,6 +92,6 @@ class SegmentExecStatus {
     }                                                                   \
   } while (false)
 
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  EXEC_TRACKER_SEGMENT_EXEC_STATUS_H_

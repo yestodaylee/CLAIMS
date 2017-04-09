@@ -42,10 +42,10 @@
 #include "../physical_operator/exchange_merger.h"
 #include "../physical_operator/physical_filter.h"
 
-using claims::common::LogicInitCnxt;
-using claims::physical_operator::ExchangeMerger;
-using claims::physical_operator::PhysicalFilter;
-namespace claims {
+using ginkgo::common::LogicInitCnxt;
+using ginkgo::physical_operator::ExchangeMerger;
+using ginkgo::physical_operator::PhysicalFilter;
+namespace ginkgo {
 namespace logical_operator {
 
 LogicalFilter::LogicalFilter(LogicalOperator* child, vector<QNode*> qual)
@@ -397,4 +397,4 @@ void LogicalFilter::PruneProj(set<string>& above_attrs) {
 }
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo

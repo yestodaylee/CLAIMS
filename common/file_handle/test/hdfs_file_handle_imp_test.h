@@ -38,7 +38,7 @@
 
 #include "../../memory_handle.h"
 #include "../../../Config.h"
-namespace claims {
+namespace ginkgo {
 
 namespace common {
 
@@ -162,6 +162,6 @@ TEST_F(HdfsFileHandleImpTest, GetName) {
 TEST_F(HdfsFileHandleImpTest, AtomicAppend) {}
 
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // COMMON_FILE_HANDLE_TEST_HDFS_FILE_HANDLE_IMP_TEST_H_

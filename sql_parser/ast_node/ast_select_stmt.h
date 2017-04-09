@@ -33,10 +33,10 @@
 #include "./ast_node.h"
 #include "../../common/expression/expr_node.h"
 #include "../../logical_operator/logical_operator.h"
-using claims::logical_operator::LogicalOperator;
+using ginkgo::logical_operator::LogicalOperator;
 using std::string;
 using std::vector;
-// namespace claims {
+// namespace ginkgo {
 // namespace sql_parser {
 /**
  * @brief The AST of select list.
@@ -371,6 +371,6 @@ class AstSelectStmt : public AstNode {
   bool have_aggeragion_;
 };
 //}  // namespace sql_parser
-//}  // namespace claims
+//}  // namespace ginkgo
 
 #endif  //  SQL_PARSER_AST_NODE_AST_SELECT_STMT_H_

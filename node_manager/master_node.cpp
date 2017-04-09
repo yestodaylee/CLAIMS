@@ -45,14 +45,14 @@
 using caf::io::remote_actor;
 using caf::make_message;
 using std::make_pair;
-using claims::common::rConRemoteActorError;
-using namespace claims::catalog;
-using claims::loader::AddBlockAtom;
-using claims::txn::GetTableIdFromGlobalPartId;
-using claims::txn::GetProjectionIdFromGlobalPartId;
-using claims::txn::GetPartitionIdFromGlobalPartId;
+using ginkgo::common::rConRemoteActorError;
+using namespace ginkgo::catalog;
+using ginkgo::loader::AddBlockAtom;
+using ginkgo::txn::GetTableIdFromGlobalPartId;
+using ginkgo::txn::GetProjectionIdFromGlobalPartId;
+using ginkgo::txn::GetPartitionIdFromGlobalPartId;
 
-namespace claims {
+namespace ginkgo {
 MasterNode* MasterNode::instance_ = 0;
 class MasterNodeActor : public event_based_actor {
  public:
@@ -342,4 +342,4 @@ RetCode MasterNode::AddBlock(int g_part_id, int block_num) {
   return cata->saveCatalog();
 }
 
-}  // namespace claims
+}  // namespace ginkgo

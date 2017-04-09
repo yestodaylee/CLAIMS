@@ -33,8 +33,8 @@
 #include "../Environment.h"
 #include "../loader/data_ingestion.h"
 using std::vector;
-using claims::loader::DataIngestion;
-namespace claims {
+using ginkgo::loader::DataIngestion;
+namespace ginkgo {
 namespace stmt_handler {
 #define NEWRESULT
 #define NEW_LOADER
@@ -158,4 +158,4 @@ RetCode LoadExec::Execute(ExecutedResult *exec_result) {
 }
 
 }  // namespace stmt_handler
-}  // namespace claims
+}  // namespace ginkgo

@@ -55,7 +55,7 @@ using std::ifstream;
 using std::to_string;
 using std::shared_ptr;
 
-namespace claims {
+namespace ginkgo {
 namespace txn {
 
 const UInt64 kMaxLogSize = 16 * 1024 * 1024;

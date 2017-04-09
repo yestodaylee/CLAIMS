@@ -33,10 +33,10 @@
 #include "./slave_node.h"
 #include "../common/log/logging.h"
 #include "../Config.h"
-using claims::MasterNode;
-using claims::SlaveNode;
+using ginkgo::MasterNode;
+using ginkgo::SlaveNode;
 int main(int argc, char** argv) {
-  claims::common::Logging claims_logging(argv[0]);
+  ginkgo::common::Logging claims_logging(argv[0]);
   Config::getInstance();
   MasterNode* master_node = new MasterNode();
   //  usleep(1000);

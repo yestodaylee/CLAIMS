@@ -43,7 +43,7 @@
 #include "../physical_operator/physical_operator_base.h"
 #include "../physical_operator/physical_operator.h"
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 
 /**
@@ -160,6 +160,6 @@ class PhysicalDeleteFilter : public PhysicalOperator {
 };
 
 } /* namespace physical_query_plan */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  //  PHYSICAL_OPERATOR_PHYSICAL_DELETE_FILTER_H_

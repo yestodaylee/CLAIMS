@@ -29,7 +29,7 @@
 #include "../stmt_handler/stmt_exec.h"
 
 #include <iostream>
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 StmtExec::StmtExec(AstNode* stmt) : stmt_(stmt) {
   // TODO Auto-generated constructor stub
@@ -71,4 +71,4 @@ bool StmtExec::isResultFlag() const { return result_flag_; }
 const ResultSet* StmtExec::getResultSet() const { return result_set_; }
 
 }  // namespace stmt_handler
-}  // namespace claims
+}  // namespace ginkgo

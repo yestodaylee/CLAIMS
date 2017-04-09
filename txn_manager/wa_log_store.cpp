@@ -29,9 +29,9 @@
 #include <map>
 #include "../common/error_define.h"
 #include "../txn_manager/wa_log_store.h"
-using claims::common::rSuccess;
-using claims::common::rFailure;
-namespace claims {
+using ginkgo::common::rSuccess;
+using ginkgo::common::rFailure;
+namespace ginkgo {
 namespace txn {
 int count = 0;
 RetCode DurableStream::Open() {
@@ -310,4 +310,4 @@ shared_ptr<WALog> DurableStream::Iterator::NextLog() {
 }
 
 }  // namespace txn
-}  // namespace claims
+}  // namespace ginkgo

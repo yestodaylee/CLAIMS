@@ -36,8 +36,8 @@
 #include "./physical_delete_filter.h"
 
 #include <stack>
-using namespace claims::common;
-namespace claims {
+using namespace ginkgo::common;
+namespace ginkgo {
 namespace physical_operator {
 
 PhysicalDeleteFilter::PhysicalDeleteFilter()
@@ -470,4 +470,4 @@ RetCode PhysicalDeleteFilter::GetAllSegments(stack<Segment*>* all_segments) {
   return ret;
 }
 } /* namespace physical_operator */
-} /* namespace claims */
+} /* namespace ginkgo */

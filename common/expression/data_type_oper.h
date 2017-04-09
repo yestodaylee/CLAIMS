@@ -20,7 +20,7 @@
 #include "boost/date_time/gregorian/parsers.hpp"
 #include <boost/date_time/gregorian/greg_duration.hpp>
 #include "boost/date_time/gregorian/formatters.hpp"
-namespace claims {
+namespace ginkgo {
 namespace common {
 #define OPER_TYPE_NUM 100
 #define DATA_TYPE_NUM 30
@@ -1500,5 +1500,5 @@ inline void InitAggAvgDivide() {
 }
 
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo
 #endif  //  COMMON_EXPRESSION_DATA_TYPE_OPER_H_

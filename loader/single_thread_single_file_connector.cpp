@@ -28,6 +28,6 @@
 
 #include "./single_thread_single_file_connector.h"
 
-namespace claims {
+namespace ginkgo {
 namespace loader {} /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */

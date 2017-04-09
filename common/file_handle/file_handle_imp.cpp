@@ -32,7 +32,7 @@
 #include "../../common/error_define.h"
 
 using std::endl;
-namespace claims {
+namespace ginkgo {
 namespace common {
 // RetCode FileHandleImp::AtomicAppend(const void* buffer, const size_t length,
 //                                    function<void()> lock_func,
@@ -65,4 +65,4 @@ RetCode FileHandleImp::PRead(void* buffer, size_t length, size_t start_pos) {
   return Read(buffer, length);
 }
 }  // namespace common
-} /* namespace claims */
+} /* namespace ginkgo */

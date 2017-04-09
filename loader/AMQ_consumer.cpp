@@ -43,10 +43,10 @@ using std::cout;
 using std::endl;
 using std::string;
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 
-void claims::loader::AMQConsumer::run(MasterLoader* mloader) {
+void ginkgo::loader::AMQConsumer::run(MasterLoader* mloader) {
   mloader_ = mloader;
   try {
     // Create a ConnectionFactory
@@ -97,7 +97,7 @@ void claims::loader::AMQConsumer::run(MasterLoader* mloader) {
   }
 }
 
-void claims::loader::AMQConsumer::onMessage(const Message* message) {
+void ginkgo::loader::AMQConsumer::onMessage(const Message* message) {
   try {
     const TextMessage* textMessage = dynamic_cast<const TextMessage*>(message);
     string text = "";
@@ -111,7 +111,7 @@ void claims::loader::AMQConsumer::onMessage(const Message* message) {
         if (client_ack) {
           message->acknowledge();
         }
-        return claims::common::rSuccess;
+        return ginkgo::common::rSuccess;
       });
     } else {
       text = "NOT A TEXTMESSAGE!";
@@ -125,7 +125,7 @@ void claims::loader::AMQConsumer::onMessage(const Message* message) {
   }
 }
 
-void claims::loader::AMQConsumer::cleanup() {
+void ginkgo::loader::AMQConsumer::cleanup() {
   //*************************************************
   // Always close destination, consumers and producers before
   // you destroy their sessions and connection.
@@ -162,4 +162,4 @@ void claims::loader::AMQConsumer::cleanup() {
 }
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */

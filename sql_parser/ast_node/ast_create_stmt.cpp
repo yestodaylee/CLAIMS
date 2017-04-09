@@ -37,7 +37,7 @@
 #include "../../catalog/table.h"
 #include "../../Environment.h"
 #include "../../common/error_define.h"
-using namespace claims::common;
+using namespace ginkgo::common;
 using std::cout;
 using std::endl;
 using std::cin;
@@ -45,7 +45,7 @@ using std::string;
 using std::setw;
 using std::bitset;
 using std::vector;
-// namespace claims {
+// namespace ginkgo {
 // namespace sql_parser {
 AstCreateDatabase::AstCreateDatabase(AstNodeType ast_node_type, int create_type,
                                      int check, string db_name)
@@ -471,4 +471,4 @@ void AstIndexColList::Print(int level) const {
   }
 }
 //}  // namespace sql_parser
-//}  // namespace claims
+//}  // namespace ginkgo

@@ -47,19 +47,19 @@
 #include "../physical_operator/expander.h"
 #include "../physical_operator/physical_aggregation.h"
 
-using claims::physical_operator::ExchangeMerger;
-using claims::physical_operator::Expander;
+using ginkgo::physical_operator::ExchangeMerger;
+using ginkgo::physical_operator::Expander;
 using std::vector;
-using claims::common::ExprNode;
-using claims::common::ExprNodeType;
-using claims::common::ExprUnary;
-using claims::common::OperType;
-using claims::common::ExprConst;
-using claims::common::ExprColumn;
-using claims::common::LogicInitCnxt;
+using ginkgo::common::ExprNode;
+using ginkgo::common::ExprNodeType;
+using ginkgo::common::ExprUnary;
+using ginkgo::common::OperType;
+using ginkgo::common::ExprConst;
+using ginkgo::common::ExprColumn;
+using ginkgo::common::LogicInitCnxt;
 
-using claims::physical_operator::PhysicalAggregation;
-namespace claims {
+using ginkgo::physical_operator::PhysicalAggregation;
+namespace ginkgo {
 namespace logical_operator {
 LogicalAggregation::LogicalAggregation(
     std::vector<Attribute> group_by_attribute_list,
@@ -493,4 +493,4 @@ void LogicalAggregation::PruneProj(set<string>& above_attrs) {
   child_ = DecideAndCreateProject(above_attrs_copy, child_);
 }
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo

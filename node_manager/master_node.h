@@ -48,7 +48,7 @@ using std::map;
 using std::pair;
 using std::string;
 using std::vector;
-namespace claims {
+namespace ginkgo {
 
 class MasterNode : public BaseNode {
  public:
@@ -77,7 +77,7 @@ class MasterNode : public BaseNode {
   std::unordered_map<unsigned int, int> node_id_to_heartbeat_;
 };
 
-}  // namespace claims
+}  // namespace ginkgo
 
 
 #endif  //  NODE_MANAGER_MASTER_NODE_H_

@@ -34,7 +34,7 @@
 #include "../ast_node/ast_node.h"
 
 using std::string;
-// namespace claims {
+// namespace ginkgo {
 // namespace sql_parser {
 /***
  * @brief The AST of load table statement.
@@ -60,6 +60,6 @@ class AstLoadTable : public AstNode {
  private:
 };
 //}  // namespace sql_parser
-//}  // namespace claims
+//}  // namespace ginkgo
 
 #endif  // SQL_PARSER_AST_NODE_AST_LOAD_STMT_H_

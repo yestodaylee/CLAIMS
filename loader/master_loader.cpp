@@ -73,13 +73,13 @@ using caf::io::publish;
 using caf::io::remote_actor;
 using caf::spawn;
 using std::endl;
-using claims::catalog::Catalog;
-using claims::catalog::Partitioner;
-using claims::catalog::TableDescriptor;
-using claims::common::Malloc;
-using claims::common::rSuccess;
-using claims::common::rFailure;
-using namespace claims::txn;  // NOLINT
+using ginkgo::catalog::Catalog;
+using ginkgo::catalog::Partitioner;
+using ginkgo::catalog::TableDescriptor;
+using ginkgo::common::Malloc;
+using ginkgo::common::rSuccess;
+using ginkgo::common::rFailure;
+using namespace ginkgo::txn;  // NOLINT
 
 // #define SEND_THREAD
 
@@ -110,7 +110,7 @@ static int MasterLoader::buffer_full_time = 0;
 atomic<uint64_t> message_count;
 static const int txn_count_for_debug = 10000;
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 
 ofstream MasterLoader::logfile;
@@ -385,7 +385,7 @@ RetCode MasterLoader::Ingest(const string& message,
                                         columns_validities),
                 "got all tuples of every partition",
                 "failed to get all tuples of every partition");
-  if (ret != rSuccess && ret != claims::common::rNoMemory) {
+  if (ret != rSuccess && ret != ginkgo::common::rNoMemory) {
     // TODO(YUKAI): error handle, like sending error message to client
     LOG(ERROR) << "the tuple is not valid";
     ack_function();
@@ -410,7 +410,7 @@ RetCode MasterLoader::Ingest(const string& message,
   ATOMIC_ADD(time_before_txn, GetElapsedTimeInUs(req_start));
 
   /// start transaction from here
-  claims::txn::Ingest ingest;
+  ginkgo::txn::Ingest ingest;
   EXEC_AND_LOG(ret, ApplyTransaction(table, partition_buffers, ingest),
                "applied transaction: " << ingest.ts_,
                "failed to apply transaction");
@@ -549,7 +549,7 @@ RetCode MasterLoader::GetPartitionTuples(
   for (auto tuple_string : req.tuples_) {
     //    DLOG(INFO) << "to be inserted tuple:" << tuple_string;
     void* tuple_buffer = Malloc(table_tuple_length);
-    if (tuple_buffer == NULL) return claims::common::rNoMemory;
+    if (tuple_buffer == NULL) return ginkgo::common::rNoMemory;
     MemoryGuardWithRetCode<void> guard(tuple_buffer, ret);
 #ifdef CHECK_VALIDITY
     if (rSuccess != (ret = table_schema->CheckAndToValue(
@@ -609,7 +609,7 @@ RetCode MasterLoader::GetPartitionTuples(
       void* target = Malloc(tuple_max_length);  // newmalloc
       if (target == NULL) {
         assert(false);
-        return (ret = claims::common::rNoMemory);
+        return (ret = ginkgo::common::rNoMemory);
       }
       sub_tuple.getSubTuple(tuple_buffer, target);
 
@@ -658,7 +658,7 @@ RetCode MasterLoader::MergePartitionTupleIntoOneBuffer(
       DLOG(INFO) << "tuple size is:" << tuple_count;
 
       void* new_buffer = Malloc(buffer_len);
-      if (NULL == new_buffer) return ret = claims::common::rNoMemory;
+      if (NULL == new_buffer) return ret = ginkgo::common::rNoMemory;
 
       for (int k = 0; k < tuple_count; ++k) {
         memcpy(new_buffer + k * tuple_len, tuple_buffer_per_part[i][j][k],
@@ -679,7 +679,7 @@ RetCode MasterLoader::MergePartitionTupleIntoOneBuffer(
 RetCode MasterLoader::ApplyTransaction(
     const TableDescriptor* table,
     const vector<vector<PartitionBuffer>>& partition_buffers,
-    claims::txn::Ingest& ingest) {
+    ginkgo::txn::Ingest& ingest) {
   RetCode ret = rSuccess;
   uint64_t table_id = table->get_table_id();
 
@@ -707,7 +707,7 @@ RetCode MasterLoader::ApplyTransaction(
 RetCode MasterLoader::WriteLog(
     const TableDescriptor* table,
     const vector<vector<PartitionBuffer>>& partition_buffers,
-    const claims::txn::Ingest& ingest) {
+    const ginkgo::txn::Ingest& ingest) {
   RetCode ret = rSuccess;
   uint64_t table_id = table->get_table_id();
 
@@ -740,7 +740,7 @@ RetCode MasterLoader::ReplyToMQ(const IngestionRequest& req) {
 RetCode MasterLoader::SendPartitionTupleToSlave(
     const TableDescriptor* table,
     const vector<vector<PartitionBuffer>>& partition_buffers,
-    const claims::txn::Ingest& ingest) {
+    const ginkgo::txn::Ingest& ingest) {
   RetCode ret = rSuccess;
   uint64_t table_id = table->get_table_id();
   for (int prj_id = 0; prj_id < partition_buffers.size(); ++prj_id) {
@@ -839,7 +839,7 @@ RetCode MasterLoader::SendPacket(const int socket_fd,
       std::cerr << "failed to send buffer to slave(" << socket_fd
                 << "): " << std::endl;
       PLOG(ERROR) << "failed to send buffer to slave(" << socket_fd << "): ";
-      return claims::common::rSentMessageError;
+      return ginkgo::common::rSentMessageError;
     }
     total_write_num += write_num;
   }
@@ -977,4 +977,4 @@ void* MasterLoader::StartMasterLoader(void* arg) {
 }
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */

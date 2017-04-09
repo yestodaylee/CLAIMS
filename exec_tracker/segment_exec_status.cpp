@@ -38,9 +38,9 @@
 using caf::io::remote_actor;
 using std::string;
 using std::endl;
-using claims::common::rNetworkError;
-using claims::common::rSendingTimeout;
-namespace claims {
+using ginkgo::common::rNetworkError;
+using ginkgo::common::rSendingTimeout;
+namespace ginkgo {
 
 SegmentExecStatus::SegmentExecStatus(NodeSegmentID node_segment_id,
                                      unsigned int coor_node_id)
@@ -152,4 +152,4 @@ bool SegmentExecStatus::HaveErrorCase(u_int64_t logic_time) {
          (logic_time - logic_time_ > TryReportTimes + 1);
 }
 
-}  // namespace claims
+}  // namespace ginkgo

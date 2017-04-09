@@ -40,15 +40,15 @@
 #include "../utility/lock.h"
 #include "../utility/lock_guard.h"
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 
 using std::string;
-using claims::common::FileOpenFlag;
-using claims::common::FileHandleImp;
-using claims::common::FilePlatform;
-using claims::common::rSuccess;
-using claims::utility::LockGuard;
+using ginkgo::common::FileOpenFlag;
+using ginkgo::common::FileHandleImp;
+using ginkgo::common::FilePlatform;
+using ginkgo::common::rSuccess;
+using ginkgo::utility::LockGuard;
 using std::atomic;
 
 class SingleFileConnector {
@@ -135,6 +135,6 @@ class SingleFileConnector {
 };
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // LOADER_SINGLE_FILE_CONNECTOR_H_

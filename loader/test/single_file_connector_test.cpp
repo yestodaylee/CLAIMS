@@ -39,10 +39,10 @@
 #include "../file_connector.h"
 #include "../single_file_connector.h"
 
-using claims::common::FilePlatform;
-using namespace claims::common;  // NOLINT
+using ginkgo::common::FilePlatform;
+using namespace ginkgo::common;  // NOLINT
 
-namespace claims {
+namespace ginkgo {
 
 namespace loader {
 
@@ -184,4 +184,4 @@ void SingleFileConnectorTest::MultiThreadWrite(FilePlatform file_platform,
 
 }  // namespace loader
 
-}  // namespace claims
+}  // namespace ginkgo

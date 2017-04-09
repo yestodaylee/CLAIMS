@@ -46,9 +46,9 @@
 #include "../../Daemon/Daemon.h"
 #include "../../Daemon/Executing.h"
 
-using claims::catalog::Catalog;
+using ginkgo::catalog::Catalog;
 
-namespace claims {
+namespace ginkgo {
 
 namespace loader {
 
@@ -56,11 +56,11 @@ using std::vector;
 using std::string;
 using std::endl;
 using std::ostringstream;
-using namespace claims::common;  // NOLINT
-using claims::common::FileOpenFlag;
-using claims::common::FilePlatform;
-using claims::loader::FileConnector;
-using claims::loader::SingleFileConnector;
+using namespace ginkgo::common;  // NOLINT
+using ginkgo::common::FileOpenFlag;
+using ginkgo::common::FilePlatform;
+using ginkgo::loader::FileConnector;
+using ginkgo::loader::SingleFileConnector;
 
 // TableFileConnectorTest::TableFileConnectorTest() {
 //  connector_ = NULL;
@@ -133,4 +133,4 @@ using claims::loader::SingleFileConnector;
 
 }  // namespace loader
 
-}  // namespace claims
+}  // namespace ginkgo

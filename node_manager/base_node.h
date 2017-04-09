@@ -46,7 +46,7 @@ using std::endl;
 using std::map;
 using std::vector;
 using caf::actor;
-namespace claims {
+namespace ginkgo {
 using OkAtom = caf::atom_constant<caf::atom("ok")>;
 using RegisterAtom = caf::atom_constant<caf::atom("register")>;
 using ExitAtom = caf::atom_constant<caf::atom("exit")>;
@@ -116,6 +116,6 @@ class BaseNode {
   std::unordered_map<int, actor> node_id_to_actor_;
 };
 
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  NODE_MANAGER_BASE_NODE_H_

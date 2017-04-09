@@ -10,7 +10,7 @@
 
 #include "../logical_operator/plan_context.h"
 
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 Requirement::Requirement() : partition_function_(0), cost_limit_(0) {
   // TODO Auto-generated constructor stub
@@ -160,4 +160,4 @@ bool Requirement::tryMerge(const Requirement req, Requirement& target) const {
   return true;
 }
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo

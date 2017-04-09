@@ -33,7 +33,7 @@
 #include "./ttmath/ttmathint.h"
 using namespace std;
 
-namespace claims {
+namespace ginkgo {
 namespace common {
 
 #define DECIMAL_TTSIZE 4
@@ -167,5 +167,5 @@ inline bool Decimal::op_great_equals(const Decimal rhs) const {
 }
 
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo
 #endif /* COMMON_TYPES_DECIMAL_H_ */

@@ -15,7 +15,7 @@
 #include "../common/Logging.h"
 #include "../utility/Timer.h"
 
-using claims::physical_operator::PhysicalOperatorBase;
+using ginkgo::physical_operator::PhysicalOperatorBase;
 class IteratorExecutorMaster {
  public:
   IteratorExecutorMaster();

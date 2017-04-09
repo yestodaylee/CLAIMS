@@ -36,7 +36,7 @@
 #include "./disk_file_handle_imp.h"
 #include "./hdfs_file_handle_imp.h"
 
-namespace claims {
+namespace ginkgo {
 namespace common {
 
 enum FilePlatform { kDisk, kHdfs };
@@ -66,6 +66,6 @@ class FileHandleImpFactory {
 
 }  // namespace common
 
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // COMMON_FILE_HANDLE_FILE_HANDLE_IMP_FACTORY_H_

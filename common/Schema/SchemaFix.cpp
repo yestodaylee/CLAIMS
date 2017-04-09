@@ -18,8 +18,8 @@
 #include "../../loader/data_ingestion.h"
 #include "../../utility/Timer.h"
 #include "../common/error_define.h"
-using claims::loader::DataIngestion;
-using namespace claims::common;  // NOLINT
+using ginkgo::loader::DataIngestion;
+using namespace ginkgo::common;  // NOLINT
 
 // #define SCHEMA_FIX_DEBUG
 // #define SCHEMA_FIX_PERF

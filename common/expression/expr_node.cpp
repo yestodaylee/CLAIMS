@@ -16,7 +16,7 @@
 
 #include "../../common/expression/expr_column.h"
 #include "../../common/ids.h"
-namespace claims {
+namespace ginkgo {
 namespace common {
 ExprNode::ExprNode(ExprNodeType expr_node_type, data_type actual_type,
                    string alias)
@@ -91,4 +91,4 @@ Attribute ExprNode::ExprNodeToAttr(const int id, const unsigned table_id) {
   return attr_alais;
 }
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo

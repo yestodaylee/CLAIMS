@@ -30,7 +30,7 @@
 #include "../utility/rdtsc.h"
 
 using std::endl;
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 PerformanceMonitor::PerformanceMonitor(State state) : state_(state) {}
 PerformanceMonitor::PerformanceMonitor() {}
@@ -121,4 +121,4 @@ void* PerformanceMonitor::ReportPerformance(void* arg) {
   }
 }
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

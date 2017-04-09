@@ -40,7 +40,7 @@
 #include <ctype.h>
 #include <glog/logging.h>
 
-namespace claims {
+namespace ginkgo {
 namespace common {
 
 // 30 '0'  1000000000000000000000000000000
@@ -233,4 +233,4 @@ Decimal Decimal::op_divide(const Decimal rhs) const {
 }
 
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo

@@ -34,8 +34,8 @@
 #include "../node_manager/base_node.h"
 #include "../storage/StorageLevel.h"
 #include "ids.h"
-using claims::NodeAddr;
-using claims::physical_operator::PhysicalOperatorBase;
+using ginkgo::NodeAddr;
+using ginkgo::physical_operator::PhysicalOperatorBase;
 
 // It's better to use fixed length information for implementation concern.
 struct StorageBudgetMessage {

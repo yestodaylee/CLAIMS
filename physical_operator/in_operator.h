@@ -34,7 +34,7 @@
 #include "../common/hashtable.h"
 #include "../common/hash.h"
 #include "../physical_operator/physical_operator_base.h"
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 
 /**
@@ -137,6 +137,6 @@ class InOperator : public PhysicalOperatorBase {
   }
 };
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  PHYSICAL_OPERATOR_IN_OPERATOR_H_

@@ -45,22 +45,22 @@
 #include "../utility/lock.h"
 #include "../utility/lock_guard.h"
 
-using claims::catalog::ProjectionDescriptor;
-// using claims::common::FilePlatform;
-using claims::utility::LockGuard;
+using ginkgo::catalog::ProjectionDescriptor;
+// using ginkgo::common::FilePlatform;
+using ginkgo::utility::LockGuard;
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 class DataIngestion;
 class TableFileConnector;
 };
 
 namespace catalog {
-using claims::loader::TableFileConnector;
+using ginkgo::loader::TableFileConnector;
 class TableDescriptor {
  public:
-  friend class claims::loader::DataIngestion;
-  friend class claims::loader::TableFileConnector;
+  friend class ginkgo::loader::DataIngestion;
+  friend class ginkgo::loader::TableFileConnector;
 
  public:
   TableDescriptor();
@@ -230,6 +230,6 @@ class TableDescriptor {
 };
 
 } /* namespace catalog */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // CATALOG_TABLE_H_

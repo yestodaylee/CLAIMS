@@ -53,7 +53,7 @@ using std::set;
 using std::unordered_map;
 using std::unordered_set;
 using std::ofstream;
-namespace claims {
+namespace ginkgo {
 namespace catalog {
 class TableDescriptor;
 }
@@ -65,7 +65,7 @@ using std::string;
 using std::vector;
 using caf::behavior;
 using caf::event_based_actor;
-using claims::catalog::TableDescriptor;
+using ginkgo::catalog::TableDescriptor;
 
 class LoadPacket;
 
@@ -164,18 +164,18 @@ class MasterLoader {
   RetCode ApplyTransaction(
       const TableDescriptor* table,
       const vector<vector<PartitionBuffer>>& partition_buffers,
-      claims::txn::Ingest& ingest);
+      ginkgo::txn::Ingest& ingest);
 
   RetCode WriteLog(const TableDescriptor* table,
                    const vector<vector<PartitionBuffer>>& partition_buffers,
-                   const claims::txn::Ingest& ingest);
+                   const ginkgo::txn::Ingest& ingest);
 
   RetCode ReplyToMQ(const IngestionRequest& req);
 
   RetCode SendPartitionTupleToSlave(
       const TableDescriptor* table,
       const vector<vector<PartitionBuffer>>& partition_buffers,
-      const claims::txn::Ingest& ingest);
+      const ginkgo::txn::Ingest& ingest);
 
   RetCode SelectSocket(const TableDescriptor* table, const uint64_t prj_id,
                        const uint64_t part_id, int& socket_fd);
@@ -232,6 +232,6 @@ class MasterLoader {
 };
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // LOADER_MASTER_LOADER_H_

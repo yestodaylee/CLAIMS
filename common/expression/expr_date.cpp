@@ -18,7 +18,7 @@
 #include "./data_type_oper.h"
 #include "./expr_type_cast.h"
 #include "../../configure.h"
-namespace claims {
+namespace ginkgo {
 namespace common {
 ExprDate::ExprDate(ExprNodeType expr_node_type, data_type actual_type,
                    data_type arg1_return_type, string alias, OperType oper_type,
@@ -68,4 +68,4 @@ void ExprDate::InitExprAtPhysicalPlan() {
 
 ExprNode* ExprDate::ExprCopy() { return new ExprDate(this); }
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo

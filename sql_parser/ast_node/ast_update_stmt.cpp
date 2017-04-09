@@ -39,14 +39,14 @@
 #include "../../common/error_define.h"
 #include "../../catalog/table.h"
 #include "../../Environment.h"
-using namespace claims::common;  // NOLINT
+using namespace ginkgo::common;  // NOLINT
 using std::cout;
 using std::endl;
 using std::string;
 using std::setw;
 using std::bitset;
 
-// namespace claims {
+// namespace ginkgo {
 // namespace ast_node {
 
 AstUpdateStmt::AstUpdateStmt(AstNodeType ast_node_type,
@@ -190,4 +190,4 @@ RetCode AstUpdateSetList::PushDownCondition(PushDownConditionContext& pdccnxt) {
 RetCode AstUpdateSetList::GetLogicalPlan(LogicalOperator*& logic_plan) {}
 
 // } /* namespace ast_node */
-// } /* namespace claims */
+// } /* namespace ginkgo */

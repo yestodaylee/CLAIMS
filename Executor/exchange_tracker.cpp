@@ -23,8 +23,8 @@ using caf::event_based_actor;
 using caf::io::remote_actor;
 using caf::response_handle;
 
-using claims::AskExchAtom;
-using claims::OkAtom;
+using ginkgo::AskExchAtom;
+using ginkgo::OkAtom;
 ExchangeTracker::ExchangeTracker() {}
 
 ExchangeTracker::~ExchangeTracker() {}

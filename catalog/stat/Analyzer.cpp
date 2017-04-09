@@ -24,10 +24,10 @@
 #include "../../logical_operator/logical_scan.h"
 #include "../../physical_operator/physical_aggregation.h"
 #include "../../exec_tracker/segment_exec_status.h"
-using namespace claims::catalog;
-using claims::SegmentExecStatus;
-using namespace claims::logical_operator;
-using claims::physical_operator::PhysicalAggregation;
+using namespace ginkgo::catalog;
+using ginkgo::SegmentExecStatus;
+using namespace ginkgo::logical_operator;
+using ginkgo::physical_operator::PhysicalAggregation;
 using std::map;
 
 typedef void* TuplePtr;

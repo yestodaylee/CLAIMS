@@ -39,7 +39,7 @@
 #include "../physical_operator/physical_operator_base.h"
 #include "../utility/lock.h"
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 #define BLOCK_SIZE_CAO 4096
 /**
@@ -107,6 +107,6 @@ class CombineTuple : public PhysicalOperatorBase {
   }
 };
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // PHYSICAL_OPERATOR_COMBINE_TUPLE_H_

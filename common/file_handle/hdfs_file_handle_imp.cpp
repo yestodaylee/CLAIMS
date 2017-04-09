@@ -40,9 +40,9 @@
 #include "../../utility/lock_guard.h"
 
 using std::endl;
-using claims::utility::LockGuard;
+using ginkgo::utility::LockGuard;
 
-namespace claims {
+namespace ginkgo {
 namespace common {
 
 RetCode HdfsFileHandleImp::SwitchStatus(FileStatus status_to_be) {
@@ -302,4 +302,4 @@ uint64_t HdfsFileHandleImp::GetSize() {
 }
 
 }  // namespace common
-} /* namespace claims */
+} /* namespace ginkgo */

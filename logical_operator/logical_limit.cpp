@@ -29,8 +29,8 @@
 #include "../logical_operator/logical_limit.h"
 #include <stdio.h>
 #include "../physical_operator/physical_limit.h"
-using claims::physical_operator::PhysicalLimit;
-namespace claims {
+using ginkgo::physical_operator::PhysicalLimit;
+namespace ginkgo {
 namespace logical_operator {
 LogicalLimit::LogicalLimit(LogicalOperator* child, int64_t returned_tuples,
                            int64_t position)
@@ -135,4 +135,4 @@ const unsigned LogicalLimit::PredictCardinality(
 }
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo

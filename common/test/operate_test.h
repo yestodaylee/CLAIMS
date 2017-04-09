@@ -34,13 +34,13 @@
 #include <float.h>
 #include "../data_type.h"
 #include "../error_define.h"
-using claims::common::rSuccess;
-using claims::common::rTooSmallData;
-using claims::common::rTooLargeData;
-using claims::common::rTooLongData;
-using claims::common::rInterruptedData;
-using claims::common::rIncorrectData;
-using claims::common::rInvalidNullData;
+using ginkgo::common::rSuccess;
+using ginkgo::common::rTooSmallData;
+using ginkgo::common::rTooLargeData;
+using ginkgo::common::rTooLongData;
+using ginkgo::common::rInterruptedData;
+using ginkgo::common::rIncorrectData;
+using ginkgo::common::rInvalidNullData;
 using std::cout;
 using std::endl;
 string big = "";

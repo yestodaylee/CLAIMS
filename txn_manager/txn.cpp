@@ -32,10 +32,10 @@
 #include "txn.hpp"
 #include "txn_server.hpp"
 using std::ostringstream;
-namespace claims {
+namespace ginkgo {
 namespace txn {
 
-using claims::txn::Strip;
+using ginkgo::txn::Strip;
 
 string Txn::ToString() {
   string str = "";
@@ -374,4 +374,4 @@ string TxnState::ToString() const {
 }
 
 }  // namespace txn
-}  // namespace claims
+}  // namespace ginkgo

@@ -28,10 +28,10 @@
 
 #include "hdfs_connector.h"
 
-namespace claims {
+namespace ginkgo {
 namespace common {
 
 hdfsFS HdfsConnector::fs_ = NULL;
 
 } /* namespace common */
-} /* namespace claims */
+} /* namespace ginkgo */

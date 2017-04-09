@@ -75,12 +75,12 @@ RetCode NodeTracker::GetNodeAddr(const NodeID& target,
   while (it != address_to_id_.cend()) {
     if (it->second == target) {
       node_addr = it->first;
-      return claims::common::rSuccess;
+      return ginkgo::common::rSuccess;
     }
     it++;
   }
   assert(false && "can't find node address according node ID");
-  return claims::common::rFailure;
+  return ginkgo::common::rFailure;
 }
 
 RetCode NodeTracker::InsertRegisteredNode(const NodeID& node_id,
@@ -88,5 +88,5 @@ RetCode NodeTracker::InsertRegisteredNode(const NodeID& node_id,
   address_to_id_[node_addr] = node_id;
   LOG(INFO) << "inserted node:" << node_id
             << ". Now size of addr2id is:" << address_to_id_.size();
-  return claims::common::rSuccess;
+  return ginkgo::common::rSuccess;
 }

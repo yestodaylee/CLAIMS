@@ -16,7 +16,7 @@
 #include "../../common/Schema/Schema.h"
 #include "./expr_node.h"
 #include "./expr_type_cast.h"
-namespace claims {
+namespace ginkgo {
 namespace common {
 // now ExprTernary just for substring
 class ExprTernary : public ExprNode {
@@ -53,5 +53,5 @@ class ExprTernary : public ExprNode {
   }
 };
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // COMMON_EXPRESSION_EXPR_TERNARY_H_

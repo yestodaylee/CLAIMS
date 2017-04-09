@@ -55,9 +55,9 @@
 #define GET_TIME_DI(var)
 #endif
 
-using claims::utility::LockGuard;
+using ginkgo::utility::LockGuard;
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 
 SingleFileConnector::SingleFileConnector(FilePlatform platform,
@@ -152,4 +152,4 @@ RetCode SingleFileConnector::Delete() {
 }
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */

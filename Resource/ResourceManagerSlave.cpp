@@ -19,11 +19,11 @@
 #include "../loader/load_packet.h"
 
 using caf::io::remote_actor;
-using claims::loader::RegNodeAtom;
+using ginkgo::loader::RegNodeAtom;
 using caf::after;
-using claims::NodeAddr;
-using claims::OkAtom;
-using claims::StorageBudgetAtom;
+using ginkgo::NodeAddr;
+using ginkgo::OkAtom;
+using ginkgo::StorageBudgetAtom;
 InstanceResourceManager::InstanceResourceManager() {}
 
 InstanceResourceManager::~InstanceResourceManager() {}

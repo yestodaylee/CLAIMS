@@ -43,9 +43,9 @@
 #include "../physical_operator/physical_projection_scan.h"
 #include "../Resource/NodeTracker.h"
 using std::string;
-using claims::physical_operator::ExchangeMerger;
-using claims::physical_operator::PhysicalProjectionScan;
-namespace claims {
+using ginkgo::physical_operator::ExchangeMerger;
+using ginkgo::physical_operator::PhysicalProjectionScan;
+namespace ginkgo {
 namespace logical_operator {
 ProjectionOffset get_Max_projection(TableDescriptor* table);
 LogicalScan::LogicalScan(std::vector<Attribute> attribute_list)
@@ -344,4 +344,4 @@ void LogicalScan::Print(int level) const {
 }
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo

@@ -40,7 +40,7 @@
 #include "../logical_operator/plan_context.h"
 #include "../physical_operator/physical_operator_base.h"
 
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 
 /**
@@ -102,6 +102,6 @@ class LogicalScan : public LogicalOperator {
 };
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  LOGICAL_OPERATOR_LOGICAL_SCAN_H_

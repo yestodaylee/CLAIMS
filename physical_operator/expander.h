@@ -42,7 +42,7 @@
 #include "../utility/thread_pool.h"
 #include "../Environment.h"
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 #define EXPANDER_BUFFER_SIZE 1000
 /**
@@ -153,5 +153,5 @@ class Expander : public PhysicalOperatorBase,
   }
 };
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // PHYSICAL_OPERATOR_EXPANDER_H_

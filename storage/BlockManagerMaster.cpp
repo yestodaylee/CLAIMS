@@ -17,9 +17,9 @@
 #include "../node_manager/base_node.h"
 using caf::after;
 using caf::io::remote_actor;
-using claims::BindingAtom;
-using claims::OkAtom;
-using claims::UnBindingAtom;
+using ginkgo::BindingAtom;
+using ginkgo::OkAtom;
+using ginkgo::UnBindingAtom;
 BlockManagerMaster *BlockManagerMaster::master_ = 0;
 
 BlockManagerMaster::BlockManagerMaster() { master_ = this; }

@@ -31,7 +31,7 @@
 #define COMMON_ERROR_NO_H_
 #include <assert.h>
 
-namespace claims {
+namespace ginkgo {
 namespace common {
 
 const int kErrorMaxNumber = 100000;
@@ -49,6 +49,6 @@ static struct ErrorInit {
 } local_init;
 
 }  // end namespace common
-}  // end namespace claims
+}  // end namespace ginkgo
 
 #endif  // COMMON_ERROR_NO_H_

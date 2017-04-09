@@ -32,7 +32,7 @@
 #include <string>
 #include "../stmt_handler/stmt_exec.h"
 #include "../sql_parser/ast_node/ast_drop_stmt.h"
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 /**
  * @brief
@@ -79,6 +79,6 @@ class DropTableExec : public StmtExec {
 };
 
 } /* namespace stmt_handler */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  //  STMT_HANDLER_DROP_TABLE_EXEC_H_

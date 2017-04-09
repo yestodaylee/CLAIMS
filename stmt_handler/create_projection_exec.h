@@ -36,7 +36,7 @@
 #include "../catalog/catalog.h"
 
 #define CREATE_DEL_TABLE
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 /**
  * @brief
@@ -70,6 +70,6 @@ class CreateProjectionExec : public StmtExec {
 };
 
 } /* namespace stmt_handler */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  //  STMT_HANDLER_CREATE_PROJECTION_EXEC_H_

@@ -32,7 +32,7 @@
 
 #include "../stmt_handler/stmt_exec.h"
 
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 /**
  * @brief
@@ -58,6 +58,6 @@ class LoadExec : public StmtExec {
 };
 
 }  // namespace stmt_handler
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // STMT_HANDLER_LOAD_EXEC_H_

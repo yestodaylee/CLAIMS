@@ -12,7 +12,7 @@
 #include "../common/ids.h"
 #include "IndexScanIterator.h"
 #include "../logical_operator/logical_operator.h"
-using namespace claims::logical_operator;
+using namespace ginkgo::logical_operator;
 
 class LogicalIndexScan : public LogicalOperator {
  public:

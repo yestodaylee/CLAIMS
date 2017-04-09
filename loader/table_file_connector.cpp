@@ -38,16 +38,16 @@
 #include "../common/file_handle/file_handle_imp_factory.h"
 #include "../common/memory_handle.h"
 
-using claims::common::FilePlatform;
-using claims::common::FileHandleImpFactory;
-using claims::common::FileOpenFlag;
-using claims::common::rSuccess;
-using claims::common::FileHandleImp;
-using claims::common::FilePlatform;
+using ginkgo::common::FilePlatform;
+using ginkgo::common::FileHandleImpFactory;
+using ginkgo::common::FileOpenFlag;
+using ginkgo::common::rSuccess;
+using ginkgo::common::FileHandleImp;
+using ginkgo::common::FilePlatform;
 using std::vector;
 using std::string;
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 
 TableFileConnector::TableFileConnector(FilePlatform platform,
@@ -305,4 +305,4 @@ RetCode TableFileConnector::UpdateWithNewProj() {
 }
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */

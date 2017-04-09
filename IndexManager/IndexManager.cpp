@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include "../catalog/catalog.h"
 
-using claims::catalog::Catalog;
+using ginkgo::catalog::Catalog;
 
 void cheak_com_index() {
   Attribute attr;

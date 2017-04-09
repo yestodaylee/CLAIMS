@@ -36,7 +36,7 @@
 #include "../physical_operator/physical_sort.h"
 #include "../logical_operator/logical_equal_join.h"
 
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 
 /**
@@ -208,6 +208,6 @@ class LogicalOuterJoin : public LogicalOperator {
   int join_type_;
 };
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  LOGICAL_OPERATOR_LOGICAL_OUTER_JOIN_H_

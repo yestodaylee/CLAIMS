@@ -35,7 +35,7 @@
 #include "../common/file_handle/file_handle_imp_factory.h"
 #include "../common/error_define.h"
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 
 class FileConnector {
@@ -61,6 +61,6 @@ class FileConnector {
 };
 
 }  // namespace loader
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // LOADER_FILE_CONNECTOR_H_

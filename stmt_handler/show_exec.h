@@ -31,7 +31,7 @@
 
 #include "../stmt_handler/stmt_exec.h"
 #include "../sql_parser/ast_node/ast_show_stmt.h"
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 /**
  * @brief
@@ -55,6 +55,6 @@ class ShowExec : public StmtExec {
 };
 
 }  // namespace stmt_handler
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  STMT_HANDLER_SHOW_EXEC_H_

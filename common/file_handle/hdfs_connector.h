@@ -38,7 +38,7 @@
 #include "../../Config.h"
 
 using std::endl;
-namespace claims {
+namespace ginkgo {
 namespace common {
 
 class HdfsConnector {
@@ -75,6 +75,6 @@ class HdfsConnector {
 };
 
 } /* namespace common */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // COMMON_FILE_HANDLE_HDFS_CONNECTOR_H_

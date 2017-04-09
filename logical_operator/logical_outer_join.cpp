@@ -43,15 +43,15 @@
 #include "../physical_operator/physical_operator_base.h"
 #include "../physical_operator/physical_outer_hash_join.h"
 
-using claims::common::LogicInitCnxt;
-using claims::physical_operator::ExchangeMerger;
-using claims::physical_operator::Expander;
-using claims::physical_operator::PhysicalHashJoin;
-using claims::physical_operator::PhysicalOperatorBase;
-using claims::physical_operator::PhysicalOuterHashJoin;
+using ginkgo::common::LogicInitCnxt;
+using ginkgo::physical_operator::ExchangeMerger;
+using ginkgo::physical_operator::Expander;
+using ginkgo::physical_operator::PhysicalHashJoin;
+using ginkgo::physical_operator::PhysicalOperatorBase;
+using ginkgo::physical_operator::PhysicalOuterHashJoin;
 
-// using claims::physical_operator::PhysicalJoin;
-namespace claims {
+// using ginkgo::physical_operator::PhysicalJoin;
+namespace ginkgo {
 namespace logical_operator {
 LogicalOuterJoin::LogicalOuterJoin(
     std::vector<LogicalEqualJoin::JoinPair> joinpair_list,
@@ -936,4 +936,4 @@ double LogicalOuterJoin::PredictEqualJoinSelectivityOnSingleJoinAttributePair(
 }
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo

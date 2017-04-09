@@ -15,7 +15,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
-namespace claims {
+namespace ginkgo {
 namespace common {
 ExprIn::ExprIn(ExprNodeType expr_node_type, data_type actual_type, string alias,
                const std::vector<ExprBinary*> cmp_expr,
@@ -108,4 +108,4 @@ void ExprIn::GetUniqueAttr(set<string>& attrs) {
 }
 
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo

@@ -45,14 +45,14 @@
 
 #include "../utility/lock.h"
 #include "../utility/rdtsc.h"
-using claims::common::DataTypeOperFunc;
-using claims::common::ExprEvalCnxt;
+using ginkgo::common::DataTypeOperFunc;
+using ginkgo::common::ExprEvalCnxt;
 using std::vector;
 using std::pair;
-using claims::common::ExprNode;
-using claims::common::OperFuncInfo;
+using ginkgo::common::ExprNode;
+using ginkgo::common::OperFuncInfo;
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 #define NEWCONDI
 /**
@@ -177,6 +177,6 @@ class PhysicalSort : public PhysicalOperator {
 };
 
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // PHYSICAL_OPERATOR_PHYSICAL_SORT_H_

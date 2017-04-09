@@ -46,9 +46,9 @@
 #include "../physical_operator/physical_operator_base.h"
 #include "../physical_operator/physical_operator.h"
 using std::atomic;
-using claims::common::ExprNode;
-using claims::common::ExprEvalCnxt;
-namespace claims {
+using ginkgo::common::ExprNode;
+using ginkgo::common::ExprEvalCnxt;
+namespace ginkgo {
 namespace physical_operator {
 
 /**
@@ -226,6 +226,6 @@ class PhysicalOuterHashJoin : public PhysicalOperator {
 };
 
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  PHYSICAL_OPERATOR_PHYSICAL_OUTER_HASH_JOIN_H_

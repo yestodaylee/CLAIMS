@@ -32,7 +32,7 @@
 #include "../../common/ids.h"
 #include "../../common/Schema/Schema.h"
 
-namespace claims {
+namespace ginkgo {
 namespace physical_query_plan {
 namespace test {
 
@@ -70,6 +70,6 @@ class FakeTableScan : public physical_operator::PhysicalOperator {
 
 } /* namespace test */
 } /* namespace physical_query_plan */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  //  PHYSICAL_OPERATOR_TEST_FAKE_TABLE_SCAN_H_

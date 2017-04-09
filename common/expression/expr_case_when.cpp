@@ -15,7 +15,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
-namespace claims {
+namespace ginkgo {
 namespace common {
 ExprCaseWhen::ExprCaseWhen(ExprNodeType expr_node_type, data_type actual_type,
                            string alias, const std::vector<ExprNode*>& mywhen,
@@ -87,4 +87,4 @@ void ExprCaseWhen::GetUniqueAttr(set<string>& attrs) {
 }
 
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo

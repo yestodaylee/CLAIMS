@@ -27,8 +27,8 @@
 #include "../set_up_environment.h"
 #include "../../Executor/IteratorExecutorSlave.h"
 
-using namespace claims::physical_operator;
-using namespace claims::logical_operator;
+using namespace ginkgo::physical_operator;
+using namespace ginkgo::logical_operator;
 
 static void query_1() {
   unsigned long long int start = curtick();

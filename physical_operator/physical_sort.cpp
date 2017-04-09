@@ -39,13 +39,13 @@
 #include "../common/expression/data_type_oper.h"
 #include "../common/expression/expr_node.h"
 
-using claims::common::DataTypeOper;
-using claims::common::ExprNode;
-using claims::common::OperFuncInfoData;
-using claims::common::OperType;
+using ginkgo::common::DataTypeOper;
+using ginkgo::common::ExprNode;
+using ginkgo::common::OperFuncInfoData;
+using ginkgo::common::OperType;
 using std::vector;
 using std::pair;
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 unsigned PhysicalSort::order_by_pos_ = 0;
 PhysicalSort::State *PhysicalSort::cmp_state_ = NULL;
@@ -314,4 +314,4 @@ RetCode PhysicalSort::GetAllSegments(stack<Segment *> *all_segments) {
 }
 
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

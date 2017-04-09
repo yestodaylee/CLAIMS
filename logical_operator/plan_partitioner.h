@@ -31,9 +31,9 @@
 #include "../catalog/partitioner.h"
 #include "../logical_operator/plan_partition_info.h"
 
-using namespace claims::catalog;
+using namespace ginkgo::catalog;
 
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 /**
  * describe how the PlanContext are partitioned and the partition property
@@ -95,5 +95,5 @@ class PlanPartitioner {
 };
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // LOGICAL_OPERATOR_PLAN_PARTITIONER_H_

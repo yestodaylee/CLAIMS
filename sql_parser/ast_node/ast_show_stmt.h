@@ -41,7 +41,7 @@ using std::string;
 using std::setw;
 using std::vector;
 
-// namespace claims {
+// namespace ginkgo {
 // namespace sql_parser {
 /**
  * @brief The AST of show statement.
@@ -69,5 +69,5 @@ class AstShowStmt : public AstNode {
 };
 
 //}  // namespace sql_parser
-//}  // namespace claims
+//}  // namespace ginkgo
 #endif  //  SQL_PARSER_AST_NODE_AST_SHOW_STMT_H_

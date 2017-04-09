@@ -40,11 +40,11 @@
 #include "../Executor/expander_tracker.h"
 #include "../utility/rdtsc.h"
 
-using claims::common::ExprNode;
+using ginkgo::common::ExprNode;
 
 // #define _DEBUG_
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 
 PhysicalHashJoin::PhysicalHashJoin(State state)
@@ -459,4 +459,4 @@ RetCode PhysicalHashJoin::GetAllSegments(stack<Segment*>* all_segments) {
   return ret;
 }
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

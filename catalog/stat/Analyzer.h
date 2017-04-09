@@ -12,7 +12,7 @@
 #include "../../common/ids.h"
 #include "../../catalog/attribute.h"
 
-using namespace claims::catalog;
+using namespace ginkgo::catalog;
 
 class Analyzer {
  public:

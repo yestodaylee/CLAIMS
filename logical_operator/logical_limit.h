@@ -30,7 +30,7 @@
 #define LOGICAL_OPERATOR_LOGICAL_LIMIT_H_
 
 #include "../logical_operator/logical_operator.h"
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 /**
  * @brief Method description:
@@ -111,6 +111,6 @@ class LogicalLimit : public LogicalOperator {
   int64_t start_position_;
 };
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  LOGICAL_OPERATOR_LOGICAL_LIMIT_H_

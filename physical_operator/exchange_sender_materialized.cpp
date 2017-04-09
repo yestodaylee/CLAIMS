@@ -48,7 +48,7 @@
 #include "../Executor/exchange_tracker.h"
 #include "../physical_operator/exchange_sender.h"
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 ExchangeSenderMaterialized::ExchangeSenderMaterialized(State state)
     : state_(state),
@@ -445,4 +445,4 @@ RetCode ExchangeSenderMaterialized::GetAllSegments(
   return ret;
 }
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

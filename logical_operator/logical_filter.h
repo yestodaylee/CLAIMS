@@ -38,8 +38,8 @@
 #include "../common/expression/expr_node.h"
 #include "../common/Expression/qnode.h"
 
-using claims::common::ExprNode;
-namespace claims {
+using ginkgo::common::ExprNode;
+namespace ginkgo {
 namespace logical_operator {
 
 /**
@@ -122,6 +122,6 @@ class LogicalFilter : public LogicalOperator {
 };
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  LOGICAL_OPERATOR_LOGICAL_FILTER_H_

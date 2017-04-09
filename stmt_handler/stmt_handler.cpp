@@ -41,9 +41,9 @@
 
 using boost::algorithm::to_lower;
 using boost::algorithm::trim;
-using claims::common::rUnknowStmtType;
-using claims::common::rSQLParserErr;
-namespace claims {
+using ginkgo::common::rUnknowStmtType;
+using ginkgo::common::rSQLParserErr;
+namespace ginkgo {
 namespace stmt_handler {
 
 StmtHandler::StmtHandler(string sql_stmt)
@@ -141,4 +141,4 @@ RetCode StmtHandler::Execute(ExecutedResult* exec_result) {
 }
 
 }  // namespace stmt_handler
-}  // namespace claims
+}  // namespace ginkgo

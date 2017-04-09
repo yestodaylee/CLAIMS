@@ -34,10 +34,10 @@
 #include "../common/error_define.h"
 #include "../catalog/catalog.h"
 
-using claims::common::rStmtHandlerCreateTableExisted;
-using claims::common::rStmtHandlerCreateTableFailed;
-using claims::common::rSuccess;
-namespace claims {
+using ginkgo::common::rStmtHandlerCreateTableExisted;
+using ginkgo::common::rStmtHandlerCreateTableFailed;
+using ginkgo::common::rSuccess;
+namespace ginkgo {
 namespace stmt_handler {
 /**
  * @brief Constructor
@@ -95,7 +95,7 @@ RetCode CreateTableExec::Execute(ExecutedResult* exec_result) {
         "The table " + tablename_ + " has existed during creating table!";
     LOG(ERROR) << "The table " + tablename_ +
                       " has existed during creating table!" << std::endl;
-    ret = claims::common::kStmtHandlerTableExistDuringCreate;
+    ret = ginkgo::common::kStmtHandlerTableExistDuringCreate;
   } else {
 #endif
     table_desc_ = new TableDescriptor(
@@ -434,4 +434,4 @@ RetCode CreateTableExec::CreateDelTable(const string& table_name,
 }
 
 }  // namespace stmt_handler
-}  // namespace claims
+}  // namespace ginkgo

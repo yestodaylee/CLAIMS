@@ -36,10 +36,10 @@
 #include "../logical_operator/logical_project.h"
 #include "../Resource/NodeTracker.h"
 
-using claims::common::ExprColumn;
-using claims::common::ExprNode;
-using claims::common::ExprNodeType;
-namespace claims {
+using ginkgo::common::ExprColumn;
+using ginkgo::common::ExprNode;
+using ginkgo::common::ExprNodeType;
+namespace ginkgo {
 namespace logical_operator {
 // LogicalOperator::LogicalOperator() {
 //	// TODO Auto-generated constructor stub
@@ -160,4 +160,4 @@ LogicalOperator* LogicalOperator::DecideAndCreateProject(
 }
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo

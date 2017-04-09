@@ -43,11 +43,11 @@
 #include "../common/expression/expr_node.h"
 #include "../physical_operator/physical_project.h"
 
-using claims::common::ExprColumn;
-using claims::common::ExprNode;
-using claims::common::LogicInitCnxt;
-using claims::physical_operator::PhysicalProject;
-namespace claims {
+using ginkgo::common::ExprColumn;
+using ginkgo::common::ExprNode;
+using ginkgo::common::LogicInitCnxt;
+using ginkgo::physical_operator::PhysicalProject;
+namespace ginkgo {
 namespace logical_operator {
 LogicalProject::LogicalProject(LogicalOperator* child,
                                vector<QNode*> expression_tree)
@@ -232,4 +232,4 @@ void LogicalProject::PruneProj(set<string>& above_attrs) {
 }
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo

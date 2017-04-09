@@ -40,7 +40,7 @@
 #include "../../utility/ThreadSafe.h"
 #include "../../utility/rdtsc.h"
 #include "../Executor/exchange_tracker.h"
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 
 ExchangeSenderPipeline::ExchangeSenderPipeline(State state)
@@ -527,4 +527,4 @@ RetCode ExchangeSenderPipeline::GetAllSegments(stack<Segment*>* all_segments) {
   return ret;
 }
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

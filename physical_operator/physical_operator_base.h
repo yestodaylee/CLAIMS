@@ -33,8 +33,8 @@
 #include "../common/error_define.h"
 #include "../common/ids.h"
 #include "../exec_tracker/segment_exec_status.h"
-using claims::common::rSuccess;
-namespace claims {
+using ginkgo::common::rSuccess;
+namespace ginkgo {
 namespace physical_operator {
 class Segment;
 
@@ -92,6 +92,6 @@ class PhysicalOperatorBase {
   }
 };
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  PHYSICAL_OPERATOR_PHYSICAL_OPERATOR_BASE_H_

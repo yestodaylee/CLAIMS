@@ -31,7 +31,7 @@
 
 #include "../ast_node/ast_node.h"
 
-// namespace claims {
+// namespace ginkgo {
 // namespace ast_node {
 
 class AstUpdateStmt : public AstNode {
@@ -65,6 +65,6 @@ class AstUpdateSetList : public AstNode {
 };
 
 // } /* namespace ast_node */
-// } /* namespace claims */
+// } /* namespace ginkgo */
 
 #endif  //  SQL_PARSER_AST_NODE_AST_UPDATE_STMT_H_

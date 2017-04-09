@@ -30,7 +30,7 @@
 #define COMMON_ERROR_DEFINE_H_
 #include <stdlib.h>
 #include "./error_no.h"
-using claims::common::CStrError;
+using ginkgo::common::CStrError;
 
 #define CLAIMS_DEBUG_LOG
 
@@ -106,7 +106,7 @@ typedef int RetCode;  // means return code
 
 #define C_DLOGI(info) DLOG_IF(INFO, kClaimsDebugLog) << info << std::endl;
 
-namespace claims {
+namespace ginkgo {
 namespace common {
 
 const int rSuccess = EXIT_SUCCESS;
@@ -381,6 +381,6 @@ const int rCouldnotFindCancelQueryId = -14400;
 const int rNetworkError = -14401;
 const int rSendingTimeout = -14402;
 }  // end namespace common
-}  // end namespace claims
+}  // end namespace ginkgo
 
 #endif  // COMMON_ERROR_DEFINE_H_

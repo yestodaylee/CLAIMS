@@ -19,7 +19,7 @@
 #include "./expr_binary.h"
 #include "../../common/Schema/Schema.h"
 #include "./expr_type_cast.h"
-namespace claims {
+namespace ginkgo {
 namespace common {
 class ExprIn : public ExprNode {
  public:
@@ -62,5 +62,5 @@ class ExprIn : public ExprNode {
   }
 };
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo
 #endif  //  COMMON_EXPRESSION_EXPR_IN_H_

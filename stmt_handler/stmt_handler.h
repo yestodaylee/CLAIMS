@@ -37,7 +37,7 @@
 #include "./create_table_exec.h"
 #include "../Daemon/Daemon.h"
 #include "../sql_parser/parser/parser.h"
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 
 class StmtHandler {
@@ -57,5 +57,5 @@ class StmtHandler {
 };
 
 }  // namespace stmt_handler
-}  // namespace claims
+}  // namespace ginkgo
 #endif  //  STMT_HANDLER_STMT_HANDLER_H_

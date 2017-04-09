@@ -38,8 +38,8 @@
 #include "./validity.h"
 #include "../common/file_handle/file_handle_imp.h"
 
-using claims::common::FileOpenFlag;
-using claims::catalog::TableDescriptor;
+using ginkgo::common::FileOpenFlag;
+using ginkgo::catalog::TableDescriptor;
 using std::vector;
 using std::string;
 class SubTuple;
@@ -49,7 +49,7 @@ class Schema;
 class PartitionFunction;
 class ExecutedResult;
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 class TableFileConnector;
 class DataIngestion {
@@ -238,6 +238,6 @@ class DataIngestion {
 };
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // LOADER_DATA_INGESTION_H_

@@ -36,9 +36,9 @@
 #include "../logical_operator/logical_operator.h"
 #include "../sql_parser/ast_node/ast_node.h"
 
-using claims::common::ExprNode;
+using ginkgo::common::ExprNode;
 
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 /***
  * @brief cross join for generating Cartesian product
@@ -120,5 +120,5 @@ class LogicalCrossJoin : public LogicalOperator {
   std::vector<ExprNode*> join_condi_;
 };
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // LOGICAL_OPERATOR_LOGICAL_CROSS_JOIN_H_

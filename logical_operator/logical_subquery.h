@@ -35,7 +35,7 @@
 
 #include "../catalog/attribute.h"
 using std::string;
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 /**
  * LogicalSubquery is needed for maintain the consistency of data logical
@@ -63,6 +63,6 @@ class LogicalSubquery : public LogicalOperator {
   string subquery_alias_;
 };
 }  // namespace logical_operator
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  //  LOGICAL_OPERATOR_LOGICAL_SUBQUERY_H_

@@ -16,7 +16,7 @@
 #include <iostream>
 #include <map>
 using std::string;
-namespace claims {
+namespace ginkgo {
 namespace common {
 ExprConst::ExprConst(ExprNodeType expr_node_type, data_type actual_type,
                      string alias, string const_value)
@@ -45,4 +45,4 @@ void ExprConst::InitExprAtPhysicalPlan() {
 
 ExprNode* ExprConst::ExprCopy() { return new ExprConst(this); }
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo

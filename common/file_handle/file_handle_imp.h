@@ -37,7 +37,7 @@
 #include "../error_define.h"
 
 using std::function;
-namespace claims {
+namespace ginkgo {
 namespace common {
 using std::string;
 using std::atomic;
@@ -142,6 +142,6 @@ class FileHandleImp {
 };
 
 }  // namespace common
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // COMMON_FILE_HANDLE_FILE_HANDLE_IMP_H_

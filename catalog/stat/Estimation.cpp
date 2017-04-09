@@ -15,7 +15,7 @@
 #include "../../catalog/stat/Statistic.h"
 #include "../../catalog/stat/StatManager.h"
 
-using namespace claims::catalog;
+using namespace ginkgo::catalog;
 
 Estimation::Estimation() {
   // TODO Auto-generated constructor stub

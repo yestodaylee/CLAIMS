@@ -37,9 +37,9 @@
 #include "../catalog/attribute.h"
 #include "../common/Schema/SchemaFix.h"
 
-using claims::catalog::Attribute;
+using ginkgo::catalog::Attribute;
 
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 
 PlanContext::PlanContext() {}
@@ -101,4 +101,4 @@ Attribute PlanContext::GetAttribute(std::string tbname,
 }
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo

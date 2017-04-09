@@ -57,13 +57,13 @@ using caf::behavior;
 using caf::event_based_actor;
 using caf::io::remote_actor;
 using caf::spawn;
-using claims::common::Malloc;
-using claims::common::rSuccess;
-using claims::common::rFailure;
-using claims::txn::GetPartitionIdFromGlobalPartId;
-using claims::txn::GetProjectionIdFromGlobalPartId;
-using claims::txn::GetTableIdFromGlobalPartId;
-using claims::MasterNode;
+using ginkgo::common::Malloc;
+using ginkgo::common::rSuccess;
+using ginkgo::common::rFailure;
+using ginkgo::txn::GetPartitionIdFromGlobalPartId;
+using ginkgo::txn::GetProjectionIdFromGlobalPartId;
+using ginkgo::txn::GetTableIdFromGlobalPartId;
+using ginkgo::MasterNode;
 using std::chrono::milliseconds;
 using std::chrono::seconds;
 
@@ -97,7 +97,7 @@ caf::actor SlaveLoader::persistor;
 static const int txn_count_for_debug = 5000;
 static const char* txn_count_string = "5000";
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 
 ofstream SlaveLoader::logfile;
@@ -267,14 +267,14 @@ RetCode SlaveLoader::ReceiveAndWorkLoop() {
     // assert(data_length >= 4 && data_length <= 10000000);
     char* data_buffer = Malloc(data_length);
     if (NULL == data_buffer) {
-      ELOG((ret = claims::common::rNoMemory),
+      ELOG((ret = ginkgo::common::rNoMemory),
            "no memory to hold data of message from master");
       return ret;
     }
 
     if (-1 == recv(master_fd_, data_buffer, data_length, MSG_WAITALL)) {
       PLOG(ERROR) << "failed to receive message from master";
-      return claims::common::rReceiveMessageError;
+      return ginkgo::common::rReceiveMessageError;
     }
     //    LOG(INFO) << "data of message from master is:" << buffer;
 
@@ -637,4 +637,4 @@ void* SlaveLoader::StartSlaveLoader(void* arg) {
 }
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */

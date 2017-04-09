@@ -42,7 +42,7 @@ using boost::chrono::seconds;
 using caf::io::remote_actor;
 using std::make_pair;
 using std::string;
-namespace claims {
+namespace ginkgo {
 
 StmtExecStatus::StmtExecStatus(string sql_stmt)
     : sql_stmt_(sql_stmt),
@@ -193,4 +193,4 @@ bool StmtExecStatus::UpdateSegExecStatus(
   }
 }
 
-}  // namespace claims
+}  // namespace ginkgo

@@ -36,15 +36,15 @@
 #include "../common/error_define.h"
 #include "../loader/data_ingestion.h"
 
-using claims::catalog::Catalog;
-using claims::common::rSuccess;
-using claims::common::FileOpenFlag;
-using claims::loader::DataIngestion;
-using claims::common::rNotSupport;
-using claims::catalog::TableDescriptor;
-using claims::common::rTableNotExisted;
+using ginkgo::catalog::Catalog;
+using ginkgo::common::rSuccess;
+using ginkgo::common::FileOpenFlag;
+using ginkgo::loader::DataIngestion;
+using ginkgo::common::rNotSupport;
+using ginkgo::catalog::TableDescriptor;
+using ginkgo::common::rTableNotExisted;
 #define NEW_LOADER
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 
 const int InsertExec::INT_LENGTH = 10;
@@ -227,7 +227,7 @@ RetCode InsertExec::Execute(ExecutedResult *exec_result) {
             LOG(ERROR) << "Value count is too few. Expected value count is "
                        << table_desc_->getNumberOfAttribute() << endl;
             exec_result->SetError("Value count is too few");
-            return claims::common::rFailure;
+            return ginkgo::common::rFailure;
           }
 
           // insert value to ostringstream and if has warning return 1;   look
@@ -244,7 +244,7 @@ RetCode InsertExec::Execute(ExecutedResult *exec_result) {
         if (NULL != insert_value) {
           LOG(ERROR) << "Value count is too many";
           exec_result->SetError("Value count is too many");
-          return claims::common::rFailure;
+          return ginkgo::common::rFailure;
         }
       } else {  // insert part of columns
         // get insert value count and check whether it match column count
@@ -258,7 +258,7 @@ RetCode InsertExec::Execute(ExecutedResult *exec_result) {
                         "insert_value_count is " << insert_value_count
                      << ", col_count is: " << col_count << endl;
           exec_result->SetError("Column count doesn't match value count");
-          return claims::common::rFailure;
+          return ginkgo::common::rFailure;
         }
         unsigned int used_col_count = 0;
         // by scdong: Claims adds a default row_id attribute for all tables
@@ -290,7 +290,7 @@ RetCode InsertExec::Execute(ExecutedResult *exec_result) {
                                                        position, ostr))) {
               ELOG(ret, "failed to insert value to stream");
               exec_result->SetError("Not supported type to insert");
-              return claims::common::rFailure;
+              return ginkgo::common::rFailure;
             }
           }
           ostr << "|";
@@ -302,7 +302,7 @@ RetCode InsertExec::Execute(ExecutedResult *exec_result) {
           LOG(ERROR) << "Some columns don't exist. "
                         "used_col_count is " << used_col_count
                      << ", col_count is: " << col_count << endl;
-          return claims::common::rFailure;
+          return ginkgo::common::rFailure;
         }
       }
       if (!is_correct_) break;
@@ -313,7 +313,7 @@ RetCode InsertExec::Execute(ExecutedResult *exec_result) {
       ++changed_row_num;
     }  // while
 
-    if (!is_correct_) return claims::common::rFailure;
+    if (!is_correct_) return ginkgo::common::rFailure;
 
     DataIngestion *injestion = new DataIngestion(table);
     // str() will copy string buffer without the last '\n'
@@ -337,4 +337,4 @@ RetCode InsertExec::Execute(ExecutedResult *exec_result) {
 }
 
 }  // namespace stmt_handler
-}  // namespace claims
+}  // namespace ginkgo

@@ -27,8 +27,8 @@
 
 #include "../../catalog/attribute.h"
 #include "../../common/ids.h"
-using claims::catalog::Attribute;
-namespace claims {
+using ginkgo::catalog::Attribute;
+namespace ginkgo {
 namespace common {
 #define MAX_ARGS 10
 #define BASE_DATA_SIZE 64
@@ -154,5 +154,5 @@ class ExprNode {
   }
 };
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // COMMON_EXPRESSION_EXPR_NODE_H_

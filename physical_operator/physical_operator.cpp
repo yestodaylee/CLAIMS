@@ -27,7 +27,7 @@
 #include <glog/logging.h>
 #include "../utility/cpu_scheduler.h"
 #include "../Executor/expander_tracker.h"
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 PhysicalOperator::PhysicalOperator(unsigned number_of_barrier,
                                    unsigned number_of_seriliazed_section)
@@ -190,4 +190,4 @@ ThreadContext* PhysicalOperator::GetFreeContext(context_reuse_mode crm) {
   return NULL;
 }
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

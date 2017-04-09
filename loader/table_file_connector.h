@@ -43,11 +43,11 @@ using std::vector;
 using std::string;
 using std::atomic;
 
-namespace claims {
+namespace ginkgo {
 namespace catalog {
 class TableDescriptor;
 }
-using claims::catalog::TableDescriptor;
+using ginkgo::catalog::TableDescriptor;
 
 namespace loader {
 class TableFileConnector {
@@ -99,6 +99,6 @@ class TableFileConnector {
 };
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // LOADER_TABLE_FILE_CONNECTOR_H_

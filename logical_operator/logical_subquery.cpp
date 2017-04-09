@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 LogicalSubquery::LogicalSubquery(LogicalOperator *child, string subquery_alias)
     : LogicalOperator(kLogicalSubquery),
@@ -115,4 +115,4 @@ void LogicalSubquery::Print(int level) const {
 
 }  // namespace logical_operator
 
-} /* namespace claims */
+} /* namespace ginkgo */

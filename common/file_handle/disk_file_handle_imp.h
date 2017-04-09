@@ -33,7 +33,7 @@
 #include "../common/error_define.h"
 #include "./file_handle_imp.h"
 
-namespace claims {
+namespace ginkgo {
 namespace common {
 
 class FileHandleImpFactory;
@@ -88,6 +88,6 @@ class DiskFileHandleImp : public FileHandleImp {
 };
 
 }  // namespace common
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // COMMON_FILE_HANDLE_DISK_FILE_HANDLE_IMP_H_

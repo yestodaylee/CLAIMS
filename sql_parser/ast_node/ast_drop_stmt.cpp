@@ -35,7 +35,7 @@
 #include "../../catalog/table.h"
 #include "../../Environment.h"
 #include "../../common/error_define.h"
-using namespace claims::common;
+using namespace ginkgo::common;
 using std::cout;
 using std::endl;
 using std::cin;
@@ -43,7 +43,7 @@ using std::string;
 using std::setw;
 using std::bitset;
 
-// namespace claims {
+// namespace ginkgo {
 // namespace sql_parser {
 
 AstDropIndex::AstDropIndex(AstNodeType ast_node_type, string index_name,
@@ -138,4 +138,4 @@ RetCode AstDropTableList::SemanticAnalisys(SemanticContext* sem_cnxt) {
   return ret;
 }
 //}  // namespace sql_parser
-//}  // namespace claims
+//}  // namespace ginkgo

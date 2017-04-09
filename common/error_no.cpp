@@ -31,7 +31,7 @@
 #include <string>
 #include "./error_no.h"
 #include "./error_define.h"
-namespace claims {
+namespace ginkgo {
 namespace common {
 
 static const char* CStrError(int errorno) {
@@ -347,4 +347,4 @@ ErrorInit::ErrorInit() {
   //  std::cout<<ERROR_MESSEGE[1]<<" , "<<ERROR_MESSEGE[2]<<std::endl;
 }
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo

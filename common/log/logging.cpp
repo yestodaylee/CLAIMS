@@ -13,7 +13,7 @@
 #include <iosfwd>
 #include <string>
 #include <ios>
-namespace claims {
+namespace ginkgo {
 namespace common {
 
 #define MKDIR \
@@ -71,4 +71,4 @@ Logging::~Logging() {
   google::ShutdownGoogleLogging();
 }
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo

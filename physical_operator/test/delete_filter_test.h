@@ -29,7 +29,7 @@
 #ifndef PHYSICAL_OPERATOR_TEST_DELETE_FILTER_TEST_H_
 #define PHYSICAL_OPERATOR_TEST_DELETE_FILTER_TEST_H_
 
-namespace claims {
+namespace ginkgo {
 namespace physical_query_plan {
 
 /*
@@ -42,6 +42,6 @@ class DeleteFilterTest : public testing::Test {
 };
 
 } /* namespace physical_query_plan */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  //  PHYSICAL_OPERATOR_TEST_DELETE_FILTER_TEST_H_

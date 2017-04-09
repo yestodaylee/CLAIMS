@@ -37,7 +37,7 @@
 #include "../../common/error_no.h"
 using std::cout;
 using std::endl;
-using namespace claims::common;  // NOLINT
+using namespace ginkgo::common;  // NOLINT
 
 class ErrorNoTest : public ::testing::Test {
  protected:
@@ -63,7 +63,7 @@ TEST_F(ErrorNoTest, B) {
 }
 
 TEST_F(ErrorNoTest, C) {
-  int errerno = claims::common::rSuccess;
+  int errerno = ginkgo::common::rSuccess;
 
   //  cout<<errerno<<" , "<<CStrError(errerno)<<endl;
   const char *res = CStrError(errerno);

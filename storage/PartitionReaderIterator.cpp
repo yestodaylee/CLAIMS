@@ -26,7 +26,7 @@
  *
  */
 #include "./PartitionReaderIterator.h"
-// namespace claims {
+// namespace ginkgo {
 // namespace storage {
 // PartitionReaderIterator::PartitionReaderIterator(
 //    PartitionStorage* partition_storage)
@@ -83,4 +83,4 @@
 //  }
 //}  //这个函数是关键，我需要考虑清楚，在决定如何动，这块～～～ --han 1123
 //}  // namespace storage
-//}  // namespace claims
+//}  // namespace ginkgo

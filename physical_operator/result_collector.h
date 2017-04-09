@@ -37,7 +37,7 @@
 using std::string;
 using std::vector;
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 /**
  * @brief ResultCollector is at the top of other physical operators.
@@ -137,4 +137,4 @@ class ResultCollector : public PhysicalOperatorBase {
 
 #endif  // PHYSICAL_QUERY_PLAN_BLOCKSTREAMRESULTCOLLECTOR_H_
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo

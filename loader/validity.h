@@ -32,13 +32,13 @@
 
 #include "../common/error_define.h"
 
-namespace claims {
+namespace ginkgo {
 namespace catalog {
 class TableDescriptor;
 }
 
 namespace loader {
-using claims::catalog::TableDescriptor;
+using ginkgo::catalog::TableDescriptor;
 using std::string;
 
 struct Validity {
@@ -57,6 +57,6 @@ struct Validity {
 };
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // LOADER_VALIDITY_H_

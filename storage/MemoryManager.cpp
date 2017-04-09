@@ -38,12 +38,12 @@
 #include "../common/error_define.h"
 #include "../common/error_no.h"
 using namespace std;
-using claims::common::rSuccess;
-using claims::common::rNoEnoughMemory;
-using claims::common::rMemoryPoolMallocFail;
-using claims::common::rReturnFailFindTargetChunkId;
+using ginkgo::common::rSuccess;
+using ginkgo::common::rNoEnoughMemory;
+using ginkgo::common::rMemoryPoolMallocFail;
+using ginkgo::common::rReturnFailFindTargetChunkId;
 
-// namespace claims {
+// namespace ginkgo {
 // namespace stroage {
 
 MemoryChunkStore* MemoryChunkStore::instance_ = NULL;
@@ -206,4 +206,4 @@ RetCode MemoryChunkStore::HasEnoughMemory() {
 }
 
 //}  // namespace stroage
-//}  // namespace claims
+//}  // namespace ginkgo

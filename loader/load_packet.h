@@ -31,7 +31,7 @@
 #include "../common/error_define.h"
 #include "../txn_manager/txn.hpp"
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 
 using IpPortAtom = caf::atom_constant<caf::atom("ip_port")>;
@@ -95,6 +95,6 @@ inline bool operator==(const LoadPacket& a, const LoadPacket& b) {
 }
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // LOADER_LOAD_PACKET_H_

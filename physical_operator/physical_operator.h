@@ -37,7 +37,7 @@
 #include "../common/hashtable.h"
 
 using boost::unordered::unordered_map;
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 class ThreadContext {
  public:
@@ -195,5 +195,5 @@ class PhysicalOperator : public PhysicalOperatorBase {
   }
 };
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  //   PHYSICAL_OPERATOR_PHYSICAL_OPERATOR_H_

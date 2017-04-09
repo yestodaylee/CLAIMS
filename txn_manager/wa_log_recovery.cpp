@@ -29,7 +29,7 @@
 #include "../txn_manager/wa_log_recovery.h"
 #include "../txn_manager/wa_log_server.h"
 using std::dynamic_pointer_cast;
-namespace claims {
+namespace ginkgo {
 namespace txn {
 
 shared_ptr<TxnState> LogRecovery::GetTxnState(
@@ -85,4 +85,4 @@ shared_ptr<TxnState> LogRecovery::GetTxnState(
   return txn_state;
 }
 }  // namespace txn
-}  // namespace claims
+}  // namespace ginkgo

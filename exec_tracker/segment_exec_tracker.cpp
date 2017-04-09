@@ -40,7 +40,7 @@ using caf::event_based_actor;
 using caf::io::remote_actor;
 using caf::time_unit;
 using std::string;
-namespace claims {
+namespace ginkgo {
 
 SegmentExecTracker::SegmentExecTracker() {
   segment_exec_tracker_actor_ = caf::spawn(ReportAllSegStatus, this);
@@ -227,4 +227,4 @@ void SegmentExecTracker::ReportAllSegStatus(
   self->send(self, ReportSegESAtom::value);
 }
 
-}  // namespace claims
+}  // namespace ginkgo

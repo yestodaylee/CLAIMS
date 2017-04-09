@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  claims::common::Logging claims_logging(argv[0]);
+  ginkgo::common::Logging claims_logging(argv[0]);
   print_welcome();
   PrintUsage();
 

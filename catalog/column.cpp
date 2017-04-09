@@ -30,7 +30,7 @@
 
 #include "../catalog/column.h"
 
-namespace claims {
+namespace ginkgo {
 namespace catalog {
 Column::~Column() {
   // TODO Auto-generated destructor stub
@@ -39,4 +39,4 @@ Column::~Column() {
 Column::Column(Attribute& attr, ColumnID column_id)
     : Attribute(attr), column_id_(column_id) {}
 } /* namespace catalog */
-} /* namespace claims */
+} /* namespace ginkgo */

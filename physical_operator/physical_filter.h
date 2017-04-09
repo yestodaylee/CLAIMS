@@ -54,10 +54,10 @@
 #include "../codegen/ExpressionGenerator.h"
 #include "../common/error_no.h"
 #include "../common/expression/expr_node.h"
-using claims::common::ExprEvalCnxt;
-using claims::common::ExprNode;
+using ginkgo::common::ExprEvalCnxt;
+using ginkgo::common::ExprNode;
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 /**
  * @brief Method description: According to expression function, we generate
@@ -193,6 +193,6 @@ class PhysicalFilter : public PhysicalOperator {
   }
 };
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  PHYSICAL_OPERATOR_PHYSICAL_FILTER_H_

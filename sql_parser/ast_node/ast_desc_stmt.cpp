@@ -42,7 +42,7 @@ using std::endl;
 using std::cin;
 using std::string;
 using std::setw;
-// namespace claims {
+// namespace ginkgo {
 // namespace sql_parser {
 
 AstDescStmt::AstDescStmt(AstNodeType ast_node_type, string table_name)
@@ -60,7 +60,7 @@ RetCode AstDescStmt::SemanticAnalisys(SemanticContext* sem_cntx) {
   int ret = rSuccess;
   cout << "SA table name :" << table_name_ << endl;
   if ((table_name_.empty())) {
-    ret = claims::common::rTableNotExisted;
+    ret = ginkgo::common::rTableNotExisted;
     LOG(ERROR) << "No table name!" << std::endl;
     sem_cntx->error_msg_ = "No table name!";
     return ret;
@@ -68,7 +68,7 @@ RetCode AstDescStmt::SemanticAnalisys(SemanticContext* sem_cntx) {
   Catalog* local_catalog = Environment::getInstance()->getCatalog();
   TableDescriptor* table = local_catalog->getTable(table_name_);
   if (table == NULL) {
-    ret = claims::common::rTableillegal;
+    ret = ginkgo::common::rTableillegal;
     LOG(ERROR) << "The table " + table_name_ + " does not exist!" << std::endl;
     sem_cntx->error_msg_ = "The table " + table_name_ + " does not exist!";
     return ret;
@@ -77,4 +77,4 @@ RetCode AstDescStmt::SemanticAnalisys(SemanticContext* sem_cntx) {
 }
 
 // } /* namespace sql_parser */
-// } /* namespace claims */
+// } /* namespace ginkgo */

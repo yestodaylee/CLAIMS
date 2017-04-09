@@ -19,7 +19,7 @@
 #include "../data_type.h"
 #include "../../loader/validity.h"
 
-using claims::loader::Validity;
+using ginkgo::loader::Validity;
 
 enum RawDataSource { kFile = 0, kSQL };
 
@@ -60,7 +60,7 @@ class Schema {
   virtual RetCode ToValue(std::string text_tuple, void* binary_tuple,
                           const string attr_separator) {
     assert(false);
-    return claims::common::rFailure;
+    return ginkgo::common::rFailure;
   }
 
   /**
@@ -71,7 +71,7 @@ class Schema {
                                   RawDataSource raw_data_source,
                                   vector<Validity>& columns_validities) {
     assert(false);
-    return claims::common::rFailure;
+    return ginkgo::common::rFailure;
   }
   inline virtual void showAccum_off() {}
   bool hasSameSchema(Schema* schema);

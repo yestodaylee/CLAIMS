@@ -38,10 +38,10 @@
 #include "../stmt_handler/stmt_exec.h"
 #include "../stmt_handler/stmt_handler.h"
 using std::stack;
-using claims::physical_operator::PhysicalOperatorBase;
-using claims::physical_operator::Segment;
+using ginkgo::physical_operator::PhysicalOperatorBase;
+using ginkgo::physical_operator::Segment;
 using std::string;
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 class SelectExec : public StmtExec {
   friend class DeleteStmtExec;
@@ -65,5 +65,5 @@ class SelectExec : public StmtExec {
   stack<Segment*> all_segments_;
 };
 }  // namespace stmt_handler
-}  // namespace claims
+}  // namespace ginkgo
 #endif  //  STMT_HANDLER_SELECT_EXEC_H_

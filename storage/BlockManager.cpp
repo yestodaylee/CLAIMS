@@ -18,11 +18,11 @@
 #include "../common/error_define.h"
 #include "../common/error_no.h"
 // #include "../utility/lock_guard.h"
-using claims::common::rLoadFromHdfsOpenFailed;
-using claims::common::rLoadFromDiskOpenFailed;
-using claims::common::rUnbindPartitionFailed;
-using claims::common::HdfsConnector;
-// using claims::utility::LockGuard;
+using ginkgo::common::rLoadFromHdfsOpenFailed;
+using ginkgo::common::rLoadFromDiskOpenFailed;
+using ginkgo::common::rUnbindPartitionFailed;
+using ginkgo::common::HdfsConnector;
+// using ginkgo::utility::LockGuard;
 BlockManager* BlockManager::blockmanager_ = NULL;
 
 BlockManager* BlockManager::getInstance() {

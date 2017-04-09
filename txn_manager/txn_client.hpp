@@ -62,7 +62,7 @@ using std::atomic;
 using std::chrono::seconds;
 using std::chrono::milliseconds;
 
-namespace claims {
+namespace ginkgo {
 namespace txn {
 /**
  * @brief: Client  APIs to transactional operate data ingestion

@@ -48,7 +48,7 @@ using cms::MessageConsumer;
 using cms::MessageListener;
 using cms::Session;
 
-namespace claims {
+namespace ginkgo {
 namespace loader {
 
 class MasterLoader;
@@ -116,6 +116,6 @@ class AMQConsumer : public ExceptionListener,
 };
 
 } /* namespace loader */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  // LOADER_AMQ_CONSUMER_H_

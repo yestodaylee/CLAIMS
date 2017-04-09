@@ -41,16 +41,16 @@
 #include "../stmt_handler/select_exec.h"
 #include "../common/error_define.h"
 #include "../loader/data_ingestion.h"
-using claims::loader::DataIngestion;
+using ginkgo::loader::DataIngestion;
 using std::endl;
 using std::string;
 using std::vector;
 using std::cout;
-using claims::catalog::TableDescriptor;
-using claims::common::rSuccess;
-using claims::common::rNoProjection;
-using claims::common::rCreateProjectionOnDelTableFailed;
-namespace claims {
+using ginkgo::catalog::TableDescriptor;
+using ginkgo::common::rSuccess;
+using ginkgo::common::rNoProjection;
+using ginkgo::common::rCreateProjectionOnDelTableFailed;
+namespace ginkgo {
 namespace stmt_handler {
 
 DeleteStmtExec::DeleteStmtExec(AstNode* stmt) : StmtExec(stmt) {
@@ -275,4 +275,4 @@ void DeleteStmtExec::InsertDeletedDataIntoTableDEL(
 }
 
 } /* namespace stmt_handler */
-} /* namespace claims */
+} /* namespace ginkgo */

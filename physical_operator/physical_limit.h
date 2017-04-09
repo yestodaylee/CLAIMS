@@ -33,7 +33,7 @@
 #include "../common/error_define.h"
 #include "../physical_operator/physical_operator_base.h"
 
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 /**
  * @brief Method description: Implementation of limit physical operator. This
@@ -120,6 +120,6 @@ class PhysicalLimit : public PhysicalOperatorBase {
   }
 };
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  //  PHYSICAL_OPERATOR_PHYSICAL_LIMIT_H_

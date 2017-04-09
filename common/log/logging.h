@@ -12,7 +12,7 @@
 #include <glog/logging.h>
 #include <glog/raw_logging.h>
 #include <gflags/gflags.h>
-namespace claims {
+namespace ginkgo {
 namespace common {
 
 #define LOG_INFO LOG(INFO)
@@ -28,6 +28,6 @@ class Logging {
   ~Logging();
 };
 }  // namespace common
-}  // namespace claims
+}  // namespace ginkgo
 
 #endif  // COMMON_LOG_LOGGING_H_

@@ -10,7 +10,7 @@
 #include "../common/memory_handle.h"
 #include "log/logging.h"
 
-using claims::common::Malloc;
+using ginkgo::common::Malloc;
 
 #define likely(x) __builtin_expect(!!(x), 1)
 #define unlikely(x) __builtin_expect(!!(x), 0)

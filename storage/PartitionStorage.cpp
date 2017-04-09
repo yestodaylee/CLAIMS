@@ -43,14 +43,14 @@
 #include "../common/file_handle/hdfs_file_handle_imp.h"
 #include "../common/file_handle/file_handle_imp_factory.h"
 #include "../utility/resource_guard.h"
-using claims::common::rSuccess;
-using claims::common::FileHandleImpFactory;
-using claims::common::FileHandleImp;
-using claims::common::kHdfs;
-using claims::common::kDisk;
-using claims::utility::LockGuard;
-using claims::common::rGetFileHandleFail;
-using claims::common::rGetMemoryHandleFail;
+using ginkgo::common::rSuccess;
+using ginkgo::common::FileHandleImpFactory;
+using ginkgo::common::FileHandleImp;
+using ginkgo::common::kHdfs;
+using ginkgo::common::kDisk;
+using ginkgo::utility::LockGuard;
+using ginkgo::common::rGetFileHandleFail;
+using ginkgo::common::rGetMemoryHandleFail;
 
 ofstream logfile;
 ofstream qylog;

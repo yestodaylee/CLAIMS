@@ -38,7 +38,7 @@ using boost::posix_time::neg_infin;
 using boost::hash_value;
 using boost::hash_combine;
 using decimal::NValue;
-using claims::common::Decimal;
+using ginkgo::common::Decimal;
 using decimal::ExportSerializeOutput;
 using boost::lexical_cast;
 using namespace decimal;

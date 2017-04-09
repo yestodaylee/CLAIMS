@@ -32,7 +32,7 @@
 #include "../stmt_handler/stmt_exec.h"
 #include "../sql_parser/ast_node/ast_desc_stmt.h"
 
-namespace claims {
+namespace ginkgo {
 namespace stmt_handler {
 
 class DescExec : public StmtExec {
@@ -53,6 +53,6 @@ class DescExec : public StmtExec {
 };
 
 } /* namespace stmt_handler */
-} /* namespace claims */
+} /* namespace ginkgo */
 
 #endif  //  STMT_HANDLER_DESC_EXEC_H_

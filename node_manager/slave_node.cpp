@@ -50,12 +50,12 @@ using caf::make_message;
 using caf::message;
 using std::make_pair;
 using std::unordered_map;
-using claims::common::rConRemoteActorError;
-using claims::common::rRegisterToMasterTimeOut;
-using claims::common::rRegisterToMasterError;
-using claims::loader::RegNodeAtom;
-using claims::loader::AddBlockAtom;
-namespace claims {
+using ginkgo::common::rConRemoteActorError;
+using ginkgo::common::rRegisterToMasterTimeOut;
+using ginkgo::common::rRegisterToMasterError;
+using ginkgo::loader::RegNodeAtom;
+using ginkgo::loader::AddBlockAtom;
+namespace ginkgo {
 SlaveNode* SlaveNode::instance_ = 0;
 class SlaveNodeActor : public event_based_actor {
  public:
@@ -429,7 +429,7 @@ RetCode SlaveNode::AddBlocks(uint64_t part_id, int block_num) {
 
   return ret;
 }
-} /* namespace claims */
+} /* namespace ginkgo */
 
 // RetCode SlaveNode::reRegisterToMaster() {
 //  RetCode ret = rSuccess;

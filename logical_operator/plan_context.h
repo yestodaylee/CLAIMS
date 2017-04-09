@@ -37,10 +37,10 @@
 #include "../catalog/attribute.h"
 #include "../logical_operator/plan_partitioner.h"
 
-using namespace claims::catalog;
+using namespace ginkgo::catalog;
 class Schema;
 
-namespace claims {
+namespace ginkgo {
 namespace logical_operator {
 /**
  * maintain the data property of the plan after having completed current
@@ -78,5 +78,5 @@ class PlanContext {
 };
 
 }  // namespace logical_operator
-}  // namespace claims
+}  // namespace ginkgo
 #endif  // LOGICAL_OPERATOR_PLAN_CONTEXT_H_

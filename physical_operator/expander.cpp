@@ -31,7 +31,7 @@
 #include "../common/Logging.h"
 #include "../physical_operator/expander.h"
 #include "../Executor/expander_tracker.h"
-namespace claims {
+namespace ginkgo {
 namespace physical_operator {
 struct ExpanderContext {
   Expander* pthis_;
@@ -482,4 +482,4 @@ RetCode Expander::GetAllSegments(stack<Segment*>* all_segments) {
   return ret;
 }
 }  // namespace physical_operator
-}  // namespace claims
+}  // namespace ginkgo
