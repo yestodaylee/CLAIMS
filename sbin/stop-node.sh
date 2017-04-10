@@ -6,15 +6,15 @@ cd $CURRDIR
 cd 2-claims-conf/
 source ./load-config.sh
 cd ../../
-# now in CLAIMS_HOME
+# now in GINKGO_HOME
 
 if [ "$1" = "all" ]; then
 
- claimspids=`ps x | grep -w ./install/claimsserver | grep -v grep | awk '{print $1}'`
+ claimspids=`ps x | grep -w ./install/ginkgo | grep -v grep | awk '{print $1}'`
  if [ "$claimspids" != "" ]; then
   for claimspid in $claimspids
   do
-   echo "stop claimsserver pid:$claimspid"
+   echo "stop ginkgo pid:$claimspid"
    kill -9 $claimspid
   done
  fi
@@ -41,9 +41,9 @@ if [ "$1" = "all" ]; then
 else
 
  if [ -f "$runclaimsprocid" ]; then
-  claimspids=`sed '/^claimsserver=/!d;s/.*=//' $runclaimsprocid`
+  claimspids=`sed '/^ginkgo=/!d;s/.*=//' $runclaimsprocid`
   if [ "$claimspids" != "" ]; then
-   echo "stop claimsserver pid : [$claimspids]"
+   echo "stop ginkgo pid : [$claimspids]"
    kill -9 $claimspids
   fi
   rm -f $runclaimsprocid

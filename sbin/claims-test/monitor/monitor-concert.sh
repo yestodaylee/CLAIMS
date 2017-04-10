@@ -5,19 +5,19 @@ cd $CURRDIR
 cd ../../2-claims-conf
 source ./load-config.sh
 cd ../../
-# now in CLAIMS_HOME
+# now in GINKGO_HOME
 
 while [ 1 ]
 do
- procid=`ps x | grep -w ./install/claimsserver | grep -v grep | awk '{print $1}'`
+ procid=`ps x | grep -w ./install/ginkgo | grep -v grep | awk '{print $1}'`
  if [ "$procid" = "" ]; then
-  echo "claimsserver is aborted. Try to restart..."
+  echo "ginkgo is aborted. Try to restart..."
   ./sbin/stop-all.sh
   if [ "$local_disk_mode" = "1" ]; then
   rm $data*
   fi
   if [ -d "install" ]; then
-    if [ ! -f "install/claimsserver" ]; then
+    if [ ! -f "install/ginkgo" ]; then
      ./sbin/1-compile.sh
     fi
   else
@@ -27,7 +27,7 @@ do
   ./sbin/start-all.sh
   sleep 3 
  else
-  echo "claimsserver is running..."
+  echo "ginkgo is running..."
   cd sbin/claims-test/
   read -p "Hit the ENTER |__>" tempuseless
   echo $tempuseless
@@ -37,6 +37,6 @@ do
   #./claimstest.sh 1 100 concert
    ./claimstest.sh 100 1 cancel
   cd ../../
-  # now in CLAIMS_HOME
+  # now in GINKGO_HOME
  fi
 done

@@ -23,7 +23,7 @@ first modify the config file of claims:
  sbin/2-claims-conf/cluster.config
 then deploy it, call script:
  sbin/3-deploy.sh
-then restart claimsserver:
+then restart ginkgo:
  sbin/start-all.sh
 then start client and load the data, this step will call script:
  sbin/claims-test/claimstest.sh 1 1 <testcase>
@@ -85,14 +85,14 @@ mode_data_case=(
                )
 
 
-claimshome=os.getenv("CLAIMS_HOME")
+claimshome=os.getenv("GINKGO_HOME")
 cf = ConfigParser.ConfigParser()
 cf.read("%s/sbin/2-claims-conf/cluster.config"%(claimshome))
 hostname = cf.get("cluster", "master") 
 user = cf.get("cluster", "user")
-config_disk_mode="ssh -f -n -l %s %s \"cd $CLAIMS_HOME/sbin/2-claims-conf; sed -i 's:^local_disk_mode = .*$:local_disk_mode = %s:g' ./cluster.config; exit;\";sleep 1;"
-config_data="ssh -f -n -l %s %s \"cd $CLAIMS_HOME/sbin/2-claims-conf; sed -i 's:^data = .*$:data = %s:g' ./cluster.config; exit;\";sleep 1;"
-deploy="ssh -f -n -l %s %s \"$CLAIMS_HOME/sbin/3-deploy.sh config; exit;\";"
+config_disk_mode="ssh -f -n -l %s %s \"cd $GINKGO_HOME/sbin/2-claims-conf; sed -i 's:^local_disk_mode = .*$:local_disk_mode = %s:g' ./cluster.config; exit;\";sleep 1;"
+config_data="ssh -f -n -l %s %s \"cd $GINKGO_HOME/sbin/2-claims-conf; sed -i 's:^data = .*$:data = %s:g' ./cluster.config; exit;\";sleep 1;"
+deploy="ssh -f -n -l %s %s \"$GINKGO_HOME/sbin/3-deploy.sh config; exit;\";"
 startall="%s/sbin/start-all.sh;"
 stopall="%s/sbin/stop-all.sh;"
 runtest="cd %s/sbin/claims-test; ./claimstest.sh %d %d %s;"

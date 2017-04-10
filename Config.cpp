@@ -18,14 +18,14 @@ using namespace std;
 //#define DEBUG_Config
 
 string gete() {
-  char *p = getenv("CLAIMS_HOME");
+  char *p = getenv("GINKGO_HOME");
   stringstream sp;
   sp << string(p).c_str() << "conf/config";
   return sp.str();
   //	return "/home/imdb/config/wangli/config";
 }
 string get_default_logfile_name() {
-  char *p = getenv("CLAIMS_HOME");
+  char *p = getenv("GINKGO_HOME");
   stringstream sp;
   sp << string(p).c_str() << "/log/claims.log";
   return sp.str();

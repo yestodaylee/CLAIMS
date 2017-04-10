@@ -18,9 +18,9 @@ namespace common {
 
 #define MKDIR \
   "mkdir -p " \
-  "claims_log"
+  "ginkgo_log"
 
-const char* LOGDIR = "claims_log";
+const char* LOGDIR = "ginkgo_log";
 void GlogSignalHandle(const char* data, int size) {
   std::string str = std::string(data, size);
   /*

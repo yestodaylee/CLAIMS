@@ -6,7 +6,7 @@ cd 2-claims-conf
 source ./load-config.sh
 #source ./generate-config.sh
 cd ../../
-# now in CLAIMS_HOME
+# now in GINKGO_HOME
 
 timestr=$(date +%Y-%m-%d)
 
@@ -28,7 +28,7 @@ echo "-----------------------------------"
 echo -e "\033[31m`pwd`\033[0m"
 
 thisip=${1#*config-}
-thislog=$logpath/claimsserver-$thisip-$timestr.log
+thislog=$logpath/ginkgo-$thisip-$timestr.log
 
 ./sbin/stop-node.sh
 
@@ -38,11 +38,11 @@ ulimit -c unlimited
 cd ../
 # for debug end ########
 
-echo "========run claimsserver on:[$thisip] time:[$(date '+%Y-%m-%d %H:%M:%S')]========" >> $thislog
-./install/claimsserver -c $1 >> $thislog &
-claimsserverpid=$!
-echo "claimsserver=$claimsserverpid" > $runclaimsprocid
-echo -e "$thisip start claimsserver pid:[$claimsserverpid][\033[32mOK\033[0m]"
+echo "========run ginkgo on:[$thisip] time:[$(date '+%Y-%m-%d %H:%M:%S')]========" >> $thislog
+./install/ginkgo -c $1 >> $thislog &
+ginkgopid=$!
+echo "ginkgo=$ginkgopid" > $runclaimsprocid
+echo -e "$thisip start ginkgo pid:[$ginkgopid][\033[32mOK\033[0m]"
 
 echo "start tracker for debug..."
 #./sbin/claims-test/statustracker.sh &

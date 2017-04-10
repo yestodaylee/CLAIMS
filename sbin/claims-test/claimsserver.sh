@@ -6,7 +6,7 @@ cd $CURRDIR
 cd ../2-claims-conf/
 source ./load-config.sh
 cd ../../
-# now in CLAIMS_HOME
+# now in GINKGO_HOME
 
 # for debug begin #####
 cd install
@@ -15,4 +15,4 @@ cd ../
 # for debug end #######
 serverpath=`pwd`
 echo $serverpath
-$serverpath/install/claimsserver -c $serverpath/sbin/2-claims-conf/config-$master
+$serverpath/install/ginkgo -c $serverpath/sbin/2-claims-conf/config-$master

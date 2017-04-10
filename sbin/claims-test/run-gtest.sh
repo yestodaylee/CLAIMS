@@ -5,12 +5,12 @@ cd $CURRDIR
 cd ../2-claims-conf
 source ./load-config.sh
 cd ../../
-# now in CLAIMS_HOME
+# now in GINKGO_HOME
 
 starttime=$(date '+%Y-%m-%d %H:%M:%S')
 while [ 1 ]
 do
-  echo "claimsserver is running..."
+  echo "ginkgo is running..."
   ((loop++))
   echo -e "\033[33m=======[$loop]=time:[`date '+%Y-%m-%d %H:%M:%S'`]========\033[0m"
   ./install/test --ip $master --port $client_listener_port

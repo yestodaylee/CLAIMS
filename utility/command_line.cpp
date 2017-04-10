@@ -78,7 +78,7 @@ int get_one_command(string& str) {
   string line;
 
   // Create prompt string from user name and current working directory.
-  snprintf(shell_prompt, sizeof(shell_prompt), "CLAIMS>");
+  snprintf(shell_prompt, sizeof(shell_prompt), "Ginkgo>");
   // Display prompt and read input (n.b. input must be freed after use)...
   bool first_line = true;
   bool last_line = false;
