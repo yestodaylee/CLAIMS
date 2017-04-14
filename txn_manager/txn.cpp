@@ -27,6 +27,8 @@
  */
 #include <string>
 #include <sstream>
+#include <vector>
+#include <map>
 #include "txn.hpp"
 #include "txn_server.hpp"
 using std::ostringstream;
@@ -240,15 +242,15 @@ void TxnBin::MergeSnapshot(Query &query) const {
   }
 }
 
-void TxnBin::MergeTxn(Query &query, int len) const {
-  for (auto i = 0; i < len; i++)
-    if (txn_list_[i].IsCommit()) {
+void TxnBin::MergeTxn(Query &query) const {
+  for (auto &ts_txn : txn_list_)
+    if (ts_txn.second.IsCommit() && ts_txn.second.ts_ <= query.ts_) {
       query.scan_count_++;
-      for (auto &strip : txn_list_[i].strip_list_)
+      for (auto &strip : ts_txn.second.strip_list_)
         query.snapshot_[strip.first].push_back(strip.second);
-    } else if (txn_list_[i].IsAbort()) {
+    } else if (ts_txn.second.IsAbort() && ts_txn.second.ts_ <= query.ts_) {
       assert(false);
-      for (auto &strip : txn_list_[i].strip_list_)
+      for (auto &strip : ts_txn.second.strip_list_)
         query.abort_list_[strip.first].push_back(strip.second);
     }
 
@@ -282,12 +284,12 @@ string TxnBin::ToString() {
 void TxnBin::GenSnapshot(const TxnBin &prev) {
   status_ = true;
   snapshot_ = prev.snapshot_;
-  for (auto &txn : txn_list_)
-    if (txn.IsCommit()) {
-      for (auto &strip : txn.strip_list_)
+  for (auto &ts_txn : txn_list_)
+    if (ts_txn.second.IsCommit()) {
+      for (auto &strip : ts_txn.second.strip_list_)
         snapshot_[strip.first].push_back(strip.second);
-    } else if (txn.IsAbort()) {
-      for (auto &strip : txn.strip_list_)
+    } else if (ts_txn.second.IsAbort()) {
+      for (auto &strip : ts_txn.second.strip_list_)
         abort_list_[strip.first].push_back(strip.second);
     }
   for (auto &part : snapshot_) {
@@ -302,12 +304,12 @@ void TxnBin::GenSnapshot(const TxnBin &prev) {
 
 void TxnBin::GenSnapshot() {
   status_ = true;
-  for (auto &txn : txn_list_)
-    if (txn.IsCommit()) {
-      for (auto &strip : txn.strip_list_)
+  for (auto &ts_txn : txn_list_)
+    if (ts_txn.second.IsCommit()) {
+      for (auto &strip : ts_txn.second.strip_list_)
         snapshot_[strip.first].push_back(strip.second);
-    } else if (txn.IsAbort()) {
-      for (auto &strip : txn.strip_list_)
+    } else if (ts_txn.second.IsAbort()) {
+      for (auto &strip : ts_txn.second.strip_list_)
         abort_list_[strip.first].push_back(strip.second);
     }
   for (auto &part : snapshot_) {

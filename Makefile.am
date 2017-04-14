@@ -49,6 +49,7 @@ LDADD =  \
 	common/file_handle/libfilehandle.a \
 	common/file_handle/test/libtest.a \
 	common/log/liblog.a \
+	common/Network/libnetwork.a \
 	common/Schema/libschema.a \
 	common/Schema/Test/libtest.a \
 	common/types/libtypes.a \
@@ -62,7 +63,7 @@ LDADD =  \
 	${BOOST_HOME}/stage/lib/libboost_serialization.so \
 	${BOOST_HOME}/stage/lib/libboost_system.so \
 	${BOOST_HOME}/stage/lib/libboost_date_time.so \
-	${HADOOP_HOME}/lib/native/libhdfs.so\
+	${HADOOP_HOME}/lib/native/libhdfs.a\
 	${JAVA_HOME}/jre/lib/amd64/server/libjvm.so\
 	${GTEST_HOME}/libgtest.a \
 	${GLOG_HOME}/.libs/libglog.so.0 \
@@ -90,12 +91,16 @@ include_HEADERS = Config.h \
 				txn_manager/wa_log_impl.h \
 				txn_manager/wa_log_store.h \
 				txn_manager/wa_log_recovery.h \
-				Config.h
+				common/Network/Network.h \
+				common/Network/Buffering.h \
+				common/Network/Epoller.h \
+				common/Network/Broker.h 
 				
 bin_PROGRAMS = claimsserver \
 				client \
 				test  \
-				wa_log_test
+				wa_log_test \
+				network_test 
 				
 client_SOURCES = Client.cpp \
 					Environment.cpp \
@@ -114,6 +119,7 @@ test_SOURCES = Test/gtest_main.cpp\
 
 wa_log_test_SOURCES = txn_manager/wa_log_test.cpp Config.cpp Environment.cpp IDsGenerator.cpp				
 				
+network_test_SOURCES = common/Network/network_test.cpp common/Network/Broker.cpp Config.cpp Environment.cpp IDsGenerator.cpp
 
 SUBDIRS=  catalog Client common Daemon Executor IndexManager\
 loader physical_operator logical_operator  Resource \

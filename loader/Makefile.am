@@ -35,7 +35,9 @@ libloader_a_SOURCES = \
 	table_file_connector.cpp 		table_file_connector.h \
 	validity.cpp 		validity.h \
 	load_packet.h		load_packet.cpp \
-	AMQ_consumer.h		AMQ_consumer.cpp
+	AMQ_consumer.h		AMQ_consumer.cpp \
+	master_loader_broker.h		master_loader_broker.cpp \
+	slave_loader_broker.h		slave_loader_broker.cpp 
 
 SUBDIRS = test
 DIST_SUBDIRS = test

@@ -113,7 +113,7 @@ static const int kGCTime = 5;
 static const int kTimeout = 3;
 static const int kBlockSize = 64 * 1024;
 static const int kTailSize = sizeof(unsigned);
-static const int kTxnBinSize = 10;  // 1024;
+static const int kTxnBinSize = 1024;  // 1024;
 
 /**
  * @brief generate global partition id from
@@ -213,10 +213,11 @@ class Txn {
   static const int kAbort = 2;
   int status_ = kActive;
   long realtime_;
+  UInt64 ts_;
   unordered_map<UInt64, PStrip> strip_list_;
   Txn() { realtime_ = GetCurrents(); }
-  Txn(const unordered_map<UInt64, PStrip> &strip_list) {
-    strip_list_ = strip_list;
+  Txn(UInt64 ts, const unordered_map<UInt64, PStrip> &strip_list)
+      : ts_(ts), strip_list_(strip_list) {
     // realtime_ = GetCurrents();
   }
   void Write(uint64_t part, const PStrip &strip) { strip_list_[part] = strip; }
@@ -475,35 +476,31 @@ class TsCheckpoint {
  */
 class TxnBin {
  public:
+  TxnBin() {}
   // get & set pos-th txn in txn
-  Txn GetTxn(int pos) const { return txn_list_[pos]; }
-  void SetTxn(int pos, const Txn &txn) {
-    txn_list_[pos] = txn;
-    ct_++;
-  }
-  void SetTxn(int pos, const unordered_map<UInt64, PStrip> &strip_list) {
-    txn_list_[pos] = Txn(strip_list);
-    ct_++;
+  void SetTxn(const Txn &txn) { txn_list_[txn.ts_] = txn; }
+  void SetTxn(UInt64 ts, const unordered_map<UInt64, PStrip> &strip_list) {
+    txn_list_[ts] = Txn(ts, strip_list);
   }
   // set state tag of a transaction to "Commit" or Abort
-  void CommitTxn(int pos) {
-    txn_list_[pos].Commit();
-    ct_commit_++;
+  void CommitTxn(UInt64 ts) {
+    txn_list_[ts].Commit();
+    commit_ct_++;
   }
-  void AbortTxn(int pos) {
-    txn_list_[pos].Abort();
-    ct_abort_++;
+  void AbortTxn(UInt64 ts) {
+    txn_list_[ts].Abort();
+    abort_ct_++;
   }
   /** Is this bin are filled with "terminated"(commit or abort) */
-  bool IsFull() const { return ct_commit_ + ct_abort_ == kTxnBinSize; }
+  bool IsFull() const { return commit_ct_ + abort_ct_ == kTxnBinSize; }
   bool IsSnapshot() const { return status_ == true; }
-  int Count() const { return ct_; }
-  int CountCommit() const { return ct_commit_; }
-  int CountAbort() const { return ct_abort_; }
+  int Count() const { return txn_list_.size(); }
+  int CountCommit() const { return commit_ct_; }
+  int CountAbort() const { return abort_ct_; }
   void GenSnapshot();
   void GenSnapshot(const TxnBin &prev);
   void MergeSnapshot(Query &query) const;
-  void MergeTxn(Query &query, int len) const;
+  void MergeTxn(Query &query) const;
   string ToString();
   /** get bin id that transaction [ts] resides,
    * [core_num] is number of cores in txn_manager */
@@ -520,13 +517,12 @@ class TxnBin {
     return txnbin_id * kTxnBinSize * core_num + kTxnBinSize + core_id;
   }
 
-  Txn txn_list_[kTxnBinSize];
+  unordered_map<UInt64, Txn> txn_list_;
 
  private:
   bool status_ = false;
-  int ct_ = 0;
-  int ct_commit_ = 0;
-  int ct_abort_ = 0;
+  int commit_ct_ = 0;
+  int abort_ct_ = 0;
   // If bin is full, a snapshot is generated.
   unordered_map<UInt64, vector<PStrip>> snapshot_;
   unordered_map<UInt64, vector<PStrip>> abort_list_;

@@ -47,12 +47,18 @@
 #include "../common/ids.h"
 #include "../txn_manager/txn.hpp"
 #include "../utility/lock.h"
-
+#include "../loader/master_loader_broker.h"
+#include "../common/Network/Epoller.h"
+#include "../common/Network/Network.h"
 using std::function;
 using std::set;
 using std::unordered_map;
 using std::unordered_set;
 using std::ofstream;
+using claims::common::Epoller;
+using claims::common::Socket;
+using claims::common::SocketS;
+using claims::common::Timer;
 namespace claims {
 namespace catalog {
 class TableDescriptor;
@@ -229,6 +235,16 @@ class MasterLoader {
   static uint64_t txn_average_delay_;
 
   static ofstream logfile;
+
+  // Timer timefd_;
+
+  Epoller* epoller;
+  SocketS* sockets_;
+  MasterLoaderBroker* broker_;
+  MasterLoaderBroker* broker__;
+  int a;
+  int b;
+  string c;
 };
 
 } /* namespace loader */

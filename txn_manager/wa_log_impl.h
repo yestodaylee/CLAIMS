@@ -47,7 +47,16 @@ using std::make_shared;
 using std::string;
 using claims::common::rSuccess;
 using claims::common::rFailure;
-enum LogType { kBegin, kWrite, kCommit, kAbort, kCheckpoint, kValue, kTail };
+enum LogType {
+  kBegin,
+  kWrite,
+  kCommit,
+  kAbort,
+  kCheckpoint,
+  kValue,
+  kTail,
+  kBValue
+};
 class WALog {
  public:
   static string EncodeLine(const string& type, const vector<uint64_t>& items);
@@ -226,6 +235,66 @@ class ValueLog : public WALog {
 
   bool is_buffer_copy_ = false;
 };
+
+class BinaryValueLog : public WALog {
+ public:
+  explicit BinaryValueLog(uint64_t body_size);
+  LogType GetType() const override;
+  string ToString() const override;
+  virtual ~BinaryValueLog() { free(head_); }
+  /*****************/
+  uint64_t GetTs() const { return *static_cast<uint64_t*>(head_ + kTsShift); }
+  uint64_t GetPart() const {
+    return *static_cast<uint64_t*>(head_ + kPartShift);
+  }
+  uint64_t GetPos() const { return *static_cast<uint64_t*>(head_ + kPosShift); }
+  uint64_t GetOffset() const {
+    return *static_cast<uint64_t*>(head_ + kOffsetShift);
+  }
+  uint64_t GetBodySize() const {
+    return *static_cast<uint64_t*>(head_ + kBodySizeShift);
+  }
+  void* GetBody() const { head_ + kHeadSize; }
+  void* GetBuf() const { return head_; }
+  uint64_t GetBufSize() const {
+    return kHeadSize + *static_cast<uint64_t*>(head_ + kBodySizeShift);
+  }
+  /*****************/
+  static uint64_t GetTs(void* head) {
+    return *static_cast<uint64_t*>(head + kTsShift);
+  }
+  static uint64_t GetPart(void* head) {
+    return *static_cast<uint64_t*>(head + kPartShift);
+  }
+  static uint64_t GetPos(void* head) {
+    return *static_cast<uint64_t*>(head + kPosShift);
+  }
+  static uint64_t GetOffset(void* head) {
+    return *static_cast<uint64_t*>(head + kOffsetShift);
+  }
+  static uint64_t GetBodySize(void* head) {
+    return *static_cast<uint64_t*>(head + kBodySizeShift);
+  }
+  static void* GetBody(void* head) { return head + kHeadSize; }
+  /*****************/
+  static uint64_t Serialize(void* head, uint64_t ts, uint64_t part_,
+                            uint64_t pos_, uint64_t offset, uint64_t body_size,
+                            void* body);
+  static shared_ptr<BinaryValueLog> Gen(uint64_t body_size) {
+    return make_shared<BinaryValueLog>(body_size);
+  }
+  static const int kHeadSize = 64;
+  static const int kTsShift = 0;
+  static const int kPartShift = sizeof(uint64_t) * 1;
+  static const int kPosShift = sizeof(uint64_t) * 2;
+  static const int kOffsetShift = sizeof(uint64_t) * 3;
+  static const int kBodySizeShift = sizeof(uint64_t) * 4;
+
+ private:
+  /** head needs 64B **/
+  void* head_ = nullptr;
+};
+
 }  // namespace txn
 }  // namespace claims
 

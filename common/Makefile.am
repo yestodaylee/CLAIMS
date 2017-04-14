@@ -42,5 +42,5 @@ libcommon_a_SOURCES = \
 	error_no.h			error_no.cpp \
 	memory.h
 
-SUBDIRS = Block file_handle log Schema types Expression expression serialization
-DIST_SUBDIRS = Block file_handle log Schema types Expression expression serialization
+SUBDIRS = Block file_handle log Schema types Expression expression serialization Network 
+DIST_SUBDIRS = Block file_handle log Schema types Expression expression serialization Network

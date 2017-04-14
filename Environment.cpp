@@ -26,6 +26,8 @@
 #include "loader/load_packet.h"
 #include "loader/master_loader.h"
 #include "loader/slave_loader.h"
+#include "loader/master_loader_broker.h"
+#include "loader/slave_loader_broker.h"
 #include "./Debug.h"
 #include "./Config.h"
 #include "common/ids.h"
@@ -275,6 +277,20 @@ bool Environment::InitLoader() {
   std::thread slave_thread(&SlaveLoader::StartSlaveLoader, nullptr);
   slave_thread.detach();
 
+  auto node_id = Environment::getNodeID();
+  /* for epoll version loader*/
+  if (Config::master_loader_id >= 0) {
+    master_loader_broker_ = new MasterLoaderBroker(node_id);
+    int public_port =
+        Config::master_loader_endpoints[Config::master_loader_id].second;
+    master_loader_broker_->PublicForIngest(public_port);
+  }
+  for (auto& endpoint : Config::master_loader_endpoints) {
+    slave_loader_broker_list_[endpoint] = new SlaveLoaderBroker(node_id);
+    slave_loader_broker_list_[endpoint]->ConnectForIngest(endpoint.first,
+                                                          endpoint.second);
+  }
+  /**/
   return true;
 }
 

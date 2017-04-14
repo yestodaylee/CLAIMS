@@ -70,9 +70,11 @@ caf::behavior TxnCore::make_behavior() {
       [this](DebugAtom, string flag) { cout << ToString() << endl; },
       [this](IngestAtom, shared_ptr<Ingest> ingest) -> caf::message {
         RetCode ret = rSuccess;
-        auto id = TxnBin::GetTxnBinID(ingest->ts_, TxnServer::concurrency_);
-        auto pos = TxnBin::GetTxnBinPos(ingest->ts_, TxnServer::concurrency_);
-        txnbin_list_[id].SetTxn(pos, ingest->strip_list_);
+        auto local_bin_id =
+            TxnBin::GetTxnBinID(ingest->ts_, TxnServer::concurrency_);
+        // auto local_bin_id = TxnBin::GetTxnBinPos(ingest->ts_,
+        // TxnServer::concurrency_);
+        txnbin_list_[local_bin_id].SetTxn(ingest->ts_, ingest->strip_list_);
         vector<shared_ptr<CommandLog>> logs;
         logs.push_back(BeginLog::Gen(ingest->ts_));
         auto strip_list = ingest->get_strip_list();
@@ -85,16 +87,14 @@ caf::behavior TxnCore::make_behavior() {
       },
       [this](ReplayTxnAtom, const Txn& txn, uint64_t ts) -> caf::message {
         RetCode ret = rSuccess;
-        auto id = TxnBin::GetTxnBinID(ts, TxnServer::concurrency_);
-        auto pos = TxnBin::GetTxnBinPos(ts, TxnServer::concurrency_);
-        txnbin_list_[id].CommitTxn(pos);
+        auto local_bin_id = TxnBin::GetTxnBinID(ts, TxnServer::concurrency_);
+        txnbin_list_[local_bin_id].CommitTxn(ts);
         return caf::make_message(ret);
       },
       [this](CommitIngestAtom, const UInt64 ts) -> caf::message {
         RetCode ret = rSuccess;
-        auto id = TxnBin::GetTxnBinID(ts, TxnServer::concurrency_);
-        auto pos = TxnBin::GetTxnBinPos(ts, TxnServer::concurrency_);
-        txnbin_list_[id].CommitTxn(pos);
+        auto local_bin_id = TxnBin::GetTxnBinID(ts, TxnServer::concurrency_);
+        txnbin_list_[local_bin_id].CommitTxn(ts);
         vector<shared_ptr<CommandLog>> logs;
         logs.push_back(CommitLog::Gen(ts));
         log_stream_->Append(logs);
@@ -102,9 +102,8 @@ caf::behavior TxnCore::make_behavior() {
       },
       [this](AbortIngestAtom, const UInt64 ts) -> caf::message {
         RetCode ret = rSuccess;
-        auto id = TxnBin::GetTxnBinID(ts, TxnServer::concurrency_);
-        auto pos = TxnBin::GetTxnBinPos(ts, TxnServer::concurrency_);
-        txnbin_list_[id].AbortTxn(pos);
+        auto local_bin_id = TxnBin::GetTxnBinID(ts, TxnServer::concurrency_);
+        txnbin_list_[local_bin_id].AbortTxn(ts);
         vector<shared_ptr<CommandLog>> logs;
         logs.push_back(AbortLog::Gen(ts));
         log_stream_->Append(logs);
@@ -112,41 +111,14 @@ caf::behavior TxnCore::make_behavior() {
       },
       [this](QueryAtom, shared_ptr<Query> query,
              bool include_abort) -> caf::message {
-        int last_core = query->ts_ / TxnServer::concurrency_;
-        int bin_num = 0;
-        if (query->ts_ >= TxnServer::concurrency_)
-          bin_num = (query->ts_) / (TxnServer::concurrency_ * kTxnBinSize);
-        int remain = 0;
-        if (query->ts_ > TxnServer::concurrency_) {
-          auto all_remain =
-              (query->ts_) % (TxnServer::concurrency_ * kTxnBinSize);
-          remain = (all_remain + TxnServer::concurrency_ - 1 - core_id_) /
-                   TxnServer::concurrency_;
-        }
-        if (core_id_ > last_core && remain > 0) remain--;
-        if (!include_abort) {
-          cout << "qy_ts:" << query->ts_ << ",core:" << core_id_
-               << ",bin num:" << bin_num << ",re:" << remain << endl;
-        }
-        if (remain > 0) {
-          txnbin_list_[bin_num].MergeTxn(*query, remain);
-          auto count = txnbin_list_[bin_num].Count();
-          if (count < remain)
-            cout << "!!!!!error:" << query->ts_ << "@" << core_id_ << ","
-                 << bin_num << "?count:" << count << ",remain:" << remain
-                 << endl;
-        }
-
-        for (int id = bin_num - 1; id >= 0; id--) {
-          if (txnbin_list_[id].IsSnapshot()) {
-            txnbin_list_[id].MergeSnapshot(*query);
+        UInt64 last_bin_id =
+            TxnBin::GetTxnBinID(query->ts_, TxnServer::concurrency_);
+        for (int bin_id = last_bin_id; bin_id >= 0; bin_id--) {
+          if (txnbin_list_[bin_id].IsSnapshot()) {
+            txnbin_list_[bin_id].MergeSnapshot(*query);
             break;
           } else {
-            txnbin_list_[id].MergeTxn(*query, kTxnBinSize);
-            auto count = txnbin_list_[id].Count();
-            if (count < kTxnBinSize)
-              cout << "error:" << query->ts_ << "@" << core_id_ << ","
-                   << bin_num << "?count:" << count << endl;
+            txnbin_list_[bin_id].MergeTxn(*query);
           }
         }
         auto next_core_id = (core_id_ + 1) % TxnServer::concurrency_;

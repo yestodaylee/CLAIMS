@@ -8,8 +8,12 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 #include <string>
+#include <vector>
+#include <utility>
 #include <libconfig.h++>
-
+using std::vector;
+using std::pair;
+using std::string;
 /**
  * This class maintains all the parameter values, which are specified in
  * "config" file.
@@ -83,6 +87,9 @@ class Config {
   static bool is_master_loader;
   static std::string master_loader_ip;
   static int master_loader_port;
+
+  static int master_loader_id;
+  static vector<pair<string, int>> master_loader_endpoints;
   static std::string amq_url;
   static std::string amq_topic;
 

@@ -75,6 +75,10 @@ master_loader_ip="127.0.0.1"
 
 master_loader_port=9002
 
+master_loader_id=0
+
+master_loader_endpoints="127.0.0.1 9005"
+
 master_loader_thread_num=8
 
 slave_loader_thread_num=6
@@ -93,7 +97,7 @@ txn_server_ip="127.0.0.1"
 txn_server_port=9100
 
 #事务日志
-cmd_log =1
+cmd_log =0
 
 value_log=0
 

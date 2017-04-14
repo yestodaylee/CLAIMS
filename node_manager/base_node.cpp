@@ -59,6 +59,8 @@ void BaseNode::ReadNodeAddr() {
   cfg.readFile(Config::config_file.c_str());
   string ip = (const char *)cfg.lookup("ip");
   node_addr_ = make_pair(ip, PortManager::getInstance()->applyPort());
+
+  string ip_test = ip;
 }
 
 NodeAddr BaseNode::GetMasterAddr() { return master_addr_; }

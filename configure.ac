@@ -47,6 +47,7 @@ AC_CONFIG_FILES([
   common/file_handle/Makefile
   common/file_handle/test/Makefile
   common/log/Makefile
+  common/Network/Makefile
   common/Schema/Makefile 
   common/Schema/Test/Makefile 
   common/types/Makefile 

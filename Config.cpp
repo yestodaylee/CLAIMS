@@ -14,8 +14,22 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <vector>
+#include <utility>
 using namespace std;
 //#define DEBUG_Config
+
+vector<pair<string, int>> get_endpoints(const string &str) {
+  // cout << "get endpoints" << endl;
+  stringstream sp(str);
+  string ip, port;
+  vector<pair<string, int>> results;
+  while (sp >> ip >> port) {
+    // cout << ip << ":" << port << endl;
+    results.push_back(make_pair(ip, stoi(port)));
+  }
+  return results;
+}
 
 string gete() {
   char *p = getenv("CLAIMS_HOME");
@@ -94,6 +108,9 @@ int Config::memory_utilization;
 bool Config::is_master_loader;
 std::string Config::master_loader_ip;
 int Config::master_loader_port;
+
+int Config::master_loader_id;
+vector<pair<string, int>> Config::master_loader_endpoints;
 std::string Config::amq_url;
 std::string Config::amq_topic;
 
@@ -175,6 +192,11 @@ void Config::initialize() {
   master_loader_ip = getString("master_loader_ip", "10.11.1.193");
 
   master_loader_port = getInt("master_loader_port", 9001);
+
+  master_loader_id = getInt("master_loader_id", 0);
+
+  master_loader_endpoints =
+      get_endpoints(getString("master_loader_endpoints", "127.0.0.1 9004"));
 
   amq_url = getString("amq_url", "58.198.176.92:61616");
 
@@ -259,6 +281,14 @@ void Config::print_configure() const {
   std::cout << "catalog_file:" << catalog_file << std::endl;
   std::cout << "codegen:" << enable_codegen << std::endl;
   std::cout << "load_thread_num:" << load_thread_num << std::endl;
+
+  std::cout << "master_loader_endpoints:" << endl;
+  for (auto i = 0; i < master_loader_endpoints.size(); i++) {
+    cout << master_loader_endpoints[i].first << " "
+         << master_loader_endpoints[i].second;
+    if (i == master_loader_id) cout << " [*]";
+    cout << endl;
+  }
   std::cout << "amq_url:" << amq_url << std::endl;
   std::cout << "amq_topic:" << amq_topic << std::endl;
 

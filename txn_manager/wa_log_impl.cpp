@@ -100,6 +100,32 @@ void ValueLog::DecodeData(const char* buffer, unsigned buffer_size,
   body_ = buffer_ + header.length();
 }
 
+uint64_t BinaryValueLog::Serialize(void* head, uint64_t ts, uint64_t part,
+                                   uint64_t pos, uint64_t offset,
+                                   uint64_t body_size, void* body) {
+  *static_cast<uint64_t*>(head) = ts;
+  *static_cast<uint64_t*>(head + sizeof(uint64_t) * 1) = part;
+  *static_cast<uint64_t*>(head + sizeof(uint64_t) * 2) = pos;
+  *static_cast<uint64_t*>(head + sizeof(uint64_t) * 3) = offset;
+  *static_cast<uint64_t*>(head + sizeof(uint64_t) * 4) = body_size;
+  memcpy(head + kHeadSize, body, body_size);
+  return kHeadSize + body_size;
+}
+
+BinaryValueLog::BinaryValueLog(uint64_t body_size) {
+  head_ = malloc(kHeadSize + body_size);
+}
+
+LogType BinaryValueLog::GetType() const { return LogType::kBValue; }
+string BinaryValueLog::ToString() const {
+  return WALog::EncodeLine("bvalue",
+                           {*static_cast<uint64_t*>(head_ + kTsShift),
+                            *static_cast<uint64_t*>(head_ + kPartShift),
+                            *static_cast<uint64_t*>(head_ + kPosShift),
+                            *static_cast<uint64_t*>(head_ + kOffsetShift),
+                            *static_cast<uint64_t*>(head_ + kBodySizeShift)});
+}
+
 }  // namespace txn
 }  // namespace claims
 

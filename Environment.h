@@ -7,6 +7,9 @@
 
 #ifndef ENVIRONMENT_H_
 #define ENVIRONMENT_H_
+#include <map>
+#include <string>
+#include <utility>
 #include "Executor/IteratorExecutorMaster.h"
 #include "Executor/IteratorExecutorSlave.h"
 #include "storage/BlockManager.h"
@@ -25,16 +28,20 @@
 #include "node_manager/master_node.h"
 #include "node_manager/slave_node.h"
 #include "Resource/BufferManager.h"
-
 namespace claims {
 namespace loader {
 class SlaveLoader;
 class MasterLoader;
+class MasterLoaderBroker;
+class SlaveLoaderBroker;
 }
 }
+
 using claims::catalog::Catalog;
 using claims::loader::SlaveLoader;
 using claims::loader::MasterLoader;
+using claims::loader::MasterLoaderBroker;
+using claims::loader::SlaveLoaderBroker;
 using claims::MasterNode;
 using claims::SegmentExecTracker;
 using claims::SlaveNode;
@@ -56,7 +63,7 @@ class Environment {
   ResourceManagerMaster* getResourceManagerMaster();
   InstanceResourceManager* getResourceManagerSlave();
   NodeID getNodeID() const;
-  void setNodeID(NodeID node_id){ node_id_ = node_id ;}
+  void setNodeID(NodeID node_id) { node_id_ = node_id; }
   claims::catalog::Catalog* getCatalog() const;
   ThreadPool* getThreadPool() const;
   IteratorExecutorSlave* getIteratorExecutorSlave() const;
@@ -74,6 +81,13 @@ class Environment {
 
   MasterLoader* get_master_loader() const { return master_loader_; }
   SlaveLoader* get_slave_loader() const { return slave_loader_; }
+
+  MasterLoaderBroker* get_master_loader_broker() const {
+    return master_loader_broker_;
+  }
+  SlaveLoaderBroker* get_slave_loader_broker(string ip, int port) {
+    return slave_loader_broker_list_[std::pair<string, int>(ip, port)];
+  }
 
  private:
   void AnnounceCafMessage();
@@ -123,6 +137,10 @@ class Environment {
   SlaveLoader* slave_loader_;
   MasterNode* master_node_;
   SlaveNode* slave_node_;
+
+  MasterLoaderBroker* master_loader_broker_;
+  std::map<std::pair<string, int>, SlaveLoaderBroker*>
+      slave_loader_broker_list_;
 
   StmtExecTracker* stmt_exec_tracker_;
   SegmentExecTracker* seg_exec_tracker_;

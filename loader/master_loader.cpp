@@ -107,6 +107,8 @@ uint64_t MasterLoader::debug_consumed_message_count = 0;
 timeval MasterLoader::start_time;
 uint64_t MasterLoader::txn_average_delay_ = 0;
 static int MasterLoader::buffer_full_time = 0;
+
+Socket socketc;
 atomic<uint64_t> message_count;
 static const int txn_count_for_debug = 10000;
 
@@ -149,6 +151,7 @@ MasterLoader::MasterLoader()
   packet_queue_lock_ = new SpineLock[send_thread_num_];
   packet_queue_to_send_count_ = new semaphore[send_thread_num_];
 #endif
+  // broker_ = new MasterLoaderBroker();
 }
 
 MasterLoader::~MasterLoader() {
@@ -743,6 +746,11 @@ RetCode MasterLoader::SendPartitionTupleToSlave(
     const claims::txn::Ingest& ingest) {
   RetCode ret = rSuccess;
   uint64_t table_id = table->get_table_id();
+
+  /** implement new version send **/
+
+  /**/
+
   for (int prj_id = 0; prj_id < partition_buffers.size(); ++prj_id) {
     for (int part_id = 0; part_id < partition_buffers[prj_id].size();
          ++part_id) {
@@ -967,7 +975,13 @@ void* MasterLoader::StartMasterLoader(void* arg) {
   }
   // i am also a worker
   Work(&para);
-
+  // Config::getInstance()
+  /* auto node_id = Environment::getInstance()->getNodeID();
+   for (auto endpoint : Config::master_loader_endpoints)
+     if (endpoint.first == Environment::getInstance()->getIp()) {
+       master_loader->broker_.PublicForIngest(node_id, endpoint.second);
+       break;
+     }*/
   while (1) sleep(10);
 
   //      while (true) EXEC_AND_ONLY_LOG_ERROR(ret, master_loader->Ingest(),
